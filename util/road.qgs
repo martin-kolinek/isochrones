@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>degrees</units>
         <extent>
-            <xmin>17.088005</xmin>
-            <ymin>48.134593</ymin>
-            <xmax>17.113118</xmax>
-            <ymax>48.148865</ymax>
+            <xmin>17.003413</xmin>
+            <ymin>48.032054</ymin>
+            <xmax>17.273655</xmax>
+            <ymax>48.217679</ymax>
         </extent>
         <projections>0</projections>
         <destinationsrs>
@@ -24,14 +24,19 @@
         </destinationsrs>
     </mapcanvas>
     <legend updateDrawingOrder="true">
-        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="output_vis" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="intersecting_vis" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="output_vis20130314012338272" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="intersecting_vis20130320110838542" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="output_vis" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="output_vis" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="output_vis20130314012022835" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="output_vis20130314012338272" visible="0"/>
+            </filegroup>
+        </legendlayer>
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="output_vis" showFeatureCount="0">
+            <filegroup open="false" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="output_vis20130314012022835" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="road_net_vis" showFeatureCount="0">
@@ -55,7 +60,74 @@
             </filegroup>
         </legendlayer>
     </legend>
-    <projectlayers layercount="6">
+    <projectlayers layercount="7">
+        <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
+            <id>intersecting_vis20130320110838542</id>
+            <datasource>sslmode=disable key='tid' srid=4326 type=LINESTRING table="intersecting_vis" (line) sql=</datasource>
+            <title></title>
+            <abstract></abstract>
+            <layername>intersecting_vis</layername>
+            <srs>
+                <spatialrefsys>
+                    <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
+                    <geographicflag>true</geographicflag>
+                </spatialrefsys>
+            </srs>
+            <transparencyLevelInt>255</transparencyLevelInt>
+            <provider encoding="System">postgres</provider>
+            <vectorjoins/>
+            <renderer-v2 symbollevels="0" type="singleSymbol">
+                <symbols>
+                    <symbol outputUnit="MM" alpha="1" type="line" name="0">
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="square"/>
+                            <prop k="color" v="255,0,0,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="solid"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="0.6"/>
+                        </layer>
+                    </symbol>
+                </symbols>
+                <rotation field=""/>
+                <sizescale field=""/>
+            </renderer-v2>
+            <customproperties/>
+            <displayfield></displayfield>
+            <label>0</label>
+            <labelattributes>
+                <label fieldname="" text="Label"/>
+                <family fieldname="" name="Sans Serif"/>
+                <size fieldname="" units="pt" value="12"/>
+                <bold fieldname="" on="0"/>
+                <italic fieldname="" on="0"/>
+                <underline fieldname="" on="0"/>
+                <strikeout fieldname="" on="0"/>
+                <color fieldname="" red="0" blue="0" green="0"/>
+                <x fieldname=""/>
+                <y fieldname=""/>
+                <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+                <angle fieldname="" value="0" auto="0"/>
+                <alignment fieldname="" value="center"/>
+                <buffercolor fieldname="" red="255" blue="255" green="255"/>
+                <buffersize fieldname="" units="pt" value="1"/>
+                <bufferenabled fieldname="" on=""/>
+                <multilineenabled fieldname="" on=""/>
+                <selectedonly on=""/>
+            </labelattributes>
+            <editform>.</editform>
+            <editforminit></editforminit>
+            <annotationform>.</annotationform>
+            <attributeactions/>
+        </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Point" type="vector" hasScaleBasedVisibilityFlag="0">
             <id>nodes20130312150057726</id>
             <datasource>sslmode=disable key='id' srid=4326 type=POINT table="nodes" (geom) sql=</datasource>
@@ -144,36 +216,36 @@
             <vectorjoins/>
             <renderer-v2 attr="distance" symbollevels="0" type="graduatedSymbol">
                 <ranges>
-                    <range symbol="0" lower="0" upper="66.6324" label="0.0000 - 66.6324"/>
-                    <range symbol="1" lower="66.6324" upper="133.265" label="66.6324 - 133.2648"/>
-                    <range symbol="2" lower="133.265" upper="199.897" label="133.2648 - 199.8972"/>
-                    <range symbol="3" lower="199.897" upper="266.53" label="199.8972 - 266.5296"/>
-                    <range symbol="4" lower="266.53" upper="333.162" label="266.5296 - 333.1620"/>
-                    <range symbol="5" lower="333.162" upper="399.794" label="333.1620 - 399.7944"/>
-                    <range symbol="6" lower="399.794" upper="466.427" label="399.7944 - 466.4268"/>
-                    <range symbol="7" lower="466.427" upper="533.059" label="466.4268 - 533.0591"/>
-                    <range symbol="8" lower="533.059" upper="599.692" label="533.0591 - 599.6915"/>
-                    <range symbol="9" lower="599.692" upper="666.324" label="599.6915 - 666.3239"/>
-                    <range symbol="10" lower="666.324" upper="732.956" label="666.3239 - 732.9563"/>
-                    <range symbol="11" lower="732.956" upper="799.589" label="732.9563 - 799.5887"/>
-                    <range symbol="12" lower="799.589" upper="866.221" label="799.5887 - 866.2211"/>
-                    <range symbol="13" lower="866.221" upper="932.854" label="866.2211 - 932.8535"/>
-                    <range symbol="14" lower="932.854" upper="999.486" label="932.8535 - 999.4859"/>
-                    <range symbol="15" lower="999.486" upper="1066.12" label="999.4859 - 1066.1183"/>
-                    <range symbol="16" lower="1066.12" upper="1132.75" label="1066.1183 - 1132.7507"/>
-                    <range symbol="17" lower="1132.75" upper="1199.38" label="1132.7507 - 1199.3831"/>
-                    <range symbol="18" lower="1199.38" upper="1266.02" label="1199.3831 - 1266.0155"/>
-                    <range symbol="19" lower="1266.02" upper="1332.65" label="1266.0155 - 1332.6479"/>
-                    <range symbol="20" lower="1332.65" upper="1399.28" label="1332.6479 - 1399.2803"/>
-                    <range symbol="21" lower="1399.28" upper="1465.91" label="1399.2803 - 1465.9126"/>
-                    <range symbol="22" lower="1465.91" upper="1532.55" label="1465.9126 - 1532.5450"/>
-                    <range symbol="23" lower="1532.55" upper="1599.18" label="1532.5450 - 1599.1774"/>
-                    <range symbol="24" lower="1599.18" upper="1665.81" label="1599.1774 - 1665.8098"/>
-                    <range symbol="25" lower="1665.81" upper="1732.44" label="1665.8098 - 1732.4422"/>
-                    <range symbol="26" lower="1732.44" upper="1799.07" label="1732.4422 - 1799.0746"/>
-                    <range symbol="27" lower="1799.07" upper="1865.71" label="1799.0746 - 1865.7070"/>
-                    <range symbol="28" lower="1865.71" upper="1932.34" label="1865.7070 - 1932.3394"/>
-                    <range symbol="29" lower="1932.34" upper="1998.97" label="1932.3394 - 1998.9718"/>
+                    <range symbol="0" lower="0" upper="166.645" label="0.0000 - 166.6451"/>
+                    <range symbol="1" lower="166.645" upper="333.29" label="166.6451 - 333.2903"/>
+                    <range symbol="2" lower="333.29" upper="499.935" label="333.2903 - 499.9354"/>
+                    <range symbol="3" lower="499.935" upper="666.581" label="499.9354 - 666.5805"/>
+                    <range symbol="4" lower="666.581" upper="833.226" label="666.5805 - 833.2256"/>
+                    <range symbol="5" lower="833.226" upper="999.871" label="833.2256 - 999.8708"/>
+                    <range symbol="6" lower="999.871" upper="1166.52" label="999.8708 - 1166.5159"/>
+                    <range symbol="7" lower="1166.52" upper="1333.16" label="1166.5159 - 1333.1610"/>
+                    <range symbol="8" lower="1333.16" upper="1499.81" label="1333.1610 - 1499.8062"/>
+                    <range symbol="9" lower="1499.81" upper="1666.45" label="1499.8062 - 1666.4513"/>
+                    <range symbol="10" lower="1666.45" upper="1833.1" label="1666.4513 - 1833.0964"/>
+                    <range symbol="11" lower="1833.1" upper="1999.74" label="1833.0964 - 1999.7415"/>
+                    <range symbol="12" lower="1999.74" upper="2166.39" label="1999.7415 - 2166.3867"/>
+                    <range symbol="13" lower="2166.39" upper="2333.03" label="2166.3867 - 2333.0318"/>
+                    <range symbol="14" lower="2333.03" upper="2499.68" label="2333.0318 - 2499.6769"/>
+                    <range symbol="15" lower="2499.68" upper="2666.32" label="2499.6769 - 2666.3221"/>
+                    <range symbol="16" lower="2666.32" upper="2832.97" label="2666.3221 - 2832.9672"/>
+                    <range symbol="17" lower="2832.97" upper="2999.61" label="2832.9672 - 2999.6123"/>
+                    <range symbol="18" lower="2999.61" upper="3166.26" label="2999.6123 - 3166.2575"/>
+                    <range symbol="19" lower="3166.26" upper="3332.9" label="3166.2575 - 3332.9026"/>
+                    <range symbol="20" lower="3332.9" upper="3499.55" label="3332.9026 - 3499.5477"/>
+                    <range symbol="21" lower="3499.55" upper="3666.19" label="3499.5477 - 3666.1928"/>
+                    <range symbol="22" lower="3666.19" upper="3832.84" label="3666.1928 - 3832.8380"/>
+                    <range symbol="23" lower="3832.84" upper="3999.48" label="3832.8380 - 3999.4831"/>
+                    <range symbol="24" lower="3999.48" upper="4166.13" label="3999.4831 - 4166.1282"/>
+                    <range symbol="25" lower="4166.13" upper="4332.77" label="4166.1282 - 4332.7734"/>
+                    <range symbol="26" lower="4332.77" upper="4499.42" label="4332.7734 - 4499.4185"/>
+                    <range symbol="27" lower="4499.42" upper="4666.06" label="4499.4185 - 4666.0636"/>
+                    <range symbol="28" lower="4666.06" upper="4832.71" label="4666.0636 - 4832.7087"/>
+                    <range symbol="29" lower="4832.71" upper="4999.35" label="4832.7087 - 4999.3539"/>
                 </ranges>
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="0">
@@ -524,9 +596,9 @@
                 <edittype type="0" name="distance"/>
                 <edittype type="0" name="node_id"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Point" type="vector" hasScaleBasedVisibilityFlag="0">
@@ -593,9 +665,9 @@
                 <edittype type="0" name="distance"/>
                 <edittype type="0" name="node_id"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <attributeactions/>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">

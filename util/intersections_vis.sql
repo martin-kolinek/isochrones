@@ -1,0 +1,1 @@
+insert into intersecting_vis(line) select ST_SetSRID(ST_MakeLine(n1.geom, n2.geom),4326) from (select distinct s_node, e_node from temp_intersect) i inner join nodes n1 on i.s_node=n1.id inner join nodes n2 on i.e_node=n2.id;
