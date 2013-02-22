@@ -23,8 +23,18 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>
 		nodesToRegions -= n
 		neighbours -= n
 	} 
+
+    def nodeRegion(node:Node) = {
+        ensureRegion(node)
+        nodesToRegions.get(node)
+    }
 	
 	def nodesInMemory = neighbours.size
+
+    def ensureRegion(node:Node) {
+        if(!nodesToRegions.isDefinedAt(node))
+            retrieveNode(node)
+    }
 
     def ensureInMemory(node:Node) {
         if(!neighbours.isDefinedAt(node)) { 
