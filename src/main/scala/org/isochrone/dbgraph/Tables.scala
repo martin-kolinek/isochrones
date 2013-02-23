@@ -15,6 +15,11 @@ class NodeTable(name:String) extends Table[(Long, Int)](name) {
 	def * = id ~ region
 }
 
+class RegionTable(name:String) extends Table[(Int, Double)](name) {
+    def id = column[Int]("id")
+    def diameter = column[Double]("diameter")
+}
+
 class GraphTables(nodeName:String, edgeName:String) {
 	val nodes = new NodeTable(nodeName)
 	val edges = new EdgeTable(edgeName)
