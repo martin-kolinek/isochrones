@@ -1,0 +1,9 @@
+#eclipse stuff
+/.classpath
+/.project
+/.cache
+/.settings
+
+#sbt stuff
+target/
+
