@@ -7,3 +7,5 @@
 #sbt stuff
 target/
 
+#emacs stuff
+*\~
