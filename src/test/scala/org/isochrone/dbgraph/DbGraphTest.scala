@@ -1,4 +1,4 @@
-package dbgraph
+package org.isochrone.dbgraph
 
 import org.scalatest.FunSuite
 import scala.slick.driver.SQLiteDriver.simple._
@@ -28,6 +28,34 @@ class DbGraphTest extends FunSuite {
 			val neigh = g.getNeighbours(2)
 			assert(neigh.size==2)
 			assert(neigh.toSet == Set((1, 0.5), (4, 0.3)))
+		}
+	}
+	
+	test("DatabaseGraph keeps right amount of regions") {
+		initDB{ tbls:GraphTables => implicit session:Session =>
+		    tbls.nodes.insertAll(
+		    		(1, 1),
+		    		(2, 1),
+		    		(3, 2),
+		    		(4, 2),
+		    		(5, 2))
+		    tbls.edges.insertAll(
+		    		(1, 2, 0.1),
+		    		(2, 3, 0.2),
+		    		(2, 4, 0.3),
+		    		(5, 2, 0.4),
+		    		(5, 3, 0.5),
+		    		(4, 5, 0.6),
+		    		(3, 5, 0.7))
+		    val g = new DatabaseGraph(tbls, 1)
+		    val neigh = g.getNeighbours(2)
+		    assert(neigh.size==2)
+		    assert(neigh.toSet==Set((3, 0.2), (4, 0.3)))
+		    assert(g.nodesInMemory==2)
+		    val neigh2 = g.getNeighbours(5)
+		    assert(neigh2.size==2)
+		    assert(neigh2.toSet==Set((2, 0.4), (3, 0.5)))
+		    assert(g.nodesInMemory==3)
 		}
 	}
 }

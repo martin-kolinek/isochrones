@@ -1,7 +1,6 @@
-package dbgraph
+package org.isochrone.dbgraph
 
-import graphlib.HasNeighbours
-import scala.slick.session.Session
+import org.isochrone.graphlib.HasNeighbours
 
 class HasNeighboursInstance(g:DatabaseGraph) {
 	implicit val nodeHasNeighbours = new HasNeighbours[Long] {

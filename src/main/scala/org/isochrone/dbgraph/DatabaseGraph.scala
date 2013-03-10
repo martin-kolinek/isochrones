@@ -1,28 +1,29 @@
-package dbgraph
+package org.isochrone.dbgraph
 
-import util.LRUCache
+import org.isochrone.util.LRUCache
 import scala.collection.mutable.HashMap
 import scala.slick.driver.BasicDriver.simple._
-import scala.collection.mutable.HashSet
 
 class DatabaseGraph(tables:GraphTables, maxRegions:Int)(implicit session:Session) {
 	type Region = Int
 	type Node = Long
-	val regions = new LRUCache[Region, Traversable[Node]]((k, v, m) => {
+	private val regions = new LRUCache[Region, Traversable[Node]]((k, v, m) => {
 		val ret = m.size > maxRegions
 		if(ret)
 			removeRegion(v)
 		ret
 	})
 	
-	val neighbours = new HashMap[Node, Traversable[(Node, Double)]]
+	private val neighbours = new HashMap[Node, Traversable[(Node, Double)]]
 	
-	val nodesToRegions = new HashMap[Node, Region]
+	private val nodesToRegions = new HashMap[Node, Region]
 	
 	def removeRegion(nodes:Traversable[Node]) = for(n<-nodes) {
 		nodesToRegions -= n
 		neighbours -= n
 	} 
+	
+	def nodesInMemory = neighbours.size
 	
 	def getNeighbours(node:Node) = {
 		if(!neighbours.isDefinedAt(node)) { 

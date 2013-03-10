@@ -1,4 +1,5 @@
-package graphlib
+package org.isochrone.graphlib
+
 import scala.language.implicitConversions
 
 trait HasNeighbours[T] {

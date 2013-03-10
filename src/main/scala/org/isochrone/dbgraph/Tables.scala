@@ -1,4 +1,4 @@
-package dbgraph
+package org.isochrone.dbgraph
 
 import scala.slick.driver.BasicDriver._
 

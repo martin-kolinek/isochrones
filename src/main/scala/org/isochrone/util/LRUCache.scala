@@ -1,4 +1,4 @@
-package util
+package org.isochrone.util
 
 import java.util.LinkedHashMap
 import scala.collection.mutable.Map
