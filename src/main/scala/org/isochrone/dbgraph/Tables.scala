@@ -3,8 +3,8 @@ package org.isochrone.dbgraph
 import scala.slick.driver.BasicDriver._
 
 class EdgeTable(name:String) extends Table[(Long, Long, Double)](name) {
-	def start = column[Long]("start")
-	def end = column[Long]("end")
+	def start = column[Long]("start_node")
+	def end = column[Long]("end_node")
 	def cost = column[Double]("cost")
 	def * = start ~ end ~ cost
 }
