@@ -7,9 +7,9 @@ trait HasComputableIsochrone[T] {
 class WithIsochrone[T:HasComputableIsochrone](t:T) {
 	val i = implicitly[HasComputableIsochrone[T]]
 	/**
-	 * Returns a lazy collection of nodes which are part of isochrone
+	 * Returns a collection of nodes which are part of isochrone
 	 */
 	def isochrone(limit:Double) = new Traversable[T] { 
 		def foreach[X](f:T=>X) = i.isochrone(Seq((t, 0)), limit, f(_)) 
-	}.view 
+	}
 }
