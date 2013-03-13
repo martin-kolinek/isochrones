@@ -31,6 +31,24 @@ class DbGraphTest extends FunSuite {
 		}
 	}
 	
+	test("DatabaseGraph return empty list for nonexistent nodes)") {
+		initDB { tbls:GraphTables => implicit session:Session =>
+			(1l to 5l).map((_, 1)).foreach(tbls.nodes.insert(_))
+			tbls.edges.insertAll(
+				(1, 2, 0.1),
+				(1, 3, 0.2),
+				(2, 4, 0.3),
+				(3, 2, 0.4),
+				(2, 1, 0.5),
+				(4, 5, 0.6))
+			
+			val g = new DatabaseGraph(tbls, 1)
+			assert(g.getNeighbours(5).size==0)
+			val neigh = g.getNeighbours(10)
+			assert(neigh.size==0)
+		}
+	}
+	
 	test("DatabaseGraph keeps right amount of regions") {
 		initDB{ tbls:GraphTables => implicit session:Session =>
 		    tbls.nodes.insertAll(

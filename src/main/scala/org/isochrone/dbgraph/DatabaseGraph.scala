@@ -29,8 +29,9 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int)(implicit session:Session
 		if(!neighbours.isDefinedAt(node)) { 
 			retrieveNode(node)
 		}
-		regions.updateUsage(nodesToRegions(node))
-		neighbours(node)
+		if(nodesToRegions.contains(node))
+			regions.updateUsage(nodesToRegions(node))
+		neighbours.getOrElse(node, Seq())
 	}
 	
 	def retrieveNode(node:Node) {
@@ -50,6 +51,6 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int)(implicit session:Session
 		}
 	}
 	
-	def graphlib = new HasNeighboursInstance(this)
+	def graphlib = new HasNeighboursInstance(this).nodeHasNeighbours
 }
 
