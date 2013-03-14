@@ -1,9 +1,9 @@
 package org.isochrone.dboutput
 
-import scala.slick.driver.BasicDriver._
+import scala.slick.driver.PostgresDriver._
 
-class OutputTable(name:String) extends Table[(Long, Int)](name) {
+class OutputTable(name:String) extends Table[(Long, Double)](name) {
 	def node = column[Long]("node")
-	def region = column[Int]("region")
-	def * = node ~ region
+	def distance = column[Double]("distance")
+	def * = node ~ distance
 }

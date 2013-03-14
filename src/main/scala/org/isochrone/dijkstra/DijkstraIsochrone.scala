@@ -9,7 +9,7 @@ import org.isochrone.util._
 
 object DijkstraIsochrone {
 
-	def computeIsochrone[T:HasNeighbours:Ordering](start:Traversable[(T, Double)], max:Double, res:T=>Unit)(implicit prec:DoublePrecision) {
+	def computeIsochrone[T:HasNeighbours:Ordering](start:Traversable[(T, Double)], max:Double, res:(T, Double)=>Unit)(implicit prec:DoublePrecision) {
         
 		val closed = new HashSet[T]
 		val costMap = new HashMap[T, Double]
@@ -24,7 +24,7 @@ object DijkstraIsochrone {
 			closed += current
             if(curCost>max)
                 return
-            res(current)
+            res(current, curCost)
 			for((neighbour, cost) <- current.neighbours if !closed.contains(neighbour)) {
 				val newCost = curCost + cost
                 val better = costMap.get(neighbour).map(newCost < _)
@@ -39,6 +39,6 @@ object DijkstraIsochrone {
 	}
 	
 	implicit def tHasComputableIsochrone[T:HasNeighbours:Ordering](implicit prec:DoublePrecision) = new HasComputableIsochrone[T]{
-		def isochrone(start:Traversable[(T, Double)], limit:Double, res:T=>Unit) = computeIsochrone(start, limit, res)
+		def isochrone(start:Traversable[(T, Double)], limit:Double, res:(T, Double)=>Unit) = computeIsochrone(start, limit, res)
 	}
 }

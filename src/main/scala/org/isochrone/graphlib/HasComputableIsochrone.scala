@@ -1,7 +1,7 @@
 package org.isochrone.graphlib
 
 trait HasComputableIsochrone[T] {
-	def isochrone(start:Traversable[(T, Double)], max:Double, resultCallback:T=>Unit)
+	def isochrone(start:Traversable[(T, Double)], max:Double, resultCallback:(T, Double)=>Unit)
 }
 
 class WithIsochrone[T:HasComputableIsochrone](t:T) {
@@ -9,7 +9,7 @@ class WithIsochrone[T:HasComputableIsochrone](t:T) {
 	/**
 	 * Returns a collection of nodes which are part of isochrone
 	 */
-	def isochrone(limit:Double) = new Traversable[T] { 
-		def foreach[X](f:T=>X) = i.isochrone(Seq((t, 0)), limit, f(_)) 
+	def isochrone(limit:Double) = new Traversable[(T, Double)] { 
+		def foreach[X](f:((T, Double))=>X) = i.isochrone(Seq((t, 0)), limit, (x, y) => f(x, y)) 
 	}
 }

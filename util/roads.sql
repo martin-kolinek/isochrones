@@ -20,7 +20,8 @@ insert into roads (id, tags, linestring) select id, tags, linestring from ways w
     and (tags -> 'highway') != 'footway'
     and (tags -> 'highway') != 'bridleway'
     and (tags -> 'highway') != 'steps'
-    and (tags -> 'highway') != 'pedestrian';
+    and (tags -> 'highway') != 'pedestrian'
+    and (tags -> 'highway') != 'proposed';
 
 --road_net table - contains separate edges from roads table
 
@@ -47,7 +48,7 @@ create table road_net (
     cost double precision
 );
 insert into road_net(start_node, end_node, cost)
-    select sn.id, en.id, ST_Distance(sn.geom, en.geom) 
+    select sn.id, en.id, ST_Distance(sn.geom::geography, en.geom::geography) 
         from road_net_bare rn 
             inner join nodes sn on sn.id = rn.start_node
             inner join nodes en on en.id = rn.end_node;
