@@ -1,6 +1,6 @@
 package org.isochrone.dboutput
 
-import scala.slick.driver.BasicDriver.simple._
+import scala.slick.driver.PostgresDriver.simple._
 
 class DatabaseOutput(name:String) {
 	val tbl = new OutputTable(name)
@@ -8,4 +8,7 @@ class DatabaseOutput(name:String) {
 	def insert(node:Long, distance:Double)(implicit session:Session) {
 		tbl.insert((node, distance))
 	}
+    def clear()(implicit session:Session) {
+        tbl.map(identity).delete
+    }
 }

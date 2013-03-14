@@ -13,6 +13,6 @@ class DijkstraIsochroneTest extends FunSuite {
 		implicit val gl = graph.graphlib
 		implicit val precision = DoublePrecision(0.01)
 		val iso = 0.isochrone(0.6).toList
-		assert(iso.toSet==(0 to 10).toSet)
+		assert(iso.map(_._1).toSet==(0 to 10).toSet)
 	}
 }

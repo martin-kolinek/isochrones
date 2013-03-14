@@ -21,26 +21,36 @@ object Main {
 		val startNode = args(0).toLong
 		val costLimit = args(1).toDouble
 		val dbname = args(2)
-		val onlyPrint = args.size==4
+		val onlyComp = args.size==4
 		val out = new DatabaseOutput("output")
 		
 		val db = Database.forURL("jdbc:postgresql:%s".format(dbname), driver="org.postgresql.Driver")
 		db.withTransaction{ implicit session:Session =>
-			println("Creating output table")
-			if(!onlyPrint)
-				out.create()
-		    implicit val graph = new DatabaseGraph(new GraphTables("road_nodes", "road_net"), 200).graphlib
+			println("Clearing output table")
+			if(!onlyComp)
+				out.clear()
+            var retrievals = 0
+            val graph = new DatabaseGraph(new GraphTables("road_nodes", "road_net"), 200, {retrievals+=1})
+            println("Preloading starting node")
+            graph.ensureInMemory(startNode)
+		    implicit val graphimp = graph.graphlib
 		    val isochrone = startNode.isochrone(costLimit)
 		    println("Starting computation")
 		    val time = timed{
+                var i = 0
 				for((node, dist)<-isochrone) {
-					if(!onlyPrint)
+					if(!onlyComp) {
 						out.insert(node, dist)
-					println("%d is in isochrone with distance %f".format(node, dist))
+                    }
+                    i+=1
+                    if(i%1000==0)
+                        println("Currently at distance %f".format(dist))
 				}
 			}
-		    println("Finished, took %dms".format(time))
+		    println("Finished computation, took %dms with %d access(es) to database".format(time, retrievals))
+            println("Commiting data")
 		}
+        println("Done")
 	}
 
 }

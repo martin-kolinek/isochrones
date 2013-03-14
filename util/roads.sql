@@ -4,7 +4,8 @@ drop table if exists roads;
 drop table if exists road_net;
 drop table if exists road_net_vis;
 drop table if exists road_nodes;
-
+DROP TABLE IF EXISTS output;
+DROP TABLE IF EXISTS output_vis;
 
 --roads table - contains ways which are roads
 
@@ -62,6 +63,21 @@ create table road_nodes (
 insert into road_nodes(id, region)
     select distinct q.id, 0 from (select start_node as id from road_net union select end_node as id from road_net) q;
 
+--output table - contains output isochrone
+         
+create table output (
+    node bigint,
+    distance double precision
+);
+        
+CREATE TABLE output_vis (
+    node_id bigint,
+    distance double precision,
+    geom geometry(Point, 4326)
+);
+
+
+    
 --road_net_vis table - contains information for visualizing road_net
 
 create table road_net_vis (
@@ -80,6 +96,5 @@ insert into road_net_vis(start_node, end_node, direction, linestring)
             inner join nodes en on en.id = prn.end_node
         where prn.direction = 1 or prn.start_node<prn.end_node;
             
-
 commit transaction;
 analyze;
