@@ -95,6 +95,22 @@ insert into road_net_vis(start_node, end_node, direction, linestring)
             inner join nodes sn on sn.id = prn.start_node 
             inner join nodes en on en.id = prn.end_node
         where prn.direction = 1 or prn.start_node<prn.end_node;
+
+create index road_net_vis_geo_idx on road_net_vis using GIST (linestring)
+
+       
+CREATE OR REPLACE FUNCTION ST_GetIntersections(double precision, double precision, double precision, double precision) returns table(start1 bigint, end1 bigint, start2 bigint, end2 bigint) as $$
+select r1.start_node, r1.end_node, r2.start_node, r2.end_node from road_net_vis r1 
+       inner join road_net_vis r2 on ST_Intersects(r1.linestring, r2.linestring) 
+             and r1.start_node!=r2.end_node 
+             and r1.end_node!=r2.end_node 
+             and r1.start_node!=r2.start_node 
+             and r1.end_node!=r2.start_node 
+       where ST_Intersects(r1.linestring, ST_SetSRID(ST_MakeBox2D(ST_SetSRID(ST_Point($1, $2), 4326), ST_SetSRID(ST_Point($3, $4), 4326)), 4326)) and
+       ST_Intersects(r2.linestring, ST_SetSRID(ST_MakeBox2D(ST_SetSRID(ST_Point($1, $2), 4326), ST_SetSRID(ST_Point($3, $4), 4326)), 4326));
+$$ LANGUAGE SQL
             
 commit transaction;
 analyze;
+
+      
