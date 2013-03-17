@@ -19,3 +19,4 @@ libraryDependencies ++= List("org.slf4j" % "slf4j-nop" % "1.6.6"
 			    ,"postgresql" % "postgresql" % "9.1-901.jdbc4")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
+
