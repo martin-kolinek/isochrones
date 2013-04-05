@@ -10,6 +10,8 @@ class Cell[T:HasNeighbours] private (val nodes:Set[T], val leaving:Set[(T, T)]) 
     lazy val boundarySize = leaving.map(_._1).toSet.size
     lazy val size = nodes.size
     lazy val edges = nodes.flatMap(_.neighbours).filter(x => nodes.contains(x._1)).size
+    
+    override def toString = s"Cell($nodes)"
 }
 
 object Cell {

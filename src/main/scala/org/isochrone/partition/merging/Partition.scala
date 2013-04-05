@@ -38,9 +38,10 @@ class Partition[T:HasNeighbours] private (val nodesToCells: Map[T, Cell[T]], mer
         }
         new Partition(newNodesToCells, mergePriority)
     }
+    override def toString = s"Partition($cells)"
 }
 
 object Partition {
-    def apply[T:HasNeighbours](nodes:List[T], mergePriority:(Cell[T], Cell[T])=>Double) = 
+    def apply[T:HasNeighbours](nodes:Traversable[T], mergePriority:(Cell[T], Cell[T])=>Double) = 
         new Partition[T](nodes.map(x => x->Cell(x)).toMap, mergePriority)
 }

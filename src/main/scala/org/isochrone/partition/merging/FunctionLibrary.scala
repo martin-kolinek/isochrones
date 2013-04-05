@@ -10,9 +10,9 @@ object FunctionLibrary {
         rand*connecting*(1 + c1.boundarySize + c2.boundarySize - newBoundary) / (c1.size*c2.size)
     }
 
-    def avgSearchGraphSize[T:HasNeighbours](p:Partition[T]) = {
+    def negAvgSearchGraphSize[T:HasNeighbours](p:Partition[T]) = {
         val cellCosts = for(c<-p.cells) 
-            yield c.size.toDouble/p.size * (2 - c.size.toDouble/p.size) * c.edges + math.pow((1 - c.size.toDouble/p.size),2) * math.pow(c.size,2)
-        cellCosts.sum + p.boundaryEdges.size
+            yield c.size.toDouble/p.size * (2.0 - c.size.toDouble/p.size) * c.edges + math.pow((1.0 - c.size.toDouble/p.size),2.0) * math.pow(c.size,2.0)
+        -cellCosts.sum - p.boundaryEdges.size
     }
 }
