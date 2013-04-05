@@ -1,6 +1,6 @@
-package org.isochrone.dboutput
+package org.isochrone.dboutput.isochrone
 
-import scala.slick.driver.PostgresDriver._
+import scala.slick.driver.PostgresDriver.simple._
 
 class OutputTable(name:String) extends Table[(Long, Double)](name) {
 	def node = column[Long]("node")

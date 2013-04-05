@@ -1,4 +1,4 @@
-package org.isochrone.dboutput
+package org.isochrone.dboutput.isochrone
 
 import scala.slick.driver.PostgresDriver.simple._
 
