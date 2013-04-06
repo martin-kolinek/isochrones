@@ -58,5 +58,7 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>
 	}
 	
 	def graphlib = new HasNeighboursInstance(this).nodeHasNeighbours
+	
+	def allNodes = tables.nodes.map(_.id).list
 }
 

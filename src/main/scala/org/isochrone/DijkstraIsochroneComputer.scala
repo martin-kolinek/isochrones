@@ -18,7 +18,7 @@ trait DijkstraIsochroneComputer {
 	
 	def dijkstra(args: Seq[String]): Unit = {
 		if(args.size!=3 && args.size != 4) {
-			println("usage: isochrones start_id cost_limit out_table")
+			println("usage: dijkstra start_id cost_limit database [only compute]")
 			sys.exit(1)
 		}
 		val startNode = args(0).toLong

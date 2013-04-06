@@ -2,7 +2,7 @@ package org.isochrone.dboutput.partition
 
 import scala.slick.driver.PostgresDriver.simple._
 
-class DatabaaseOutput(name:String) {
+class DatabaseOutput(name:String) {
 	val tbl = new OutputTable(name)
 	def create()(implicit session:Session) {tbl.ddl.create}
 	def insert(node:Long, region:Int)(implicit session:Session) {
