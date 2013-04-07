@@ -11,8 +11,8 @@ object FunctionLibrary {
     }
 
     def negAvgSearchGraphSize[T:HasNeighbours](p:Partition[T]) = {
-        val cellCosts = for(c<-p.cells) 
-            yield c.size.toDouble/p.size * (2.0 - c.size.toDouble/p.size) * c.edges + math.pow((1.0 - c.size.toDouble/p.size),2.0) * math.pow(c.size,2.0)
-        -cellCosts.sum - p.boundaryEdges.size
+        val cellCosts = for(c<-p.cellNeighbours.keys) 
+            yield c.size.toDouble/p.nodes * (2.0 - c.size.toDouble/p.nodes) * c.edges + math.pow((1.0 - c.size.toDouble/p.nodes),2.0) * math.pow(c.size,2.0)
+        -cellCosts.sum - p.boundaryEdgeCount
     }
 }

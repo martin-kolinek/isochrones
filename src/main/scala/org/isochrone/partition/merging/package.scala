@@ -8,12 +8,12 @@ package object merging {
                                    mergePriority:(Cell[T], Cell[T])=>Double, 
                                    partitionValue:Partition[T]=>Double,
                                    stepNotification:Int => Unit = x=>Unit) = {
-        val initial:Option[Partition[T]] = Some(Partition(nodes, mergePriority))
-        val it = Iterator.iterate(initial)(part => part.flatMap{ x=>
-        	stepNotification(x.cells.size)
-        	x.next
+        val initial = Partition(nodes, mergePriority)
+        val it = Iterator.iterate(initial)(part => { 
+        	stepNotification(part.cellNeighbours.size)
+        	Partition.step(part)
         })
-        val best = it.takeWhile(_.isDefined).map(_.get).maxBy(partitionValue(_))
-        best.cells.map(_.nodes)
+        val best = it.takeWhile(_.cellNeighbours.size>1).maxBy(partitionValue)
+        best.cellNeighbours.keys.map(_.nodes)
     }
 }
