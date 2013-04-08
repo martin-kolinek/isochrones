@@ -3,6 +3,8 @@ begin transaction;
 drop table if exists roads;
 drop table if exists road_net;
 drop table if exists road_net_vis;
+drop table if exists road_net_undir;
+drop table if exists road_net_undir_vis;
 drop table if exists road_nodes;
 DROP TABLE IF EXISTS output;
 DROP TABLE IF EXISTS output_vis;
@@ -54,6 +56,20 @@ insert into road_net(start_node, end_node, cost)
             inner join nodes sn on sn.id = rn.start_node
             inner join nodes en on en.id = rn.end_node;
 
+--road_net_undir - undirected version of road_net
+
+create table road_net_undir (
+    start_node bigint,
+    end_node bigint,
+    cost double precision
+);
+insert into road_net_undir(start_node, end_node, cost)
+    select start_node, end_node, cost from road_net;
+delete from road_net_undir where exists(select * from road_net_undir rn2 where rn2.start_node=road_net_undir.end_node and rn2.end_node=road_net_undir.start_node) 
+        and start_node<end_node;
+insert into road_net_undir(start_node, end_node, cost)
+    select end_node, start_node, cost from road_net_undir;
+
 --road_nodes table - contains nodes which define roads
 
 create table road_nodes (
@@ -96,8 +112,27 @@ insert into road_net_vis(start_node, end_node, direction, linestring)
             inner join nodes en on en.id = prn.end_node
         where prn.direction = 1 or prn.start_node<prn.end_node;
 
-create index road_net_vis_geo_idx on road_net_vis using GIST (linestring)
+create index road_net_vis_geo_idx on road_net_vis using GIST (linestring);
 
+--road_net_undir_vis
+
+create table road_net_undir_vis (
+    start_node bigint,
+    end_node bigint,
+    direction int,
+    linestring geometry(Geometry, 4326)
+);
+
+insert into road_net_undir_vis(start_node, end_node, direction, linestring)
+    select sn.id, en.id, prn.direction, ST_MakeLine(sn.geom, en.geom) 
+        from (select distinct rn.start_node, rn.end_node, case coalesce(rn2.start_node, 1) when 1 then 1 else 0 end as direction 
+                from road_net_undir rn 
+                    left join road_net_undir rn2 on rn2.start_node=rn.end_node and rn2.end_node=rn.start_node) prn
+            inner join nodes sn on sn.id = prn.start_node 
+            inner join nodes en on en.id = prn.end_node
+        where prn.direction = 1 or prn.start_node<prn.end_node;
+
+create index road_net_undir_vis_geo_idx on road_net_undir_vis using GIST (linestring);
        
             
 commit transaction;

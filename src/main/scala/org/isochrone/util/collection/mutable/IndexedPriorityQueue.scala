@@ -41,6 +41,8 @@ class IndexedPriorityQueue[ItemType, PriorityType] private (
 	
 	def maximum = priorities.lastEntry.getValue.head
 	
+	def empty = priorities.isEmpty
+	
 	def ++=(items:Traversable[(ItemType, PriorityType)]) {
 		for(i<-items)
             this += i

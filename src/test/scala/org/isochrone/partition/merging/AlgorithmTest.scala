@@ -6,7 +6,7 @@ import org.isochrone.graphlib._
 import org.isochrone.util.RandomGraph
 
 class AlgorithmTest extends FunSuite {
-	/*test("merging algorithm works with controlled functions") {
+	test("merging algorithm works with controlled functions") {
 		val unweighted = Seq(
 				1->2,
 				2->1,
@@ -44,34 +44,49 @@ class AlgorithmTest extends FunSuite {
 		info(partition(Seq(1, 2, 3, 4, 5, 6, 7, 8), 
 				FunctionLibrary.mergePriority[Int] _, 
 				FunctionLibrary.negAvgSearchGraphSize[Int] _).toString)
-	}*/
+	}
 	
 	test("Sanity checks for step function on random graphs") {
-		for (i <- 1 to 20) {
-			val graph = RandomGraph.randomGraph(5*i, 20*i)
+		for (i <- 1 to 21 by 5) {
+			val graph = RandomGraph.randomSymmetricGraph(5*i, 20*i)
 			implicit val gl = graph.graphlib
-			val part = Partition(graph.nodes.toSeq, FunctionLibrary.mergePriority[Int] _)
-			for(_ <- 1 to 100) {
-				part.step()
+			//info(graph.toString)
+			val part = Partition(graph.nodes.toSeq, (x:Cell[Int], y:Cell[Int])=>x.size+y.size)
+			for(i <- 1 to 1000) {
+				//info(i.toString)
 				checkCellNeighbours(part)
+				checkPriorities(part)
+				checkBoundaryEdges(part)
+				/*if(!part.priorities.empty)
+					info(part.priorities.maximum.toString)*/
+				part.step()
 			}
 		}
 	}
 
     def checkCellNeighbours[T:HasNeighbours](part:Partition[T]) {
         val nodesToCells = part.cells.flatMap(x=>x.nodes.map(y=>x -> y)).map(_.swap).toMap
-        val cellNeighbours = part.cells.map(x=> x -> x.nodes.flatMap(_.neighbours).map(_._1).map(nodesToCells).toSet).toMap
+        val cellNeighbours = part.cells.map(x=> x -> x.nodes.flatMap(_.neighbours).map(_._1).map(nodesToCells).filter(y=>y!=x).toSet).filter(!_._2.isEmpty).toMap
+        if(cellNeighbours!=part.cellNeighbours) {
+        	info("Cell neighbours do not match")
+        	info(cellNeighbours.toString)
+        	info(part.cellNeighbours.toString)
+        }
         assert(cellNeighbours == part.cellNeighbours)
     }
 
     def checkPriorities[T:HasNeighbours](part:Partition[T]) {
         val should = for {
             c <- part.cells
-            c2 <- part.cellNeighbours(c)
+            c2 <- part.cellNeighbours.getOrElse(c, Set())
         } yield (Set(c, c2), part.mergePriority(c, c2))
 
         def ok(p1:(scala.collection.Set[Cell[T]], Double), p2:(scala.collection.Set[Cell[T]], Double)) = p1._1 == p2._1 && math.abs(p1._2 - p2._2)<0.0001
-
+        if(!should.forall(p=>part.priorities.exists(ok(p, _))) || !part.priorities.forall(p=>should.exists(ok(p, _)))) {
+        	info("Priorities do not match")
+        	info(should.toString)
+        	info(part.priorities.toString)
+        }
         assert(should.forall(p=>part.priorities.exists(ok(p, _))))
         assert(part.priorities.forall(p=>should.exists(ok(p, _))))
     }
@@ -79,12 +94,24 @@ class AlgorithmTest extends FunSuite {
     def checkBoundaryEdges[T:HasNeighbours](part:Partition[T]) {
         val nodesToCells = part.cells.flatMap(x=>x.nodes.map(y=>x -> y)).map(_.swap).toMap
         val neighs = for {
-            cell <- part.cells
-            node <- cell.nodes
-            (neigh, _) <- node.neighbours
-        } yield Set(cell, nodesToCells(neigh)) -> 1
-        val should = neighs.groupBy(_._1).map(x=>x._1->x._2.map(_._2).sum)
+            cell <- part.cells.toSeq
+            node <- cell.nodes.toSeq
+            (neigh, _) <- node.neighbours.toSeq
+            neighCell = nodesToCells(neigh)
+            if neighCell != cell
+        } yield Set(cell, neighCell) -> 1
+        val should = neighs.groupBy(_._1).map(x=>x._1->x._2.map(_._2).sum/2)
+        if(should != part.boundaryEdges) {
+        	info("boundary edges do not match")
+        	info(should.toString)
+        	info(part.boundaryEdges.toString)
+        }
         assert(should == part.boundaryEdges)
+        if(should.map(_._2).sum != part.boundaryEdgeCount) {
+        	info("boundary edge counts do not match")
+        	info(should.map(_._2).sum.toString)
+        	info(part.boundaryEdgeCount.toString)
+        }
         assert(should.map(_._2).sum == part.boundaryEdgeCount)
     }
 }
