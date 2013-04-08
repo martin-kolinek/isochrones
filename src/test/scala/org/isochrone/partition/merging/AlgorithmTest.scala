@@ -3,6 +3,7 @@ package org.isochrone.partition.merging
 import org.scalatest.FunSuite
 import org.isochrone.simplegraph.SimpleGraph
 import org.isochrone.graphlib._
+import org.isochrone.util.RandomGraph
 
 class AlgorithmTest extends FunSuite {
 	/*test("merging algorithm works with controlled functions") {
@@ -45,30 +46,16 @@ class AlgorithmTest extends FunSuite {
 				FunctionLibrary.negAvgSearchGraphSize[Int] _).toString)
 	}*/
 	
-	test("Sanity checks for step function") {
-		/*val directed = Seq(
-				1->2, 1->3, 1->4, 2->3, 2->4, 
-				4->5,
-				5->6, 5->7, 5->8, 6->7, 6->8)
-		val undirected = directed ++ directed.map(_.swap)
-		val graph = new SimpleGraph(undirected.map(x=>(x._1, x._2, 1.0)):_*)*/
-		val unweighted = Seq(
-				1->2,
-				2->1,
-				1->3,
-				3->1,
-				2->3,
-				3->2,
-				3->4,
-				4->3)
-		
-		val graph = new SimpleGraph(unweighted.map(x=>(x._1, x._2, 1.0)):_*)
-		implicit val gl = graph.graphlib
-		val part = Partition(Seq(1, 2, 3, 4, 5, 6, 7, 8), FunctionLibrary.mergePriority[Int] _)
-        for(_ <- 1 to 100) {
-            part.step()
-            checkCellNeighbours(part)
-        }
+	test("Sanity checks for step function on random graphs") {
+		for (i <- 1 to 20) {
+			val graph = RandomGraph.randomGraph(5*i, 20*i)
+			implicit val gl = graph.graphlib
+			val part = Partition(graph.nodes.toSeq, FunctionLibrary.mergePriority[Int] _)
+			for(_ <- 1 to 100) {
+				part.step()
+				checkCellNeighbours(part)
+			}
+		}
 	}
 
     def checkCellNeighbours[T:HasNeighbours](part:Partition[T]) {

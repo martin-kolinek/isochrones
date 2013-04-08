@@ -3,12 +3,12 @@ package org.isochrone.partition.merging
 import org.isochrone.graphlib._
 import scala.collection.mutable.Map
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.Set
+import scala.collection.immutable.Set
 import scala.collection.mutable.HashSet
 import org.isochrone.util.collection.mutable.IndexedPriorityQueue
 
 class Partition[T:HasNeighbours] private (
-        val cells:Set[Cell[T]],
+        var cells:Set[Cell[T]],
 		val cellNeighbours:Map[Cell[T], HashSet[Cell[T]]],
 		val priorities:IndexedPriorityQueue[Set[Cell[T]], Double],
 		val mergePriority:(Cell[T], Cell[T])=>Double,
@@ -33,6 +33,6 @@ object Partition {
     	val priorityQueue = IndexedPriorityQueue(priorities.toSeq:_*)
     	val boundaryEdges = HashMap(priorityQueue.map(_._1 -> 1).toSeq:_*)
     	val boundaryEdgeCount = boundaryEdges.values.sum
-    	new Partition[T](HashSet(cells.values.toSeq:_*), cellNeighbours, priorityQueue, mergePriority, nodes.size, boundaryEdges, boundaryEdgeCount)
+    	new Partition[T](cells.values.toSet, cellNeighbours, priorityQueue, mergePriority, nodes.size, boundaryEdges, boundaryEdgeCount)
     } 
 }
