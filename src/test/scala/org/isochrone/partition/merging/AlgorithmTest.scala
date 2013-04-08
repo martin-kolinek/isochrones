@@ -5,7 +5,7 @@ import org.isochrone.simplegraph.SimpleGraph
 import org.isochrone.graphlib._
 
 class AlgorithmTest extends FunSuite {
-	test("merging algorithm works with controlled functions") {
+	/*test("merging algorithm works with controlled functions") {
 		val unweighted = Seq(
 				1->2,
 				2->1,
@@ -43,7 +43,7 @@ class AlgorithmTest extends FunSuite {
 		info(partition(Seq(1, 2, 3, 4, 5, 6, 7, 8), 
 				FunctionLibrary.mergePriority[Int] _, 
 				FunctionLibrary.negAvgSearchGraphSize[Int] _).toString)
-	}
+	}*/
 	
 	test("Sanity checks for step function") {
 		/*val directed = Seq(
@@ -65,26 +65,39 @@ class AlgorithmTest extends FunSuite {
 		val graph = new SimpleGraph(unweighted.map(x=>(x._1, x._2, 1.0)):_*)
 		implicit val gl = graph.graphlib
 		val part = Partition(Seq(1, 2, 3, 4, 5, 6, 7, 8), FunctionLibrary.mergePriority[Int] _)
-		val last = (part /: (1 to 100)){(p, i)=>
-			info(p.cellNeighbours.toString)
-			for {
-				(c, cn) <- p.cellNeighbours
-				n <- c.nodes
-				(nn, _) <- n.neighbours if !c.nodes.contains(nn)
-			} {
-				if(!cn.exists(_.nodes.contains(nn)))
-					info(s"missing cell neighbour: $c $n $nn")
-				assert(cn.exists(_.nodes.contains(nn)))
-			}
-			for {
-				(c, cn) <- p.cellNeighbours
-				c2 <- cn
-			} {
-				if(!c.nodes.exists(n => c2.nodes.exists(n2 => n2.neighbours.toSeq.map(_._1).contains(n))))
-					info(s"missing node for cell neighbour: $c2")
-				assert(c.nodes.exists(n => c2.nodes.exists(n2 => n2.neighbours.toSeq.map(_._1).contains(n))))
-			}
-			Partition.step(p)
-		}
+        for(_ <- 1 to 100) {
+            part.step()
+            checkCellNeighbours(part)
+        }
 	}
+
+    def checkCellNeighbours[T:HasNeighbours](part:Partition[T]) {
+        val nodesToCells = part.cells.flatMap(x=>x.nodes.map(y=>x -> y)).map(_.swap).toMap
+        val cellNeighbours = part.cells.map(x=> x -> x.nodes.flatMap(_.neighbours).map(_._1).map(nodesToCells).toSet).toMap
+        assert(cellNeighbours == part.cellNeighbours)
+    }
+
+    def checkPriorities[T:HasNeighbours](part:Partition[T]) {
+        val should = for {
+            c <- part.cells
+            c2 <- part.cellNeighbours(c)
+        } yield (Set(c, c2), part.mergePriority(c, c2))
+
+        def ok(p1:(scala.collection.Set[Cell[T]], Double), p2:(scala.collection.Set[Cell[T]], Double)) = p1._1 == p2._1 && math.abs(p1._2 - p2._2)<0.0001
+
+        assert(should.forall(p=>part.priorities.exists(ok(p, _))))
+        assert(part.priorities.forall(p=>should.exists(ok(p, _))))
+    }
+
+    def checkBoundaryEdges[T:HasNeighbours](part:Partition[T]) {
+        val nodesToCells = part.cells.flatMap(x=>x.nodes.map(y=>x -> y)).map(_.swap).toMap
+        val neighs = for {
+            cell <- part.cells
+            node <- cell.nodes
+            (neigh, _) <- node.neighbours
+        } yield Set(cell, nodesToCells(neigh)) -> 1
+        val should = neighs.groupBy(_._1).map(x=>x._1->x._2.map(_._2).sum)
+        assert(should == part.boundaryEdges)
+        assert(should.map(_._2).sum == part.boundaryEdgeCount)
+    }
 }

@@ -8,12 +8,15 @@ package object merging {
                                    mergePriority:(Cell[T], Cell[T])=>Double, 
                                    partitionValue:Partition[T]=>Double,
                                    stepNotification:Int => Unit = x=>Unit) = {
-        val initial = Partition(nodes, mergePriority)
-        val it = Iterator.iterate(initial)(part => { 
-        	stepNotification(part.cellNeighbours.size)
-        	Partition.step(part)
-        })
-        val best = it.takeWhile(_.cellNeighbours.size>1).maxBy(partitionValue)
-        best.cellNeighbours.keys.map(_.nodes)
+        val part = Partition(nodes, mergePriority)
+        val trav = new Traversable[(Double, Set[Set[T]])] {
+            def foreach[U](func:((Double, Set[Set[T]])) => U) {
+                while(true) {
+                    func((partitionValue(part), part.cells.map(_.nodes).toSet))
+                    part.step();
+                }
+            }
+        }
+        trav.takeWhile(_._2.size>1).maxBy(_._1)._2
     }
 }
