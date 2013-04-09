@@ -18,7 +18,7 @@ class Partition[T:HasNeighbours] private (
     def step() {
     	if(priorities.empty)
     		return
-        val Seq(c1, c2) = priorities.maximum.toSeq
+        val Seq(c1, c2) = priorities.maximum._1.toSeq
         val merged = c1 ++ c2
         cells = cells - c1 - c2 + merged
         

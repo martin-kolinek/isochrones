@@ -37,9 +37,9 @@ class IndexedPriorityQueue[ItemType, PriorityType] private (
         inverse -= item
 	}
 	
-	def minimum = priorities.firstEntry.getValue.head
+	def minimum = priorities.firstEntry.getValue.head -> priorities.firstEntry.getKey
 	
-	def maximum = priorities.lastEntry.getValue.head
+	def maximum = priorities.lastEntry.getValue.head -> priorities.lastEntry.getKey
 	
 	def empty = priorities.isEmpty
 	
