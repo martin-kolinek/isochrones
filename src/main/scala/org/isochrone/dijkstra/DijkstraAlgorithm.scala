@@ -8,9 +8,9 @@ import scala.collection.mutable.TreeSet
 import org.isochrone.util._
 import org.isochrone.util.collection.mutable.IndexedPriorityQueue
 
-object DijkstraIsochrone {
+object DijkstraAlgorithm {
 
-	def computeIsochrone[T:HasNeighbours](start:Traversable[(T, Double)], max:Double, res:(T, Double)=>Unit) {
+	private def alg[T:HasNeighbours](start:Traversable[(T, Double)], res:(T, Double)=>Unit) {
         
 		val closed = new HashSet[T]
 		val costMap = new HashMap[T, Double]
@@ -21,8 +21,6 @@ object DijkstraIsochrone {
 			val (current, curCost) = open.minimum
             open -= current
 			closed += current
-            if(curCost>max)
-                return
             res(current, curCost)
 			for((neighbour, cost) <- current.neighbours if !closed.contains(neighbour)) {
 				val newCost = curCost + cost
@@ -37,7 +35,12 @@ object DijkstraIsochrone {
 		}
 	}
 	
-	implicit def tHasComputableIsochrone[T:HasNeighbours:Ordering](implicit prec:DoublePrecision) = new HasComputableIsochrone[T]{
-		def isochrone(start:Traversable[(T, Double)], limit:Double, res:(T, Double)=>Unit) = computeIsochrone(start, limit, res)
+	def compute[T:HasNeighbours](start:Traversable[(T, Double)]) = new Traversable[(T, Double)] {
+		def foreach[U](func:((T, Double))=>U) {
+			alg(start, (x:T, y:Double)=>func(x->y))
+		}
 	}
+	
+	def isochrone[T:HasNeighbours](start:Traversable[(T, Double)], max:Double) = 
+		compute(start).takeWhile(_._2 <= max)
 }

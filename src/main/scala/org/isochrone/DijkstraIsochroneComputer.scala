@@ -2,7 +2,7 @@ package org.isochrone
 
 import org.isochrone.dboutput.isochrone.DatabaseOutput
 import scala.slick.driver.BasicDriver.simple._
-import org.isochrone.dijkstra.DijkstraIsochrone._
+import org.isochrone.dijkstra.DijkstraHelpers
 import org.isochrone.dbgraph.DatabaseGraph
 import org.isochrone.dbgraph.GraphTables
 import graphlib._
@@ -37,7 +37,7 @@ trait DijkstraIsochroneComputer {
             println("Preloading starting node")
             graph.ensureInMemory(startNode)
 		    implicit val graphimp = graph.graphlib
-		    val isochrone = startNode.isochrone(costLimit)
+		    val isochrone = DijkstraHelpers.isochrone(startNode, costLimit)
 		    println("Starting computation")
 		    val time = timed{
                 var i = 0

@@ -3,7 +3,6 @@ package org.isochrone.dijkstra
 import org.scalatest.FunSuite
 import org.isochrone.simplegraph.SimpleGraph
 import org.isochrone.graphlib._
-import org.isochrone.dijkstra.DijkstraIsochrone._
 import org.isochrone.util.DoublePrecision
 
 class DijkstraIsochroneTest extends FunSuite {
@@ -12,7 +11,7 @@ class DijkstraIsochroneTest extends FunSuite {
 		val graph = new SimpleGraph(edges:_*)
 		implicit val gl = graph.graphlib
 		implicit val precision = DoublePrecision(0.01)
-		val iso = 0.isochrone(0.6).toList
+		val iso = DijkstraHelpers.isochrone(0, 0.6).toList
 		assert(iso.map(_._1).toSet==(0 to 10).toSet)
 	}
 }
