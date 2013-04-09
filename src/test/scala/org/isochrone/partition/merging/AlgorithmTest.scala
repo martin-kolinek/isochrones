@@ -47,12 +47,12 @@ class AlgorithmTest extends FunSuite {
 	}
 	
 	test("Sanity checks for step function on random graphs") {
-		for (i <- 1 to 21 by 5) {
-			val graph = RandomGraph.randomSymmetricGraph(5*i, 20*i)
+		for (i <- 1 to 3) {
+			val graph = RandomGraph.randomSymmetricGraph(50, 150)
 			implicit val gl = graph.graphlib
 			//info(graph.toString)
 			val part = Partition(graph.nodes.toSeq, (x:Cell[Int], y:Cell[Int])=>x.size+y.size)
-			for(i <- 1 to 1000) {
+			for(i <- 1 to 70) {
 				//info(i.toString)
 				checkCellNeighbours(part)
 				checkPriorities(part)
