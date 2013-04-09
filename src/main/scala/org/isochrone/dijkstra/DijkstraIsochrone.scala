@@ -10,7 +10,7 @@ import org.isochrone.util.collection.mutable.IndexedPriorityQueue
 
 object DijkstraIsochrone {
 
-	def computeIsochrone[T](start:Traversable[(T, Double)], max:Double, res:(T, Double)=>Unit)(implicit ev:HasConditionalNeighbours[T, Double]) {
+	def computeIsochrone[T:HasNeighbours](start:Traversable[(T, Double)], max:Double, res:(T, Double)=>Unit) {
         
 		val closed = new HashSet[T]
 		val costMap = new HashMap[T, Double]
@@ -24,7 +24,7 @@ object DijkstraIsochrone {
             if(curCost>max)
                 return
             res(current, curCost)
-			for((neighbour, cost) <- current.condNeighbours(curCost) if !closed.contains(neighbour)) {
+			for((neighbour, cost) <- current.neighbours if !closed.contains(neighbour)) {
 				val newCost = curCost + cost
                 val better = costMap.get(neighbour).map(newCost < _)
                 if(better.getOrElse(false)) {
