@@ -7,15 +7,16 @@ package object merging {
     def partition[T:HasNeighbours](nodes:Traversable[T], 
                                    mergePriority:(Cell[T], Cell[T])=>Double, 
                                    partitionValue:Partition[T]=>Double,
-                                   stepNotification:Int => Unit = x=>Unit) = {
+                                   stepNotification:(Int, Double) => Unit = (x, y)=>Unit) = {
         val part = Partition(nodes, mergePriority)
         val trav = new Traversable[(Double, Set[Cell[T]])] {
             def foreach[U](func:((Double, Set[Cell[T]])) => U) {
             	var lastSize = 0
                 while(lastSize!=part.cells.size) {
-                    func((partitionValue(part), part.cells))
+                	val value =partitionValue(part) 
+                    func((value, part.cells))
                     lastSize = part.cells.size
-                    stepNotification(lastSize)
+                    stepNotification(lastSize, value)
                     part.step();
                 }
             }

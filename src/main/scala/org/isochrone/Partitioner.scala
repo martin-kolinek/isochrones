@@ -12,9 +12,9 @@ trait Partitioner {
 	
 	object notifier {
 		var counter = 0
-		def notify(size:Int) {
-			if(counter==0)
-				println(s"current partition size: $size")
+		def notify(size:Int, value:Double) {
+			if(counter==0 || size < 400)
+				println(s"current partition size: $size with value $value")
 			counter = (counter + 1) % 1000
 		}
 	}
@@ -36,8 +36,8 @@ trait Partitioner {
 			val nodes = graph.allNodes
 			println("computing partition")
 			val part = org.isochrone.partition.merging.partition(nodes, 
-					FunctionLibrary.mergePriority[Long] _, 
-					FunctionLibrary.negAvgSearchGraphSize[Long] _,
+					FunctionLibrary.randMergePriority[Long] _, 
+					FunctionLibrary.boundaryEdgesCellSize[Long](200),
 					notifier.notify _)
 			println("writing output")
 			val toDb = for{

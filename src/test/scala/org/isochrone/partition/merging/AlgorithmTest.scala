@@ -43,23 +43,30 @@ class AlgorithmTest extends FunSuite {
 		implicit val gl = graph.graphlib
 		info(partition(Seq(1, 2, 3, 4, 5, 6, 7, 8), 
 				FunctionLibrary.mergePriority[Int] _, 
-				FunctionLibrary.negAvgSearchGraphSize[Int] _).toString)
+				FunctionLibrary.boundaryEdgesCellSize[Int](4)).toString)
 	}
 	
 	test("Sanity checks for step function on random graphs") {
+		
 		for (i <- 1 to 3) {
 			val graph = RandomGraph.randomSymmetricGraph(50, 150)
 			implicit val gl = graph.graphlib
-			//info(graph.toString)
-			val part = Partition(graph.nodes.toSeq, (x:Cell[Int], y:Cell[Int])=>x.size+y.size)
-			for(i <- 1 to 70) {
-				//info(i.toString)
-				checkCellNeighbours(part)
-				checkPriorities(part)
-				checkBoundaryEdges(part)
-				/*if(!part.priorities.empty)
-					info(part.priorities.maximum.toString)*/
-				part.step()
+			val comutative = Seq(
+				(x:Cell[Int], y:Cell[Int])=>1.0+x.size+y.size,
+				FunctionLibrary.mergePriority[Int] _)
+			for (mergeFunc <- comutative) {
+				//info(graph.toString)
+				val part = Partition(graph.nodes.toSeq, mergeFunc)
+				for(i <- 1 to 70) {
+					//info(i.toString)
+					checkCellNeighbours(part)
+					checkPriorities(part, true)
+					checkBoundaryEdges(part)
+					checkCells(part)
+					/*if(!part.priorities.empty)
+				    info(part.priorities.maximum.toString)*/
+					part.step()
+				}
 			}
 		}
 	}
@@ -75,12 +82,19 @@ class AlgorithmTest extends FunSuite {
         assert(cellNeighbours == part.cellNeighbours)
     }
 
-    def checkPriorities[T:HasNeighbours](part:Partition[T]) {
+    def checkPriorities[T:HasNeighbours](part:Partition[T], checkComutative:Boolean) {
         val should = for {
             c <- part.cells
             c2 <- part.cellNeighbours.getOrElse(c, Set())
         } yield (Set(c, c2), part.mergePriority(c, c2))
 
+        if(checkComutative) {
+        	for {
+        		c <- part.cells
+        		c2 <- part.cellNeighbours.getOrElse(c, Set())
+        	} assert(scala.math.abs(part.mergePriority(c, c2)-part.mergePriority(c2, c))<0.00001)
+        }
+        
         def ok(p1:(scala.collection.Set[Cell[T]], Double), p2:(scala.collection.Set[Cell[T]], Double)) = p1._1 == p2._1 && math.abs(p1._2 - p2._2)<0.0001
         if(!should.forall(p=>part.priorities.exists(ok(p, _))) || !part.priorities.forall(p=>should.exists(ok(p, _)))) {
         	info("Priorities do not match")
@@ -113,5 +127,13 @@ class AlgorithmTest extends FunSuite {
         	info(part.boundaryEdgeCount.toString)
         }
         assert(should.map(_._2).sum == part.boundaryEdgeCount)
+    }
+    
+    def checkCells[T:HasNeighbours](part:Partition[T]) {
+    	for (cell<-part.cells) {
+    		val should = cell.nodes.flatMap(
+    				x=>x.neighbours.filter(y=> !cell.nodes.contains(y._1)).map(y=>x -> y._1)).toSet
+    		assert(should == cell.leaving)
+    	}
     }
 }
