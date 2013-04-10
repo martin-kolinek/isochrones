@@ -1,19 +1,9 @@
 package org.isochrone.graphlib
 
-trait IsGraph[T] {
-    type Node
-    def neigh(t:T):HasNeighbours[Node]
+trait IsGraph[T, Node] {
+	def neighbours(t:T, n:Node):Traversable[(Node, Double)]
 }
 
-/*class WithIsGraphOps[T:IsGraph](t:T)(implicit imp:IsGraph[T]) {
-    def neigh = imp.neigh(t)
-}*/
-
-trait IsGraphWithRegions[T] extends IsGraph[T] {
-    type Region
-    def nodeRegion(t:T, n:Node):Option[Region]
+trait IsGraphWithRegions[T, Node, Region] extends IsGraph[T, Node] {
+	def nodeRegion(t:T, n:Node):Option[Region]
 }
-
-/*class WithIsGraphWithRegionsOps[T](t:T)(implicit imp:IsGraphWithRegions[T])  {
-    def nodeRegion(n:imp.Node) = imp.nodeRegion(t, n)
-}*/
