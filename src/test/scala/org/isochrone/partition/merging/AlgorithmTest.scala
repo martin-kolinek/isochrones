@@ -28,7 +28,7 @@ class AlgorithmTest extends FunSuite {
 		
 		def cost(p:Partition[Int]) = p.cellNeighbours.keys.count(_.size==2)
 		
-		implicit val gl = graph.graphlib
+		implicit val gl = graph.instance
 		
 		assert(partition(Seq(1, 2, 3, 4), priority, cost) == Set(Set(1, 2), Set(3, 4)))
 	}
@@ -40,7 +40,7 @@ class AlgorithmTest extends FunSuite {
 				5->6, 5->7, 5->8, 6->7, 6->8)
 		val undirected = directed ++ directed.map(_.swap)
 		val graph = new SimpleGraph(undirected.map(x=>(x._1, x._2, 1.0)):_*)
-		implicit val gl = graph.graphlib
+		implicit val gl = graph.instance
 		info(partition(Seq(1, 2, 3, 4, 5, 6, 7, 8), 
 				FunctionLibrary.mergePriority[Int] _, 
 				FunctionLibrary.boundaryEdgesCellSize[Int](4)).toString)
@@ -50,7 +50,7 @@ class AlgorithmTest extends FunSuite {
 		
 		for (i <- 1 to 3) {
 			val graph = RandomGraph.randomSymmetricGraph(50, 150)
-			implicit val gl = graph.graphlib
+			implicit val gl = graph.instance
 			val comutative = Seq(
 				(x:Cell[Int], y:Cell[Int])=>1.0+x.size+y.size,
 				FunctionLibrary.mergePriority[Int] _)

@@ -36,7 +36,7 @@ trait DijkstraIsochroneComputer {
             val graph = new DatabaseGraph(new GraphTables("road_nodes", "road_net"), 200, {retrievals+=1})
             println("Preloading starting node")
             graph.ensureInMemory(startNode)
-		    implicit val graphimp = graph.graphlib
+		    implicit val graphimp = graph.instance
 		    val isochrone = DijkstraHelpers.isochrone(startNode, costLimit)
 		    println("Starting computation")
 		    val time = timed{

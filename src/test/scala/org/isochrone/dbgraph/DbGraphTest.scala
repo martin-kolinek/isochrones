@@ -25,7 +25,7 @@ class DbGraphTest extends FunSuite {
 				(4, 5, 0.6))
 			
 			val g = new DatabaseGraph(tbls, 1)
-			val neigh = g.getNeighbours(2)
+			val neigh = g.neighbours(2)
 			assert(neigh.size==2)
 			assert(neigh.toSet == Set((1, 0.5), (4, 0.3)))
 		}
@@ -43,8 +43,8 @@ class DbGraphTest extends FunSuite {
 				(4, 5, 0.6))
 			
 			val g = new DatabaseGraph(tbls, 1)
-			assert(g.getNeighbours(5).size==0)
-			val neigh = g.getNeighbours(10)
+			assert(g.neighbours(5).size==0)
+			val neigh = g.neighbours(10)
 			assert(neigh.size==0)
 		}
 	}
@@ -62,10 +62,10 @@ class DbGraphTest extends FunSuite {
 			
             var retrievals = 0
 			val g = new DatabaseGraph(tbls, 1, {retrievals+=1})
-			assert(g.getNeighbours(5).size==0)
-			assert(g.getNeighbours(5).size==0)
-			assert(g.getNeighbours(5).size==0)
-			val neigh = g.getNeighbours(10)
+			assert(g.neighbours(5).size==0)
+			assert(g.neighbours(5).size==0)
+			assert(g.neighbours(5).size==0)
+			val neigh = g.neighbours(10)
 			assert(neigh.size==0)
             assert(retrievals>0)
             assert(retrievals<=2)
@@ -90,11 +90,11 @@ class DbGraphTest extends FunSuite {
 		    		(4, 5, 0.6),
 		    		(3, 5, 0.7))
 		    val g = new DatabaseGraph(tbls, 1)
-		    val neigh = g.getNeighbours(2)
+		    val neigh = g.neighbours(2)
 		    assert(neigh.size==2)
 		    assert(neigh.toSet==Set((3, 0.2), (4, 0.3)))
 		    assert(g.nodesInMemory==2)
-		    val neigh2 = g.getNeighbours(5)
+		    val neigh2 = g.neighbours(5)
 		    assert(neigh2.size==2)
 		    assert(neigh2.toSet==Set((2, 0.4), (3, 0.5)))
 		    assert(g.nodesInMemory==3)

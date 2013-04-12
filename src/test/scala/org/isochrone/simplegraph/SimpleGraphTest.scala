@@ -12,9 +12,9 @@ class SimpleGraphTest extends FunSuite {
 		    		(5, 3, 0.5),
 		    		(4, 5, 0.6),
 		    		(3, 5, 0.7))
-		val neigh = sg.getNeighbours(2)
+		val neigh = sg.neighbours(2)
 		assert(neigh.toSet == Set((3, 0.2),(4, 0.3)))
-		val neigh2 = sg.getNeighbours(5)
+		val neigh2 = sg.neighbours(5)
 		assert(neigh2.toSet == Set((2, 0.4),(3, 0.5)))
 	}
 	
@@ -27,7 +27,7 @@ class SimpleGraphTest extends FunSuite {
 		    		(5, 3, 0.5),
 		    		(4, 5, 0.6),
 		    		(3, 5, 0.7))
-		val neigh = sg.getNeighbours(10)
+		val neigh = sg.neighbours(10)
 		assert(neigh.size==0)
 	}
 	

@@ -3,8 +3,9 @@ package org.isochrone.dbgraph
 import org.isochrone.util.LRUCache
 import scala.collection.mutable.HashMap
 import scala.slick.driver.BasicDriver.simple._
+import org.isochrone.graphlib.Graph
 
-class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>Unit)(implicit session:Session) {
+class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>Unit)(implicit session:Session) extends Graph[Long] {
     def this(tables:GraphTables, maxRegions:Int)(implicit session:Session) = this(tables, maxRegions, {})
 	type Region = Int
 	type Node = Long
@@ -15,13 +16,13 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>
 		ret
 	})
 	
-	private val neighbours = new HashMap[Node, Traversable[(Node, Double)]]
+	private val neigh = new HashMap[Node, Traversable[(Node, Double)]]
 	
 	private val nodesToRegions = new HashMap[Node, Region]
 	
 	def removeRegion(nodes:Traversable[Node]) = for(n<-nodes) {
 		nodesToRegions -= n
-		neighbours -= n
+		neigh -= n
 	} 
 
     def nodeRegion(node:Node) = {
@@ -29,7 +30,7 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>
         nodesToRegions.get(node)
     }
 	
-	def nodesInMemory = neighbours.size
+	def nodesInMemory = neigh.size
 
     def ensureRegion(node:Node) {
         if(!nodesToRegions.isDefinedAt(node))
@@ -37,16 +38,16 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>
     }
 
     def ensureInMemory(node:Node) {
-        if(!neighbours.isDefinedAt(node)) { 
+        if(!neigh.isDefinedAt(node)) { 
 			retrieveNode(node)
 		}
     }
 	
-	def getNeighbours(node:Node) = {
+	def neighbours(node:Node) = {
 		ensureInMemory(node)
 		if(nodesToRegions.contains(node))
 			regions.updateUsage(nodesToRegions(node))
-		neighbours.getOrElse(node, Seq())
+		neigh.getOrElse(node, Seq())
 	}
 	
 	def retrieveNode(node:Node) {
@@ -62,12 +63,10 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>
 		regions(region) = list.map(_._1)
 		val map = list.groupBy(_._1)
 		for((k, v) <- map) {
-			neighbours(k)=v.collect{case (st, Some(en), Some(c)) => (en, c)}
+			neigh(k)=v.collect{case (st, Some(en), Some(c)) => (en, c)}
 			nodesToRegions(k) = region
 		}
 	}
-	
-	def graphlib = new HasNeighboursInstance(this).nodeHasNeighbours
 	
 	def allNodes = tables.nodes.map(_.id).list
 }

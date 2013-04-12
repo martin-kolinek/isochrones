@@ -5,6 +5,7 @@ import org.isochrone.dbgraph.GraphTables
 import scala.slick.driver.PostgresDriver.simple._
 import org.isochrone.dboutput.partition._
 import org.isochrone.partition.merging._
+import org.isochrone.graphlib._
 
 trait Partitioner {
 	self:ActionExecutor =>
@@ -28,7 +29,7 @@ trait Partitioner {
 		db.withTransaction {
 			implicit session:Session =>
 			val graph = new DatabaseGraph(new GraphTables("road_nodes", "road_net_undir"), 200)
-			implicit val gl = graph.graphlib
+			implicit val gl = graph.instance
 			val out = new DatabaseOutput("part_out")
 			println("clearing output table")
 			out.clear()
