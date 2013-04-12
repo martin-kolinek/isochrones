@@ -16,7 +16,7 @@ class MultilevelDijstra[T, Node, Region](levels:List[T])(implicit ev:IsGraphWith
 				res <- DijkstraAlgorithm.isochrone(regStart, limit)(single.instance)
 			} yield res
 			val fromUpperLevel = isochrone(singleResult, rest.tail, limit)
-			fromUpperLevel
+		    DijkstraAlgorithm.isochrone(fromUpperLevel.filter(x=> limit - x._2 < curLevel.eccentricity(x._1)), limit)
 		}
 	}
 }

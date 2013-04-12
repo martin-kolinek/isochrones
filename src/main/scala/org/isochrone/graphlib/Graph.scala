@@ -6,4 +6,5 @@ trait IsGraph[T, Node] {
 
 trait IsGraphWithRegions[T, Node, Region] extends IsGraph[T, Node] {
 	def nodeRegion(t:T, n:Node):Option[Region]
+    def nodeExcentricity(n:Node):Double
 }
