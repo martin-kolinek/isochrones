@@ -11,9 +11,9 @@ package object graphlib {
 	}
 	
 	implicit class RegionGraphOps[T](t:T) {
-		def nodeRegion[Node, Region](n:Node)(implicit ev:IsGraphWithRegions[T, Node, Region]) =
+		def nodeRegion[Node, Region](n:Node)(implicit ev:HasRegions[T, Node, Region]) =
 			ev.nodeRegion(t, n)
-        def eccentricity[Node, Region](n:Node)(implicit ev:IsGraphWithRegions[T, Node, Region]) = ev.nodeEccentricity(t, n)
+        def eccentricity[Node, Region](n:Node)(implicit ev:HasRegions[T, Node, Region]) = ev.nodeEccentricity(t, n)
 	}
 	
 	implicit def singleRegionGraphIsGraph[T, Node, Region] = new IsGraph[SingleRegionGraph[T, Node, Region], Node] {
@@ -24,8 +24,7 @@ package object graphlib {
         def neighbours(g:Graph[Node], n:Node) = g.neighbours(n)
     }
 
-    implicit def graphWithRegionsIsGraphWithRegions[Node, Region] = new IsGraphWithRegions[GraphWithRegions[Node, Region], Node, Region] {
-        def neighbours(g:GraphWithRegions[Node, Region], n:Node) = g.neighbours(n)
+    implicit def graphWithRegionsIsGraphWithRegions[Node, Region] = new HasRegions[GraphWithRegions[Node, Region], Node, Region] {
         def nodeRegion(g:GraphWithRegions[Node, Region], n:Node) = g.nodeRegion(n)
         def nodeEccentricity(g:GraphWithRegions[Node, Region], n:Node) = g.nodeEccentricity(n)
     }

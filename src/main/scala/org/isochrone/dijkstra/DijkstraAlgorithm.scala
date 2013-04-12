@@ -11,7 +11,6 @@ import org.isochrone.util.collection.mutable.IndexedPriorityQueue
 object DijkstraAlgorithm {
 
 	private def alg[T:HasNeighbours](start:Traversable[(T, Double)], res:(T, Double)=>Unit) {
-        
 		val closed = new HashSet[T]
 		val costMap = new HashMap[T, Double]
         val open = IndexedPriorityQueue(start.toSeq:_*)

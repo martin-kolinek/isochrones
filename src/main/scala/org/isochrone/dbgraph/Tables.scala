@@ -18,6 +18,7 @@ class NodeTable(name:String) extends Table[(Long, Int)](name) {
 class RegionTable(name:String) extends Table[(Int, Double)](name) {
     def id = column[Int]("id")
     def diameter = column[Double]("diameter")
+    def * = id ~ diameter
 }
 
 class GraphTables(nodeName:String, edgeName:String) {

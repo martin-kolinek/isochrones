@@ -6,19 +6,25 @@ import java.util.TreeMap
 import scala.collection.mutable.Map
 import scala.collection.mutable.HashMap
 
-class IndexedPriorityQueue[ItemType, PriorityType] private (
+class IndexedPriorityQueue[ItemType, PriorityType:Ordering] private (
 		val priorities:TreeMap[PriorityType, Set[ItemType]],
 		val inverse:Map[ItemType, PriorityType]) extends Iterable[(ItemType, PriorityType)] {
-	
+	val imp = implicitly[Ordering[PriorityType]]
+	import imp._
 	def +=(item:(ItemType, PriorityType)) {
-        val st = priorities.get(item._2)
-        if(st == null) {
-            priorities.put(item._2, Set(item._1))
-        }
-        else {
-            st += item._1
-        }
-        inverse+=item
+		val haveGreater = inverse.get(item._1).map(_ > item._2)
+		if(haveGreater.getOrElse(false))
+			this-=item._1
+		if(haveGreater.getOrElse(true)) {
+			val st = priorities.get(item._2)
+			if(st == null) {
+				priorities.put(item._2, Set(item._1))
+			}
+			else {
+				st += item._1
+			}
+			inverse+=item
+		}
 	}
 	
     private def nullToOpt[T](t:T) = if(t==null) None else Some(t)

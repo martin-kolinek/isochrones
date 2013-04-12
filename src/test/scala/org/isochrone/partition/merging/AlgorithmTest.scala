@@ -17,7 +17,7 @@ class AlgorithmTest extends FunSuite {
 				3->4,
 				4->3)
 		
-		val graph = new SimpleGraph(unweighted.map(x=>(x._1, x._2, 1.0)):_*)
+		val graph = SimpleGraph(unweighted.map(x=>(x._1, x._2, 1.0)):_*)
 		def priority(c1:Cell[Int], c2:Cell[Int]) = {
 			val merged = c1.nodes ++ c2.nodes
 			if(merged == Set(1, 2) || merged == Set(3, 4)) 
@@ -39,7 +39,7 @@ class AlgorithmTest extends FunSuite {
 				4->5,
 				5->6, 5->7, 5->8, 6->7, 6->8)
 		val undirected = directed ++ directed.map(_.swap)
-		val graph = new SimpleGraph(undirected.map(x=>(x._1, x._2, 1.0)):_*)
+		val graph = SimpleGraph(undirected.map(x=>(x._1, x._2, 1.0)):_*)
 		implicit val gl = graph.instance
 		info(partition(Seq(1, 2, 3, 4, 5, 6, 7, 8), 
 				FunctionLibrary.mergePriority[Int] _, 

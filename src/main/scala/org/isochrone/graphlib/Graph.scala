@@ -4,7 +4,7 @@ trait IsGraph[-T, Node] {
 	def neighbours(t:T, n:Node):Traversable[(Node, Double)]
 }
 
-trait IsGraphWithRegions[-T, Node, Region] extends IsGraph[T, Node] {
+trait HasRegions[-T, Node, Region] {
 	def nodeRegion(t:T, n:Node):Option[Region]
     def nodeEccentricity(t:T, n:Node):Double
 }

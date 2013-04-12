@@ -1,6 +1,6 @@
 package org.isochrone.graphlib
 
-class SingleRegionGraph[T, Node, Region](val underlying:T, val region:Region)(implicit ev:IsGraphWithRegions[T, Node, Region]) {
+class SingleRegionGraph[T, Node, Region](val underlying:T, val region:Region)(implicit ev2:IsGraph[T, Node], ev:HasRegions[T, Node, Region]) {
     
 	def getNeighbours(nd:Node) = {
 		implicit val ins = underlying.instance

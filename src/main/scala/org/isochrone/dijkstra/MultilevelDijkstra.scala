@@ -2,7 +2,7 @@ package org.isochrone.dijkstra
 
 import org.isochrone.graphlib._
 
-class MultilevelDijstra[T, Node, Region](levels:List[T])(implicit ev:IsGraphWithRegions[T, Node, Region]) {
+class MultilevelDijstra[T, Node, Region](levels:List[T])(implicit ev:HasRegions[T, Node, Region], ev2:IsGraph[T, Node]) {
 	private def isochrone(start:Traversable[(Node, Double)], rest:List[T], limit:Double):Traversable[(Node, Double)] = {
 		if(rest.isEmpty) start
 		else {
