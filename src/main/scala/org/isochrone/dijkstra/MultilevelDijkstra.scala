@@ -2,21 +2,26 @@ package org.isochrone.dijkstra
 
 import org.isochrone.graphlib._
 
-class MultilevelDijstra[T, Node, Region](levels:List[T])(implicit ev:HasRegions[T, Node, Region], ev2:IsGraph[T, Node]) {
-	private def isochrone(start:Traversable[(Node, Double)], rest:List[T], limit:Double):Traversable[(Node, Double)] = {
+class MultilevelDijkstra[T, Node, Region](levels:List[T])(implicit ev:HasRegions[T, Node, Region], ev2:IsGraph[T, Node]) {
+	private def iso(start:Traversable[(Node, Double)], rest:List[T], limit:Double):Traversable[(Node, Double)] = {
 		if(rest.isEmpty) start
 		else {
 			val curLevel = rest.head
 					
-			val grouped = start.groupBy(x=>curLevel.nodeRegion(x._1))
-			assert(grouped.map(_._1).map(_.isEmpty).forall(!_))
+			val grouped = start.groupBy(x=>curLevel.nodeRegion(x._1)).collect{
+				case (Some(reg), x) => reg ->x
+			}.toSeq
 			val singleResult = for {
 				(reg, regStart) <- grouped
-				single = new SingleRegionGraph(curLevel, reg.get)
+				single = new SingleRegionGraph(curLevel, reg)
 				res <- DijkstraAlgorithm.isochrone(regStart, limit)(single.instance)
 			} yield res
-			val fromUpperLevel = isochrone(singleResult, rest.tail, limit)
-		    DijkstraAlgorithm.isochrone(fromUpperLevel.filter(x=> limit - x._2 < curLevel.eccentricity(x._1)), limit)(curLevel.instance)
+			val fromUpperLevel = iso(singleResult, rest.tail, limit)
+		    singleResult ++ DijkstraAlgorithm.isochrone(fromUpperLevel.filter(x=> limit - x._2 < curLevel.eccentricity(x._1)), limit)(curLevel.instance)
 		}
+	}
+	
+	def isochrone(start:Node, limit:Double) = {
+		iso(Seq((start, 0.0)), levels, limit).groupBy(_._1).map(x=>x._1 -> x._2.map(_._2).min)
 	}
 }

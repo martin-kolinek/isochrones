@@ -23,4 +23,22 @@ class DijkstraIsochroneTest extends FunSuite {
 			DijkstraHelpers.isochrone(1, 20.0)
 		}
 	}
+	
+	test("multilevel dijkstra works on a graph") {
+		val dir = Seq(1->2, 2->3, 3->1, 3->4, 4->5, 5->6, 6->7, 7->8, 8->9, 9->7, 9->10, 8->11)
+		val regs = Map(1->1, 2->1, 3->1, 4->2, 5->2, 6->2, 7->3, 8->3, 9->3, 10->3, 11->3)
+		val undir = dir ++ dir.map(_.swap)
+		val weigh = undir.map(x=>(x._1, x._2, 1.0))
+		val lowlevel = SimpleGraph(weigh, regs)
+		val upper = SimpleGraph(
+				(3, 4, 1.0),
+				(4, 6, 2.0),
+				(6, 7, 1.0))
+		val dijk = new MultilevelDijkstra[SimpleGraph, Int, Int](List(lowlevel, upper))
+		val iso = dijk.isochrone(1, 3.1)
+		assert(iso.keySet==Set(1,2,3,4,5))
+		val iso2 = dijk.isochrone(1, 6.5)
+		info(iso2.toSeq.sortBy(_._1).toString)
+		assert(iso2.keySet == Set(1, 2, 3, 6, 7, 8, 9))
+	}
 }
