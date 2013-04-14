@@ -6,6 +6,10 @@ drop table if exists road_net_vis;
 drop table if exists road_net_undir;
 drop table if exists road_net_undir_vis;
 drop table if exists road_nodes;
+drop table if exists higher_nodes;
+drop table if exists higher_edges;
+drop table if exists higher_regions;
+drop table if exists road_regions;
 DROP TABLE IF EXISTS output;
 DROP TABLE IF EXISTS output_vis;
 
@@ -78,6 +82,30 @@ create table road_nodes (
 );
 insert into road_nodes(id, region)
     select distinct q.id, 0 from (select start_node as id from road_net union select end_node as id from road_net) q;
+
+--higher level tables
+
+create table higher_nodes (
+    id bigint,
+    region int
+);
+
+create table higher_edges (
+    start_node bigint,
+    end_node bigint,
+    cost double precision
+);
+
+create table road_regions (
+    id int,
+    diameter double precision
+);
+
+create table higher_regions (
+    id int,
+    diameter double precision
+);
+
 
 --output table - contains output isochrone
          

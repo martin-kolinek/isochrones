@@ -2,6 +2,7 @@ package org.isochrone.graphlib
 
 trait IsGraph[-T, Node] {
 	def neighbours(t:T, n:Node):Traversable[(Node, Double)]
+	def nodes(t:T):Traversable[Node]
 }
 
 trait HasRegions[-T, Node, Region] {
@@ -11,6 +12,7 @@ trait HasRegions[-T, Node, Region] {
 
 trait Graph[Node] {
     def neighbours(n:Node):Traversable[(Node, Double)]
+    def nodes:Traversable[Node]
 }
 
 trait GraphWithRegions[Node, Region] extends Graph[Node] {

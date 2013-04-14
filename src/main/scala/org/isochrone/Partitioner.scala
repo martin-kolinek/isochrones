@@ -20,7 +20,7 @@ trait Partitioner {
 		}
 	}
 	
-	def doPart(args:IndexedSeq[String]) {
+	private def doPart(args:IndexedSeq[String]) {
 		if(args.size!=1) {
 			println("usage: partition database")
 		}
@@ -30,17 +30,17 @@ trait Partitioner {
 			implicit session:Session =>
 			val graph = new DatabaseGraph(new GraphTables("road_nodes", "road_net_undir"), 200)
 			implicit val gl = graph.instance
-			val out = new DatabaseOutput("part_out")
-			println("clearing output table")
-			out.clear()
+			val out = new DatabaseOutput("road_nodes")
 			println("loading nodes")
-			val nodes = graph.allNodes
+			val nodes = graph.nodes
 			println("computing partition")
 			val part = org.isochrone.partition.merging.partition(nodes, 
 					FunctionLibrary.randMergePriority[Long] _, 
-					FunctionLibrary.boundaryEdgesCellSize[Long](200),
+					FunctionLibrary.boundaryEdgesCellSize[Long](70),
 					notifier.notify _)
 			println("writing output")
+			println("clearing output table")
+			out.clear()
 			val toDb = for{
 				(p, i) <- part.zipWithIndex
 				n <- p

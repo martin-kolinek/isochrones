@@ -4,10 +4,10 @@
     <mapcanvas>
         <units>degrees</units>
         <extent>
-            <xmin>16.994675</xmin>
-            <ymin>48.063180</ymin>
-            <xmax>17.321294</xmax>
-            <ymax>48.248804</ymax>
+            <xmin>16.974801</xmin>
+            <ymin>48.079662</ymin>
+            <xmax>17.301420</xmax>
+            <ymax>48.265286</ymax>
         </extent>
         <projections>0</projections>
         <destinationsrs>
@@ -24,29 +24,39 @@
         </destinationsrs>
     </mapcanvas>
     <legend updateDrawingOrder="true">
-        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="partition_vis" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="higher_node_vis" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="partition_vis20130409004058060" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="higher_node_vis20130413225043480" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="output_vis" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="higher_edge_vis" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="output_vis20130314012338272" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="higher_edge_vis20130413225043440" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="output_vis" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="partition_vis" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="output_vis20130314012022835" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="partition_vis20130409004058060" visible="0"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="road_net_vis" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="output_vis" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="road_net_vis20130312224944299" visible="0"/>
+                <legendlayerfile isInOverview="0" layerid="output_vis20130314012338272" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="road_net_undir_vis" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="output_vis" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="road_net_undir_vis20130409000705683" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="output_vis20130314012022835" visible="1"/>
+            </filegroup>
+        </legendlayer>
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="road_net_vis" showFeatureCount="0">
+            <filegroup open="false" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="road_net_vis20130312224944299" visible="1"/>
+            </filegroup>
+        </legendlayer>
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="road_net_undir_vis" showFeatureCount="0">
+            <filegroup open="false" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="road_net_undir_vis20130409000705683" visible="0"/>
             </filegroup>
         </legendlayer>
         <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="nodes" showFeatureCount="0">
@@ -65,7 +75,142 @@
             </filegroup>
         </legendlayer>
     </legend>
-    <projectlayers layercount="8">
+    <projectlayers layercount="10">
+        <maplayer minimumScale="0" maximumScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0">
+            <id>higher_edge_vis20130413225043440</id>
+            <datasource>sslmode=disable key='tid' srid=4326 type=LINESTRING table="higher_edge_vis" (geom) sql=</datasource>
+            <title></title>
+            <abstract></abstract>
+            <layername>higher_edge_vis</layername>
+            <srs>
+                <spatialrefsys>
+                    <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
+                    <geographicflag>true</geographicflag>
+                </spatialrefsys>
+            </srs>
+            <transparencyLevelInt>255</transparencyLevelInt>
+            <provider encoding="System">postgres</provider>
+            <vectorjoins/>
+            <renderer-v2 symbollevels="0" type="singleSymbol">
+                <symbols>
+                    <symbol outputUnit="MM" alpha="1" type="line" name="0">
+                        <layer pass="0" class="SimpleLine" locked="0">
+                            <prop k="capstyle" v="square"/>
+                            <prop k="color" v="85,85,0,255"/>
+                            <prop k="customdash" v="5;2"/>
+                            <prop k="joinstyle" v="bevel"/>
+                            <prop k="offset" v="0"/>
+                            <prop k="penstyle" v="solid"/>
+                            <prop k="use_custom_dash" v="0"/>
+                            <prop k="width" v="0.26"/>
+                        </layer>
+                    </symbol>
+                </symbols>
+                <rotation field=""/>
+                <sizescale field=""/>
+            </renderer-v2>
+            <customproperties/>
+            <displayfield></displayfield>
+            <label>0</label>
+            <labelattributes>
+                <label fieldname="" text="Label"/>
+                <family fieldname="" name="Sans Serif"/>
+                <size fieldname="" units="pt" value="12"/>
+                <bold fieldname="" on="0"/>
+                <italic fieldname="" on="0"/>
+                <underline fieldname="" on="0"/>
+                <strikeout fieldname="" on="0"/>
+                <color fieldname="" red="0" blue="0" green="0"/>
+                <x fieldname=""/>
+                <y fieldname=""/>
+                <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+                <angle fieldname="" value="0" auto="0"/>
+                <alignment fieldname="" value="center"/>
+                <buffercolor fieldname="" red="255" blue="255" green="255"/>
+                <buffersize fieldname="" units="pt" value="1"/>
+                <bufferenabled fieldname="" on=""/>
+                <multilineenabled fieldname="" on=""/>
+                <selectedonly on=""/>
+            </labelattributes>
+            <editform></editform>
+            <editforminit></editforminit>
+            <annotationform></annotationform>
+            <attributeactions/>
+        </maplayer>
+        <maplayer minimumScale="0" maximumScale="1e+08" geometry="Point" type="vector" hasScaleBasedVisibilityFlag="0">
+            <id>higher_node_vis20130413225043480</id>
+            <datasource>sslmode=disable key='tid' srid=4326 type=POINT table="higher_node_vis" (geom) sql=</datasource>
+            <title></title>
+            <abstract></abstract>
+            <layername>higher_node_vis</layername>
+            <srs>
+                <spatialrefsys>
+                    <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
+                    <ellipsoidacronym>WGS84</ellipsoidacronym>
+                    <geographicflag>true</geographicflag>
+                </spatialrefsys>
+            </srs>
+            <transparencyLevelInt>255</transparencyLevelInt>
+            <provider encoding="System">postgres</provider>
+            <vectorjoins/>
+            <renderer-v2 symbollevels="0" type="singleSymbol">
+                <symbols>
+                    <symbol outputUnit="MM" alpha="1" type="marker" name="0">
+                        <layer pass="0" class="SimpleMarker" locked="0">
+                            <prop k="angle" v="0"/>
+                            <prop k="color" v="255,0,0,255"/>
+                            <prop k="color_border" v="255,0,0,255"/>
+                            <prop k="name" v="cross2"/>
+                            <prop k="offset" v="0,0"/>
+                            <prop k="size" v="6"/>
+                        </layer>
+                    </symbol>
+                </symbols>
+                <rotation field=""/>
+                <sizescale field=""/>
+            </renderer-v2>
+            <customproperties/>
+            <displayfield>id</displayfield>
+            <label>0</label>
+            <labelattributes>
+                <label fieldname="" text="Label"/>
+                <family fieldname="" name="Sans Serif"/>
+                <size fieldname="" units="pt" value="12"/>
+                <bold fieldname="" on="0"/>
+                <italic fieldname="" on="0"/>
+                <underline fieldname="" on="0"/>
+                <strikeout fieldname="" on="0"/>
+                <color fieldname="" red="0" blue="0" green="0"/>
+                <x fieldname=""/>
+                <y fieldname=""/>
+                <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+                <angle fieldname="" value="0" auto="0"/>
+                <alignment fieldname="" value="center"/>
+                <buffercolor fieldname="" red="255" blue="255" green="255"/>
+                <buffersize fieldname="" units="pt" value="1"/>
+                <bufferenabled fieldname="" on=""/>
+                <multilineenabled fieldname="" on=""/>
+                <selectedonly on=""/>
+            </labelattributes>
+            <edittypes>
+                <edittype type="0" name="id"/>
+            </edittypes>
+            <editform></editform>
+            <editforminit></editforminit>
+            <annotationform></annotationform>
+            <attributeactions/>
+        </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" geometry="Point" type="vector" hasScaleBasedVisibilityFlag="0">
             <id>nodes20130312150057726</id>
             <datasource>sslmode=disable key='id' srid=4326 type=POINT table="nodes" (geom) sql=</datasource>
@@ -154,36 +299,36 @@
             <vectorjoins/>
             <renderer-v2 attr="distance" symbollevels="0" type="graduatedSymbol">
                 <ranges>
-                    <range symbol="0" lower="0" upper="166.645" label="0.0000 - 166.6451"/>
-                    <range symbol="1" lower="166.645" upper="333.29" label="166.6451 - 333.2903"/>
-                    <range symbol="2" lower="333.29" upper="499.935" label="333.2903 - 499.9354"/>
-                    <range symbol="3" lower="499.935" upper="666.581" label="499.9354 - 666.5805"/>
-                    <range symbol="4" lower="666.581" upper="833.226" label="666.5805 - 833.2256"/>
-                    <range symbol="5" lower="833.226" upper="999.871" label="833.2256 - 999.8708"/>
-                    <range symbol="6" lower="999.871" upper="1166.52" label="999.8708 - 1166.5159"/>
-                    <range symbol="7" lower="1166.52" upper="1333.16" label="1166.5159 - 1333.1610"/>
-                    <range symbol="8" lower="1333.16" upper="1499.81" label="1333.1610 - 1499.8062"/>
-                    <range symbol="9" lower="1499.81" upper="1666.45" label="1499.8062 - 1666.4513"/>
-                    <range symbol="10" lower="1666.45" upper="1833.1" label="1666.4513 - 1833.0964"/>
-                    <range symbol="11" lower="1833.1" upper="1999.74" label="1833.0964 - 1999.7415"/>
-                    <range symbol="12" lower="1999.74" upper="2166.39" label="1999.7415 - 2166.3867"/>
-                    <range symbol="13" lower="2166.39" upper="2333.03" label="2166.3867 - 2333.0318"/>
-                    <range symbol="14" lower="2333.03" upper="2499.68" label="2333.0318 - 2499.6769"/>
-                    <range symbol="15" lower="2499.68" upper="2666.32" label="2499.6769 - 2666.3221"/>
-                    <range symbol="16" lower="2666.32" upper="2832.97" label="2666.3221 - 2832.9672"/>
-                    <range symbol="17" lower="2832.97" upper="2999.61" label="2832.9672 - 2999.6123"/>
-                    <range symbol="18" lower="2999.61" upper="3166.26" label="2999.6123 - 3166.2575"/>
-                    <range symbol="19" lower="3166.26" upper="3332.9" label="3166.2575 - 3332.9026"/>
-                    <range symbol="20" lower="3332.9" upper="3499.55" label="3332.9026 - 3499.5477"/>
-                    <range symbol="21" lower="3499.55" upper="3666.19" label="3499.5477 - 3666.1928"/>
-                    <range symbol="22" lower="3666.19" upper="3832.84" label="3666.1928 - 3832.8380"/>
-                    <range symbol="23" lower="3832.84" upper="3999.48" label="3832.8380 - 3999.4831"/>
-                    <range symbol="24" lower="3999.48" upper="4166.13" label="3999.4831 - 4166.1282"/>
-                    <range symbol="25" lower="4166.13" upper="4332.77" label="4166.1282 - 4332.7734"/>
-                    <range symbol="26" lower="4332.77" upper="4499.42" label="4332.7734 - 4499.4185"/>
-                    <range symbol="27" lower="4499.42" upper="4666.06" label="4499.4185 - 4666.0636"/>
-                    <range symbol="28" lower="4666.06" upper="4832.71" label="4666.0636 - 4832.7087"/>
-                    <range symbol="29" lower="4832.71" upper="4999.35" label="4832.7087 - 4999.3539"/>
+                    <range symbol="0" lower="0" upper="599.944" label="0.0000 - 599.9440"/>
+                    <range symbol="1" lower="599.944" upper="1199.89" label="599.9440 - 1199.8880"/>
+                    <range symbol="2" lower="1199.89" upper="1799.83" label="1199.8880 - 1799.8320"/>
+                    <range symbol="3" lower="1799.83" upper="2399.78" label="1799.8320 - 2399.7759"/>
+                    <range symbol="4" lower="2399.78" upper="2999.72" label="2399.7759 - 2999.7199"/>
+                    <range symbol="5" lower="2999.72" upper="3599.66" label="2999.7199 - 3599.6639"/>
+                    <range symbol="6" lower="3599.66" upper="4199.61" label="3599.6639 - 4199.6079"/>
+                    <range symbol="7" lower="4199.61" upper="4799.55" label="4199.6079 - 4799.5519"/>
+                    <range symbol="8" lower="4799.55" upper="5399.5" label="4799.5519 - 5399.4959"/>
+                    <range symbol="9" lower="5399.5" upper="5999.44" label="5399.4959 - 5999.4398"/>
+                    <range symbol="10" lower="5999.44" upper="6599.38" label="5999.4398 - 6599.3838"/>
+                    <range symbol="11" lower="6599.38" upper="7199.33" label="6599.3838 - 7199.3278"/>
+                    <range symbol="12" lower="7199.33" upper="7799.27" label="7199.3278 - 7799.2718"/>
+                    <range symbol="13" lower="7799.27" upper="8399.22" label="7799.2718 - 8399.2158"/>
+                    <range symbol="14" lower="8399.22" upper="8999.16" label="8399.2158 - 8999.1598"/>
+                    <range symbol="15" lower="8999.16" upper="9599.1" label="8999.1598 - 9599.1038"/>
+                    <range symbol="16" lower="9599.1" upper="10199" label="9599.1038 - 10199.0477"/>
+                    <range symbol="17" lower="10199" upper="10799" label="10199.0477 - 10798.9917"/>
+                    <range symbol="18" lower="10799" upper="11398.9" label="10798.9917 - 11398.9357"/>
+                    <range symbol="19" lower="11398.9" upper="11998.9" label="11398.9357 - 11998.8797"/>
+                    <range symbol="20" lower="11998.9" upper="12598.8" label="11998.8797 - 12598.8237"/>
+                    <range symbol="21" lower="12598.8" upper="13198.8" label="12598.8237 - 13198.7677"/>
+                    <range symbol="22" lower="13198.8" upper="13798.7" label="13198.7677 - 13798.7117"/>
+                    <range symbol="23" lower="13798.7" upper="14398.7" label="13798.7117 - 14398.6556"/>
+                    <range symbol="24" lower="14398.7" upper="14998.6" label="14398.6556 - 14998.5996"/>
+                    <range symbol="25" lower="14998.6" upper="15598.5" label="14998.5996 - 15598.5436"/>
+                    <range symbol="26" lower="15598.5" upper="16198.5" label="15598.5436 - 16198.4876"/>
+                    <range symbol="27" lower="16198.5" upper="16798.4" label="16198.4876 - 16798.4316"/>
+                    <range symbol="28" lower="16798.4" upper="17398.4" label="16798.4316 - 17398.3756"/>
+                    <range symbol="29" lower="17398.4" upper="17998.3" label="17398.3756 - 17998.3195"/>
                 </ranges>
                 <symbols>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="0">
@@ -193,7 +338,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="1">
@@ -203,7 +348,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="10">
@@ -213,7 +358,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="11">
@@ -223,7 +368,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="12">
@@ -233,7 +378,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="13">
@@ -243,7 +388,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="14">
@@ -253,7 +398,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="15">
@@ -263,7 +408,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="16">
@@ -273,7 +418,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="17">
@@ -283,7 +428,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="18">
@@ -293,7 +438,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="19">
@@ -303,7 +448,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="2">
@@ -313,7 +458,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="20">
@@ -323,7 +468,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="21">
@@ -333,7 +478,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="22">
@@ -343,7 +488,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="23">
@@ -353,7 +498,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="24">
@@ -363,7 +508,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="25">
@@ -373,7 +518,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="26">
@@ -383,7 +528,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="27">
@@ -393,7 +538,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="28">
@@ -403,7 +548,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="29">
@@ -413,7 +558,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="3">
@@ -423,7 +568,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="4">
@@ -433,7 +578,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="5">
@@ -443,7 +588,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="6">
@@ -453,7 +598,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="7">
@@ -463,7 +608,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="8">
@@ -473,7 +618,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                     <symbol outputUnit="MM" alpha="1" type="marker" name="9">
@@ -483,7 +628,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                 </symbols>
@@ -495,7 +640,7 @@
                             <prop k="color_border" v="0,0,0,255"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
-                            <prop k="size" v="2"/>
+                            <prop k="size" v="4"/>
                         </layer>
                     </symbol>
                 </source-symbol>

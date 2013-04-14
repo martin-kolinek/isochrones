@@ -6,4 +6,4 @@ create table partition_vis(
 );
 
 insert into partition_vis (node_id, region, geom)
-    select n.id, p.region, n.geom from part_out p inner join nodes n on n.id = p.node_id;
+    select n.id, p.region, n.geom from road_nodes p inner join nodes n on n.id = p.id;

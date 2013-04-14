@@ -7,7 +7,6 @@ class MultilevelDijkstra[T, Node, Region](levels:List[T])(implicit ev:HasRegions
 		if(rest.isEmpty) start
 		else {
 			val curLevel = rest.head
-					
 			val grouped = start.groupBy(x=>curLevel.nodeRegion(x._1)).collect{
 				case (Some(reg), x) => reg ->x
 			}.toSeq
@@ -18,6 +17,7 @@ class MultilevelDijkstra[T, Node, Region](levels:List[T])(implicit ev:HasRegions
 			} yield res
 			val fromUpperLevel = iso(singleResult, rest.tail, limit)
 		    singleResult ++ DijkstraAlgorithm.isochrone(fromUpperLevel.filter(x=> limit - x._2 < curLevel.eccentricity(x._1)), limit)(curLevel.instance)
+			fromUpperLevel
 		}
 	}
 	

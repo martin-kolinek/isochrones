@@ -5,7 +5,7 @@ import scala.collection.mutable.HashMap
 import scala.slick.driver.BasicDriver.simple._
 import org.isochrone.graphlib.Graph
 
-class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>Unit)(implicit session:Session) extends Graph[Long] {
+class DatabaseGraph(val tables:GraphTables, maxRegions:Int, retrieveNotification: =>Unit)(implicit session:Session) extends Graph[Long] {
     def this(tables:GraphTables, maxRegions:Int)(implicit session:Session) = this(tables, maxRegions, {})
 	type Region = Int
 	type Node = Long
@@ -68,6 +68,6 @@ class DatabaseGraph(tables:GraphTables, maxRegions:Int, retrieveNotification: =>
 		}
 	}
 	
-	def allNodes = tables.nodes.map(_.id).list
+	def nodes = tables.nodes.map(_.id).list
 }
 
