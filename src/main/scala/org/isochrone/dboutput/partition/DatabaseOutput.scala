@@ -1,6 +1,6 @@
 package org.isochrone.dboutput.partition
 
-import scala.slick.driver.PostgresDriver.simple._
+import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.dbgraph.NodeTable
 
 class DatabaseOutput(name:String) {

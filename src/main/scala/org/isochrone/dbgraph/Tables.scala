@@ -1,6 +1,6 @@
 package org.isochrone.dbgraph
 
-import scala.slick.driver.PostgresDriver.simple._
+import org.isochrone.util.db.MyPostgresDriver.simple._
 
 class EdgeTable(name:String) extends Table[(Long, Long, Double)](name) {
 	def start = column[Long]("start_node")

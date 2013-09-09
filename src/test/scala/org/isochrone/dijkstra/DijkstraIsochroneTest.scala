@@ -36,6 +36,7 @@ class DijkstraIsochroneTest extends FunSuite {
 				(6, 7, 1.0))
 		val dijk = new MultilevelDijkstra[SimpleGraph, Int, Int](List(lowlevel, upper))
 		val iso = dijk.isochrone(1, 3.1)
+		info(iso.keySet.toString)
 		assert(iso.keySet==Set(1,2,3,4,5))
 		val iso2 = dijk.isochrone(1, 6.5)
 		info(iso2.toSeq.sortBy(_._1).toString)

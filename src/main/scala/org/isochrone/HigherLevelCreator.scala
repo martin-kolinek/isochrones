@@ -1,6 +1,6 @@
 package org.isochrone
 
-import scala.slick.driver.PostgresDriver.simple._
+import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.dbgraph.DatabaseGraph
 import org.isochrone.dbgraph.GraphTables
 import org.isochrone.dbgraph.DatabaseGraphWithRegions
