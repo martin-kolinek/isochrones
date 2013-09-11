@@ -16,6 +16,8 @@ libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.0-M8"
 
 libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3"
 
+libraryDependencies += "commons-io" % "commons-io" % "2.4"
+
 libraryDependencies += "com.github.tminglei" % "slick-pg_2.10.1" % "0.1.3"
 
 libraryDependencies ++= List("org.slf4j" % "slf4j-nop" % "1.6.6"
