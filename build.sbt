@@ -10,7 +10,7 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
 
-libraryDependencies += "com.typesafe.slick" %% "slick" % "1.0.0"
+libraryDependencies += "com.typesafe.slick" %% "slick" % "1.0.1"
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.0-M8"
 
