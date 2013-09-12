@@ -10,6 +10,12 @@ import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.VisualizationTableComponent
 import org.postgresql.util.PSQLException
 
+trait TestTableCreatorComponent
+    extends TableCreatorComponent
+    with TestDatabaseComponent
+    with DefaultRoadNetTableComponent
+    with DefaultVisualizationTableComponent
+
 class TableCreatorTest extends FunSuite with TestDatabase {
     def queries(comp: RoadNetTableComponent with VisualizationTableComponent) = {
         import comp._
@@ -20,14 +26,8 @@ class TableCreatorTest extends FunSuite with TestDatabase {
             Query(visualizationTables.roadNetUndirVisualization))
     }
 
-    trait TestComponent
-        extends TableCreatorComponent
-        with TestDatabaseComponent
-        with DefaultRoadNetTableComponent
-        with DefaultVisualizationTableComponent
-
     test("TableCreator creates tables") {
-        val comp = new TestComponent {
+        val comp = new TestTableCreatorComponent {
             component =>
             TableCreator.create()
 
@@ -40,7 +40,7 @@ class TableCreatorTest extends FunSuite with TestDatabase {
     }
 
     test("TableCreator drops tables") {
-        val comp = new TestComponent {
+        val comp = new TestTableCreatorComponent {
             component =>
             TableCreator.create()
             TableCreator.drop()

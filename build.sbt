@@ -26,3 +26,6 @@ libraryDependencies ++= List("org.slf4j" % "slf4j-nop" % "1.6.6"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
+parallelExecution in Test := false
+
+fork := true

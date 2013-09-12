@@ -24,12 +24,9 @@ trait OsmTableComponent {
 	    def * = id ~ geom
 	}
 	
-	trait OsmTables {
-	    val ways:Ways
-	    val wayNodes:WayNodes
-	    val nodes:Nodes
+	object osmTables{
+	    val ways:Ways = new Ways
+	    val wayNodes:WayNodes = new WayNodes
+	    val nodes:Nodes = new Nodes
 	}
-	
-	val osmTables:OsmTables
-
 }
