@@ -19,3 +19,10 @@ trait VisualizationTableComponent {
 	
 	val visualizationTables: VisualizationTables
 }
+
+trait DefaultVisualizationTableComponent extends VisualizationTableComponent {
+    val visualizationTables = new VisualizationTables {
+        val roadNetVisualization = new RoadNetVisualization("road_net_vis")
+        val roadNetUndirVisualization = new RoadNetVisualization("road_net_undir_vis")
+    }
+}

@@ -1,6 +1,7 @@
 package org.isochrone.db
 
 import org.isochrone.util.db.MyPostgresDriver.simple._
+import org.isochrone.dbgraph.EdgeTable
 
 trait RoadNetTableComponent {
 	class EdgeTable(name:String) extends Table[(Long, Long, Float)](name) {
@@ -29,4 +30,12 @@ trait RoadNetTableComponent {
 	}
 	
 	val roadNetTables:RoadNetTables
+}
+
+trait DefaultRoadNetTableComponent extends RoadNetTableComponent {
+    val roadNetTables = new RoadNetTables {
+        val roadNet = new EdgeTable("road_net")
+        val roadNetUndir = new EdgeTable("road_net_undir")
+        val roadNodes = new NodeTable("road_nodes")
+    }
 }
