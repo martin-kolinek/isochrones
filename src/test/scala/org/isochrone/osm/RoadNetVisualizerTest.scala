@@ -8,9 +8,9 @@ trait TestRoadNetVisualizerComponent extends RoadNetVisualizerComponent with Tes
 class RoadNetVisualizerTest extends FunSuite with TestDatabase {
     test("RoadNetVisualizer works") {
         val comp = new TestRoadNetVisualizerComponent {
-            TableCreator.create()
-            RoadImporter.execute()
-            Visualizer.execute()
+            tableCreator.execute()
+            roadImporter.execute()
+            visualizer.execute()
             database.withSession { implicit s: Session =>
                 val lst = Query(visualizationTables.roadNetVisualization).filter(x => x.start === 262930213l && x.end === 262930214l || x.end === 262930213l && x.start === 262930214l).map(_.direction).list()
                 assert(lst.size == 1)

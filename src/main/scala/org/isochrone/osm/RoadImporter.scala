@@ -4,11 +4,13 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.OsmTableComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.DatabaseProvider
+import org.isochrone.ActionComponent
+import org.isochrone.ActionComponent
 
-trait RoadImporterComponent {
+trait RoadImporterComponent extends ActionComponent {
     self: OsmTableComponent with RoadNetTableComponent with DatabaseProvider =>
 	
-    object RoadImporter {
+    object roadImporter extends Executor {
         val roadNetQuery = {
         	val roads = for {
         		w <- osmTables.ways 

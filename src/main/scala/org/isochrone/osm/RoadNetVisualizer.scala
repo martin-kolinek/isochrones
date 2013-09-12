@@ -6,10 +6,11 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.OsmTableComponent
 import org.isochrone.db.VisualizationTableComponent
 import scala.slick.jdbc.{ StaticQuery => Q }
+import org.isochrone.ActionComponent
 
-trait RoadNetVisualizerComponent {
+trait RoadNetVisualizerComponent extends ActionComponent {
     self: RoadNetTableComponent with DatabaseProvider with OsmTableComponent with VisualizationTableComponent =>
-    object Visualizer {
+    object visualizer extends Executor {
         def execute() {
             database.withTransaction { implicit s: Session =>
                 def insertQuery(out: String, rnet: String, nodes: String) = s"""
