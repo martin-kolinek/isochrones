@@ -10,7 +10,7 @@ trait TestRoadImporterComponent extends RoadImporterComponent with TestTableCrea
 class RoadImporterTest extends FunSuite with TestDatabase {
     test("RoadImporter imports roads") {
         val comp = new TestRoadImporterComponent {
-            tableCreator.execute()
+            tableCreator.create()
             roadImporter.execute()
             database.withSession { implicit s: Session =>
                 assert(Query(roadNetTables.roadNodes).filter(_.id === 262930213l).list.size == 1)

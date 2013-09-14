@@ -29,7 +29,7 @@ class TableCreatorTest extends FunSuite with TestDatabase {
     test("TableCreator creates tables") {
         val comp = new TestTableCreatorComponent {
             component =>
-            tableCreator.execute()
+            tableCreator.create()
 
             database.withSession { implicit s: Session =>
                 for (q <- queries(component)) {
@@ -42,8 +42,8 @@ class TableCreatorTest extends FunSuite with TestDatabase {
     test("TableCreator drops tables") {
         val comp = new TestTableCreatorComponent {
             component =>
-            tableCreator.execute()
-            tableDropper.execute()
+            tableCreator.create()
+            tableCreator.drop()
 
             database.withSession { implicit s: Session =>
                 for (q <- queries(component)) {

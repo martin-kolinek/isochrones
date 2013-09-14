@@ -7,11 +7,11 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import scala.slick.jdbc.{ StaticQuery => Q }
 import org.isochrone.ActionComponent
 
-trait TableCreatorComponent extends ActionComponent {
+trait TableCreatorComponent {
     self: RoadNetTableComponent with VisualizationTableComponent with DatabaseProvider =>
 
-    object tableCreator extends Executor {
-        def execute() {
+    object tableCreator {
+        def create() {
             database.withTransaction {
                 implicit s: Session =>
                     roadNetTables.roadNet.ddl.create
@@ -23,9 +23,7 @@ trait TableCreatorComponent extends ActionComponent {
                         Q.updateNA(s"""CREATE INDEX "ix_${tbl.tableName}" ON ${tbl.tableName} using GIST (linestring)""").execute
             }
         }
-    }
-    object tableDropper extends Executor {
-        def execute() {
+        def drop() {
             database.withTransaction {
                 implicit s: Session =>
                     roadNetTables.roadNet.ddl.drop

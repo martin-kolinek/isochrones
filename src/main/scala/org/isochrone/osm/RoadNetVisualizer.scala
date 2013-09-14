@@ -8,9 +8,9 @@ import org.isochrone.db.VisualizationTableComponent
 import scala.slick.jdbc.{ StaticQuery => Q }
 import org.isochrone.ActionComponent
 
-trait RoadNetVisualizerComponent extends ActionComponent {
+trait RoadNetVisualizerComponent {
     self: RoadNetTableComponent with DatabaseProvider with OsmTableComponent with VisualizationTableComponent =>
-    object visualizer extends Executor {
+    object visualizer {
         def execute() {
             database.withTransaction { implicit s: Session =>
                 def insertQuery(out: String, rnet: String, nodes: String) = s"""

@@ -8,7 +8,7 @@ trait TestRoadNetVisualizerComponent extends RoadNetVisualizerComponent with Tes
 class RoadNetVisualizerTest extends FunSuite with TestDatabase {
     test("RoadNetVisualizer works") {
         val comp = new TestRoadNetVisualizerComponent {
-            tableCreator.execute()
+            tableCreator.create()
             roadImporter.execute()
             visualizer.execute()
             database.withSession { implicit s: Session =>

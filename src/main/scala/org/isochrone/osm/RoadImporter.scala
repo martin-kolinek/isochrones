@@ -7,10 +7,10 @@ import org.isochrone.db.DatabaseProvider
 import org.isochrone.ActionComponent
 import org.isochrone.ActionComponent
 
-trait RoadImporterComponent extends ActionComponent {
+trait RoadImporterComponent {
     self: OsmTableComponent with RoadNetTableComponent with DatabaseProvider =>
 	
-    object roadImporter extends Executor {
+    object roadImporter {
         val roadNetQuery = {
         	val roads = for {
         		w <- osmTables.ways 
