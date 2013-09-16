@@ -1,5 +1,5 @@
 package org.isochrone
-
+/*
 import org.isochrone.dboutput.isochrone.DatabaseOutput
 import scala.slick.driver.BasicDriver.simple._
 import org.isochrone.dijkstra.DijkstraHelpers
@@ -66,3 +66,4 @@ trait DijkstraIsochroneComputer {
         println("Done")
 	}
 }
+*/

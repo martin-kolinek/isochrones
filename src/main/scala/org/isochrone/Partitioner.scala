@@ -6,7 +6,7 @@ import scala.slick.driver.PostgresDriver.simple._
 import org.isochrone.dboutput.partition._
 import org.isochrone.partition.merging._
 import org.isochrone.graphlib._
-
+/*
 trait Partitioner {
 	self:ActionExecutor =>
 	registerAction("partition", doPart)
@@ -49,3 +49,4 @@ trait Partitioner {
 		}
 	}
 }
+*/

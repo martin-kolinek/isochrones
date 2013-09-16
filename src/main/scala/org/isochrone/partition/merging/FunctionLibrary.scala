@@ -2,7 +2,7 @@ package org.isochrone.partition.merging
 import org.isochrone.graphlib._
 import scala.math
 import scala.util.Random
-
+/*
 object FunctionLibrary {
     def mergePriority[T:HasNeighbours](c1:Cell[T], c2:Cell[T]) = {
         val connecting = c1.leaving.toSeq.map(_._2).filter(c2.nodes.contains(_)).size
@@ -24,3 +24,4 @@ object FunctionLibrary {
         (rat*rat+1.0)/rat - 2.0
     }.map(x=>x*x).sum
 }
+*/

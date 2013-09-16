@@ -5,13 +5,12 @@ import resource._
 import org.isochrone.dbgraph.DatabaseGraphWithRegions
 import scala.slick.driver.PostgresDriver.simple._
 import org.isochrone.util._
-import org.isochrone.partition.RegionAnalyzer
+//import org.isochrone.partition.RegionAnalyzer
 import org.isochrone.dbgraph.NodeTable
 import org.isochrone.dbgraph.EdgeTable
 import org.isochrone.dbgraph.RegionTable
-import org.isochrone.dijkstra.DijkstraAlgorithm
 import scala.collection.mutable.ListBuffer
-
+/*
 class HigherLevelGraph(nodeTable:NodeTable, edgeTable:EdgeTable, regionTable:RegionTable)(implicit session:Session) {
 	def createHigherLevelGraph(g:DatabaseGraphWithRegions, notification:Int=>Unit = x=>Unit) {
 		val difRegs = for {
@@ -43,4 +42,4 @@ class HigherLevelGraph(nodeTable:NodeTable, edgeTable:EdgeTable, regionTable:Reg
 		}
 		regionTable.insert(region, diam)
 	}
-}
+}*/

@@ -6,7 +6,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.immutable.Set
 import scala.collection.mutable.HashSet
 import org.isochrone.util.collection.mutable.IndexedPriorityQueue
-
+/*
 class Partition[T:HasNeighbours] private (
         var cells:Set[Cell[T]],
 		val cellNeighbours:Map[Cell[T], Set[Cell[T]]],
@@ -73,3 +73,4 @@ object Partition {
     	new Partition[T](cells.values.toSet, cellNeighbours, priorityQueue, mergePriority, nodes.size, boundaryEdges, boundaryEdgeCount)
     } 
 }
+*/

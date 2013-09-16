@@ -2,7 +2,7 @@ package org.isochrone.partition.merging
 
 import org.isochrone.graphlib._
 import scala.collection.immutable.Set
-
+/*
 class Cell[T:HasNeighbours] private (val nodes:Set[T], val leaving:Set[(T, T)]) {
     def ++ (other:Cell[T]) = 
         new Cell(nodes ++ other.nodes, 
@@ -17,3 +17,4 @@ class Cell[T:HasNeighbours] private (val nodes:Set[T], val leaving:Set[(T, T)]) 
 object Cell {
     def apply[T:HasNeighbours](nd:T) = new Cell[T](Set(nd), nd.neighbours.map(nd -> _._1).toSet)
 }
+*/

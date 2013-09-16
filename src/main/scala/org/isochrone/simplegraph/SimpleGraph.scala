@@ -1,8 +1,8 @@
 package org.isochrone.simplegraph
 
 import org.isochrone.graphlib._
-import org.isochrone.dijkstra.DijkstraAlgorithm
-
+//import org.isochrone.dijkstra.DijkstraAlgorithm
+/*
 class SimpleGraph private (edges:Seq[(Int, Int, Double)], nodeRegions:Map[Int, Int]) extends GraphWithRegions[Int, Int] {
 	private val neigh = edges.groupBy(_._1).map{case (k,v) => (k, v.map(x=>(x._2, x._3)))}
 	
@@ -30,3 +30,4 @@ object SimpleGraph {
 	def apply(edges:(Int, Int, Double)*) = new SimpleGraph(edges, (edges.map(_._1)++edges.map(_._2)).map(_->0).toMap)
 	def apply(edges:Seq[(Int, Int, Double)], nodes:Map[Int, Int]) = new SimpleGraph(edges, nodes)
 }
+*/
