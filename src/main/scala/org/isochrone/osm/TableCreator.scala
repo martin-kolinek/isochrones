@@ -17,6 +17,7 @@ trait TableCreatorComponent {
                     roadNetTables.roadNet.ddl.create
                     roadNetTables.roadNetUndir.ddl.create
                     roadNetTables.roadNodes.ddl.create
+                    roadNetTables.roadRegions.ddl.create
                     visualizationTables.roadNetVisualization.ddl.create
                     visualizationTables.roadNetUndirVisualization.ddl.create
                     for (tbl <- Seq(visualizationTables.roadNetVisualization, visualizationTables.roadNetUndirVisualization))
@@ -29,6 +30,7 @@ trait TableCreatorComponent {
                     roadNetTables.roadNet.ddl.drop
                     roadNetTables.roadNetUndir.ddl.drop
                     roadNetTables.roadNodes.ddl.drop
+                    roadNetTables.roadRegions.ddl.drop
                     visualizationTables.roadNetVisualization.ddl.drop
                     visualizationTables.roadNetUndirVisualization.ddl.drop
                     for (tbl <- Seq(visualizationTables.roadNetVisualization, visualizationTables.roadNetUndirVisualization))

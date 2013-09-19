@@ -1,8 +1,8 @@
 package org.isochrone.dboutput.partition
 
 import org.isochrone.util.db.MyPostgresDriver.simple._
-import org.isochrone.dbgraph.NodeTable
 
+/*
 class DatabaseOutput(name:String) {
 	val tbl = new NodeTable(name)
 	def create()(implicit session:Session) {tbl.ddl.create}
@@ -12,4 +12,4 @@ class DatabaseOutput(name:String) {
     def clear()(implicit session:Session) {
         tbl.map(identity).delete
     }
-}
+}*/

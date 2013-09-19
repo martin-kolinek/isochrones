@@ -51,7 +51,7 @@ trait RoadImporterComponent {
         		(s, e) <- roadNetBareAll
         		sn <- osmTables.nodes if sn.id === s
         		en <- osmTables.nodes if en.id === e
-        	} yield (s, e, sn.geom distanceSphere en.geom)  
+        	} yield (s, e, (sn.geom distanceSphere en.geom).asColumnOf[Double])  
         } 
         
         val roads = for {
@@ -104,6 +104,7 @@ trait RoadImporterComponent {
                 val starts = roadNet.groupBy(_.start).map(x => x._1 -> 0)
                 val ends = roadNet.groupBy(_.end).map(x => x._1 -> 0)
                 roadNodes.insert(starts union ends)
+                roadRegions.insert(0 -> Double.PositiveInfinity)
             }
         }
     }

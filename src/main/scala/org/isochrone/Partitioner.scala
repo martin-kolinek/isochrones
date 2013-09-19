@@ -1,7 +1,6 @@
 package org.isochrone
 
-import org.isochrone.dbgraph.DatabaseGraph
-import org.isochrone.dbgraph.GraphTables
+
 import scala.slick.driver.PostgresDriver.simple._
 import org.isochrone.dboutput.partition._
 import org.isochrone.partition.merging._

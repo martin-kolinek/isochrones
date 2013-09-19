@@ -1,14 +1,8 @@
 package org.isochrone
 
 import org.isochrone.util.db.MyPostgresDriver.simple._
-import org.isochrone.dbgraph.DatabaseGraph
-import org.isochrone.dbgraph.GraphTables
-import org.isochrone.dbgraph.DatabaseGraphWithRegions
-import org.isochrone.dbgraph.RegionTable
-import org.isochrone.dboutput.partition.HigherLevelGraph
-import org.isochrone.dbgraph.NodeTable
-import org.isochrone.dbgraph.EdgeTable
 
+/*
 trait HigherLevelCreator {
 	self:ActionExecutor =>
 		
@@ -41,4 +35,4 @@ trait HigherLevelCreator {
 		}
 		println("Done")
 	}
-}
+}*/

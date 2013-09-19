@@ -47,7 +47,6 @@ object Main {
                 val execute = visualizer.execute _
             }
         }
-
     }
 
     def main(args: Array[String]) {
