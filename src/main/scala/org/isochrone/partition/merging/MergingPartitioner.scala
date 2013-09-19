@@ -2,8 +2,8 @@ package org.isochrone.partition.merging
 
 import org.isochrone.graphlib._
 
-trait MergingPartitionerComponent {
-	self:GraphComponent with PartitionComponent with CellComponent with MergingAlgorithmPropertiesComponent =>
+trait MergingPartitionerComponent extends PartitionComponent with CellComponent {
+	self:GraphComponent with MergingAlgorithmPropertiesComponent =>
 	    
     object MergingPartitioner {
         /* use merging algorithm to find the partition with maximum value */

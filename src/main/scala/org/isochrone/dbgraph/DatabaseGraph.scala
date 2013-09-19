@@ -12,8 +12,7 @@ import org.isochrone.graphlib.GraphWithRegionsType
 
 trait DatabaseGraphComponent extends GraphWithRegionsComponent {
     self: RoadNetTableComponent with SessionProviderComponent =>
-    class DatabaseGraph(maxRegions: Int, retrieveNotification: => Unit) extends GraphWithRegionsType[Long, Int] {
-        def this(maxRegions: Int) = this(maxRegions, {})
+    class DatabaseGraph(maxRegions: Int) extends GraphWithRegionsType[Long, Int] {
         type Region = Int
         type Node = Long
         private val regions = new LRUCache[Region, Traversable[Node]]((k, v, m) => {
@@ -27,6 +26,9 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent {
 
         private val nodesToRegions = new HashMap[Node, Region]
 
+        private var retrievalscntr = 0
+        def retrievals = retrievalscntr
+        
         def removeRegion(nodes: Traversable[Node]) = for (n <- nodes) {
             nodesToRegions -= n
             neigh -= n
@@ -58,7 +60,7 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent {
         }
         
         def retrieveNode(node: Node) {
-            retrieveNotification
+            retrievalscntr += 1
             val q = roadNetTables.roadNodes.filter(_.id === node).map(_.region)
             q.list()(session).map(retrieveRegion)
         }

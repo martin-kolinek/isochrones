@@ -31,7 +31,7 @@ trait FunctionLibraryComponent {
             (Random.nextDouble / 100.0 + 1.0) * mergePriority(c1, c2)
         }
 
-        def boundaryEdgesCellSize[T](size: Int) = (p: Partition) => {
+        def boundaryEdgesCellSize(size: Int) = (p: Partition) => {
             cellSize(size)(p) - p.boundaryEdgeCount.toDouble
         }
 

@@ -6,7 +6,7 @@ trait SessionProviderComponent {
 	val session:Session
 }
 
-trait SingleSessionProvider {
+trait SingleSessionProvider extends SessionProviderComponent {
     self:DatabaseProvider =>
     
     lazy val session = database.createSession
