@@ -5,7 +5,7 @@ import org.isochrone.graphlib._
 trait MultiLevelDijkstraComponent {
     self: MultiLevelGraphComponent =>
     
-    object MultilevelDijkstra {//[T, Node, Region](levels: List[T])(implicit ev: HasRegions[T, Node, Region], ev2: IsGraph[T, Node]) {
+    object MultilevelDijkstra {
         private def dijkstraComp(g:GraphType[NodeType]) = {
             new DijkstraAlgorithmComponent with GraphComponent {
                 type NodeType = self.NodeType

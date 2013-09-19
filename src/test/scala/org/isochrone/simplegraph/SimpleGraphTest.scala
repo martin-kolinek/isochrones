@@ -6,7 +6,7 @@ import org.isochrone.dijkstra.DefaultDijkstraProvider
 class SimpleGraphTest extends FunSuite {
     test("SimpleGraph works") {
         new SimpleGraphComponent with DefaultDijkstraProvider {
-            val sg = SimpleGraph(
+            val graph = SimpleGraph(
                 (1, 2, 0.1),
                 (2, 3, 0.2),
                 (2, 4, 0.3),
@@ -14,16 +14,16 @@ class SimpleGraphTest extends FunSuite {
                 (5, 3, 0.5),
                 (4, 5, 0.6),
                 (3, 5, 0.7))
-            val neigh = sg.neighbours(2)
+            val neigh = graph.neighbours(2)
             assert(neigh.toSet == Set((3, 0.2), (4, 0.3)))
-            val neigh2 = sg.neighbours(5)
+            val neigh2 = graph.neighbours(5)
             assert(neigh2.toSet == Set((2, 0.4), (3, 0.5)))
         }
     }
 
     test("SimpleGraph returns empty list for nonexistent node") {
         new SimpleGraphComponent with DefaultDijkstraProvider {
-            val sg = SimpleGraph(
+            val graph = SimpleGraph(
                 (1, 2, 0.1),
                 (2, 3, 0.2),
                 (2, 4, 0.3),
@@ -31,7 +31,7 @@ class SimpleGraphTest extends FunSuite {
                 (5, 3, 0.5),
                 (4, 5, 0.6),
                 (3, 5, 0.7))
-            val neigh = sg.neighbours(10)
+            val neigh = graph.neighbours(10)
             assert(neigh.size == 0)
         }
     }
@@ -48,14 +48,14 @@ class SimpleGraphTest extends FunSuite {
                 5 -> 6,
                 6 -> 4)
             val undir = dir ++ dir.map(_.swap)
-            val sg = SimpleGraph(undir.map(x => (x._1, x._2, 1.0)),
+            val graph = SimpleGraph(undir.map(x => (x._1, x._2, 1.0)),
                 Map(0 -> 0, 1 -> 0, 2 -> 0, 3 -> 0, 4 -> 1, 5 -> 1, 6 -> 1))
-            assert(sg.nodeRegion(0) == Some(0))
-            assert(sg.nodeRegion(5) == Some(1))
-            assert(math.abs(sg.nodeEccentricity(6) - 1.0) < 0.0001)
-            assert(math.abs(sg.nodeEccentricity(4) - 1.0) < 0.0001)
-            assert(math.abs(sg.nodeEccentricity(1) - 1.0) < 0.0001)
-            assert(math.abs(sg.nodeEccentricity(3) - 2.0) < 0.0001)
+            assert(graph.nodeRegion(0).map(_.num) == Some(0))
+            assert(graph.nodeRegion(5).map(_.num) == Some(1))
+            assert(math.abs(graph.nodeEccentricity(6) - 1.0) < 0.0001)
+            assert(math.abs(graph.nodeEccentricity(4) - 1.0) < 0.0001)
+            assert(math.abs(graph.nodeEccentricity(1) - 1.0) < 0.0001)
+            assert(math.abs(graph.nodeEccentricity(3) - 2.0) < 0.0001)
         }
     }
 

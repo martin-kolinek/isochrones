@@ -37,7 +37,7 @@ trait HigherLevelGraphCreatorComponent {
         }
 
         def processRegion(region: Int, nodes: Seq[Long], session:Session) {
-            val analyzerComp = regionAnalyzerProvider.getAnalyzer(graph.singleRegion(region))
+            val analyzerComp = regionAnalyzerProvider.getAnalyzer(graph.singleRegion(DatabaseRegion(region)))
             var diam = 0.0
             for ((node, others) <- analyzerComp.RegionAnalyzer.borderNodeDistances(nodes.toSet)) {
                 higherRoadNetTables.roadNodes.insert(node -> 0)(session)

@@ -12,7 +12,7 @@ import org.isochrone.dijkstra.DefaultDijkstraProvider
 
 class AlgorithmTest extends FunSuite {
     test("merging algorithm works with controlled functions") {
-        new SimpleGraphComponent with MergingPartitionerComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider {
+        new SimpleGraphComponent with GraphComponent with MergingPartitionerComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider {
             val mergeAlgProps = new MergingAlgorithmProperties {
                 def mergePriorityFunc(c1: Cell, c2: Cell) = {
                     val merged = c1.nodes ++ c2.nodes
@@ -41,7 +41,7 @@ class AlgorithmTest extends FunSuite {
     }
 
     test("Merging algorithm with bridge") {
-        new SimpleGraphComponent with MergingPartitionerComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider with FunctionLibraryComponent {
+        new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider with FunctionLibraryComponent {
             val mergeAlgProps = new MergingAlgorithmProperties {
                 def mergePriorityFunc(c1: Cell, c2: Cell) = FunctionLibrary.mergePriority(c1, c2)
                 def partitionValueFunc(p: Partition) = FunctionLibrary.boundaryEdgesCellSize(4)(p)
@@ -59,7 +59,7 @@ class AlgorithmTest extends FunSuite {
 
     test("Sanity checks for step function on random graphs") {
         for (i <- 1 to 3; funcn <- 0 to 1) {
-            new RandomGraphComponent with DefaultDijkstraProvider with PartitionComponent with CellComponent with MergingAlgorithmPropertiesComponent with FunctionLibraryComponent {
+            new RandomGraphComponent with DefaultDijkstraProvider with PartitionComponent with GraphComponent with CellComponent with MergingAlgorithmPropertiesComponent with FunctionLibraryComponent {
                 def checkCellNeighbours(part: Partition) {
                     val nodesToCells = part.cells.flatMap(x => x.nodes.map(y => x -> y)).map(_.swap).toMap
                     val cellNeighbours = part.cells.map(x => x -> x.nodes.flatMap(graph.neighbours _).map(_._1).map(nodesToCells).filter(y => y != x).toSet).filter(!_._2.isEmpty).toMap

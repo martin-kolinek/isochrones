@@ -3,21 +3,27 @@ package org.isochrone.simplegraph
 import org.isochrone.graphlib._
 import org.isochrone.dijkstra.DijkstraProvider
 
-trait SimpleGraphComponent extends GraphWithRegionsComponent {
+trait SimpleGraphComponent {
     self: DijkstraProvider =>
 
     type NodeType = Int
-    type RegionType = Int
+    type RegionType = SimpleGraphRegion
 
-    class SimpleGraph private (edges: Seq[(Int, Int, Double)], nodeRegions: Map[Int, Int]) extends GraphWithRegionsType[Int, Int] {
+    case class SimpleGraphRegion private[SimpleGraphComponent] (num: Int, sg: SimpleGraph) extends Region {
+        lazy val diameter = sg.nodes.filter(x => sg.nodeRegion(x) == Some(num)).map(sg.nodeEccentricity).max
+    }
+
+    class SimpleGraph private (edges: Seq[(Int, Int, Double)], nodeRegions: Map[Int, Int]) extends GraphWithRegionsType[Int, SimpleGraphRegion] {
         private val neigh = edges.groupBy(_._1).map { case (k, v) => (k, v.map(x => (x._2, x._3))) }
+
+        val nodeRegionsProc = nodeRegions.mapValues(new SimpleGraphRegion(_, this))
 
         lazy val nodeEccentrities = {
             val x = for {
                 node <- nodes.toSeq
                 region <- nodeRegions.get(node)
-                single = this.singleRegion(nodeRegions(node))
-            } yield node -> dijkstraForGraph(single).DijkstraAlgorithm.compute(Seq(node -> 0.0)).toSeq.last._2
+                single = this.singleRegion(nodeRegionsProc(node))
+            } yield node -> dijkstraForGraph(single).DijkstraAlgorithm.compute(Seq(node -> 0.0)).map(_._2).max
             x.toMap
         }
 
@@ -25,7 +31,7 @@ trait SimpleGraphComponent extends GraphWithRegionsComponent {
 
         def neighbours(node: Int) = neigh.getOrElse(node, Seq())
 
-        def nodeRegion(node: Int) = nodeRegions.get(node)
+        def nodeRegion(node: Int) = nodeRegionsProc.get(node)
 
         def nodeEccentricity(n: Int) = nodeEccentrities(n)
 

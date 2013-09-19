@@ -22,6 +22,11 @@ trait TestDatabase extends BeforeAndAfterEach {
     abstract override def afterEach() {
         super.afterEach()
         pg.withSession { implicit s: Session =>
+            sqlu"""
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname = 'test_isochrones_db'
+  AND pid <> pg_backend_pid();""".execute
             sqlu"DROP DATABASE test_isochrones_db".execute
         }
     }

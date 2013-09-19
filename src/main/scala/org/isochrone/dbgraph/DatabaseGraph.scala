@@ -9,65 +9,64 @@ import org.isochrone.db.SessionProviderComponent
 import org.isochrone.graphlib.GraphComponent
 import org.isochrone.graphlib.GraphWithRegionsComponent
 import org.isochrone.graphlib.GraphWithRegionsType
+import org.isochrone.graphlib.Region
 
 trait DatabaseGraphComponent extends GraphWithRegionsComponent {
     self: RoadNetTableComponent with SessionProviderComponent =>
-    class DatabaseGraph(maxRegions: Int) extends GraphWithRegionsType[Long, Int] {
-        type Region = Int
-        type Node = Long
-        private val regions = new LRUCache[Region, Traversable[Node]]((k, v, m) => {
+    class DatabaseGraph(maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] {
+        private val regions = new LRUCache[RegionType, Traversable[NodeType]]((k, v, m) => {
             val ret = m.size > maxRegions
             if (ret)
                 removeRegion(v)
             ret
         })
 
-        private val neigh = new HashMap[Node, Traversable[(Node, Double)]]
+        private val neigh = new HashMap[NodeType, Traversable[(NodeType, Double)]]
 
-        private val nodesToRegions = new HashMap[Node, Region]
+        private val nodesToRegions = new HashMap[NodeType, RegionType]
 
         private var retrievalscntr = 0
         def retrievals = retrievalscntr
-        
-        def removeRegion(nodes: Traversable[Node]) = for (n <- nodes) {
+
+        def removeRegion(nodes: Traversable[NodeType]) = for (n <- nodes) {
             nodesToRegions -= n
             neigh -= n
         }
 
-        def nodeRegion(node: Node) = {
+        def nodeRegion(node: NodeType) = {
             ensureRegion(node)
             nodesToRegions.get(node)
         }
 
         def nodesInMemory = neigh.size
 
-        def ensureRegion(node: Node) {
+        def ensureRegion(node: NodeType) {
             if (!nodesToRegions.isDefinedAt(node))
                 retrieveNode(node)
         }
 
-        def ensureInMemory(node: Node) {
+        def ensureInMemory(node: NodeType) {
             if (!neigh.isDefinedAt(node)) {
                 retrieveNode(node)
             }
         }
 
-        def neighbours(node: Node) = {
+        def neighbours(node: NodeType) = {
             ensureInMemory(node)
             if (nodesToRegions.contains(node))
                 regions.updateUsage(nodesToRegions(node))
             neigh.getOrElse(node, Seq())
         }
-        
-        def retrieveNode(node: Node) {
+
+        def retrieveNode(node: NodeType) {
             retrievalscntr += 1
             val q = roadNetTables.roadNodes.filter(_.id === node).map(_.region)
-            q.list()(session).map(retrieveRegion)
+            q.list()(session).map(x => retrieveRegion(DatabaseRegion(x)))
         }
 
-        def retrieveRegion(region: Region) {
+        def retrieveRegion(region: RegionType) {
             val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
-            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region) yield n.id ~ e.end.? ~ e.cost.?
+            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region.num) yield n.id ~ e.end.? ~ e.cost.?
             val list = q.list()(session)
             regions(region) = list.map(_._1)
             val map = list.groupBy(_._1)
@@ -88,12 +87,17 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent {
 
         def nodeEccentricity(n: Long) = (for {
             r <- nodeRegion(n)
-            d <- regionDiameters.get(r)
+            d <- regionDiameters.get(r.num)
         } yield d).getOrElse(Double.PositiveInfinity)
     }
-    
+
     type NodeType = Long
-    type RegionType = Int
-    
+
+    case class DatabaseRegion(num: Int) extends Region {
+        def diameter = roadNetTables.roadRegions.filter(x => x.id === num).map(_.diameter).firstOption(session).getOrElse(Double.PositiveInfinity)
+    }
+
+    type RegionType = DatabaseRegion
+
     val graph = new DatabaseGraph(500)
 }
