@@ -5,8 +5,10 @@ trait GraphType[Node] {
     def nodes:Traversable[Node]
 }
 
-trait GraphComponent {
-    type NodeType
-    
+trait GraphComponent extends GraphComponentBase {
     val graph:GraphType[NodeType]
+}
+
+trait GraphComponentBase {
+    type NodeType
 }

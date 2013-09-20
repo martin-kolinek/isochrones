@@ -6,11 +6,11 @@ trait GraphWithRegionsType[Node, Region] extends GraphType[Node] {
 
     def nodeEccentricity(nd: Node): Double
 
-    def singleRegion(rg: Region) = {
-        new GraphType[Node] {
-            def neighbours(nd: Node) = self.neighbours(nd).filter(x => self.nodeRegion(x._1) == Some(rg))
-            def nodes = self.nodes.filter(x => self.nodeRegion(x) == Some(rg))
-        }
+    def singleRegion(rg: Region) = filterRegions(_ == rg)
+
+    def filterRegions(func: Region => Boolean) = new GraphType[Node] {
+        def neighbours(nd: Node) = self.neighbours(nd).filter(x => self.nodeRegion(x._1).filter(func).isDefined)
+        def nodes = self.nodes.filter(x => self.nodeRegion(x).map(func).isDefined)
     }
 }
 
@@ -19,8 +19,7 @@ trait GraphWithRegionsComponent extends GraphComponent {
     val graph: GraphWithRegionsType[NodeType, RegionType]
 }
 
-trait MultiLevelGraphComponent {
-    type NodeType
+trait MultiLevelGraphComponent extends GraphComponentBase {
     type RegionType <: Region
 
     val levels: Seq[GraphWithRegionsType[NodeType, RegionType]]

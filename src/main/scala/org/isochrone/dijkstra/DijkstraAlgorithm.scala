@@ -7,11 +7,12 @@ import scala.collection.mutable.PriorityQueue
 import scala.collection.mutable.TreeSet
 import org.isochrone.util._
 import org.isochrone.util.collection.mutable.IndexedPriorityQueue
+import org.isochrone.compute.IsochroneComputerComponent
 
-trait DijkstraAlgorithmComponent {
+trait DijkstraAlgorithmComponent extends IsochroneComputerComponent {
     self: GraphComponent =>
 
-    object DijkstraAlgorithm {
+    object DijkstraAlgorithm extends IsochroneComputer {
 
         private def alg(start: Traversable[(NodeType, Double)], res: (NodeType, Double) => Unit) {
             val closed = new HashSet[NodeType]
@@ -42,9 +43,24 @@ trait DijkstraAlgorithmComponent {
                 alg(start, (x: NodeType, y: Double) => func(x -> y))
             }
         }
+        
+        def nodesWithin(start:Traversable[(NodeType, Double)], max:Double) = compute(start).takeWhile(_._2 <= max) 
 
-        def isochrone(start: Traversable[(NodeType, Double)], max: Double) =
-            compute(start).takeWhile(_._2 <= max)
+        def isochrone(start: Traversable[(NodeType, Double)], max: Double) = {
+            val nodes = nodesWithin(start, max).toSeq
+            val inIsoSet = nodes.map(_._1).toSet
+            nodes.flatMap {
+                case (nd, cost) => {
+                    val remaining = max - cost
+                    for {
+                        (neigh, ncost) <- graph.neighbours(nd)
+                        if !inIsoSet.contains(neigh)
+                        quotient = remaining / ncost
+                        if quotient <= 1
+                    } yield IsochroneEdge(nd, neigh, quotient)
+                }
+            }
+        }
     }
 
     object DijkstraHelpers {

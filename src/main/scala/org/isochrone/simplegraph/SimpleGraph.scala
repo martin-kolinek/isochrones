@@ -10,7 +10,13 @@ trait SimpleGraphComponent {
     type RegionType = SimpleGraphRegion
 
     case class SimpleGraphRegion private[SimpleGraphComponent] (num: Int, sg: SimpleGraph) extends Region {
-        lazy val diameter = sg.nodes.filter(x => sg.nodeRegion(x) == Some(num)).map(sg.nodeEccentricity).max
+        lazy val diameter = {
+            val eccs = sg.nodes.filter(x => sg.nodeRegion(x) == Some(num)).map(sg.nodeEccentricity)
+            if (eccs.isEmpty)
+                Double.PositiveInfinity
+            else
+                eccs.max
+        }
     }
 
     class SimpleGraph private (edges: Seq[(Int, Int, Double)], nodeRegions: Map[Int, Int]) extends GraphWithRegionsType[Int, SimpleGraphRegion] {
