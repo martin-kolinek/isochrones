@@ -3,7 +3,7 @@ package org.isochrone.simplegraph
 import org.isochrone.graphlib._
 import org.isochrone.dijkstra.DijkstraProvider
 
-trait SimpleGraphComponent {
+trait SimpleGraphComponent extends GraphComponentBase {
     self: DijkstraProvider =>
 
     type NodeType = Int
@@ -11,15 +11,17 @@ trait SimpleGraphComponent {
 
     case class SimpleGraphRegion private[SimpleGraphComponent] (num: Int, sg: SimpleGraph) extends Region {
         lazy val diameter = {
-            val eccs = sg.nodes.filter(x => sg.nodeRegion(x) == Some(num)).map(sg.nodeEccentricity)
+            val eccs = sg.nodes.filter(x => sg.nodeRegion(x) == Some(this)).map(sg.nodeEccentricity)
             if (eccs.isEmpty)
                 Double.PositiveInfinity
             else
                 eccs.max
         }
+        
+        override def toString = s"SimpleRegion($num, diam=$diameter)"
     }
 
-    class SimpleGraph private (edges: Seq[(Int, Int, Double)], nodeRegions: Map[Int, Int]) extends GraphWithRegionsType[Int, SimpleGraphRegion] {
+    class SimpleGraph (edges: Seq[(Int, Int, Double)], nodeRegions: Map[Int, Int]) extends GraphWithRegionsType[Int, SimpleGraphRegion] {
         private val neigh = edges.groupBy(_._1).map { case (k, v) => (k, v.map(x => (x._2, x._3))) }
 
         val nodeRegionsProc = nodeRegions.mapValues(new SimpleGraphRegion(_, this))

@@ -28,24 +28,51 @@ class DijkstraIsochroneTest extends FunSuite {
         }
     }
 
+    def lowerlevelregs = {
+        Map(1 -> 1, 2 -> 1, 3 -> 1, 4 -> 2, 5 -> 2, 6 -> 2, 7 -> 3, 8 -> 3, 9 -> 3, 10 -> 3, 11 -> 3)
+    }
+
+    def lowerlevel = {
+        val dir = Seq(1 -> 2, 2 -> 3, 3 -> 1, 3 -> 4, 4 -> 5, 5 -> 6, 6 -> 7, 7 -> 8, 8 -> 9, 9 -> 7, 9 -> 10, 8 -> 11)
+        val undir = dir ++ dir.map(_.swap)
+        undir.map(x => (x._1, x._2, 1.0))
+    }
+
+    def upperlevel = Seq(
+        (3, 4, 1.0),
+        (4, 6, 2.0),
+        (6, 7, 1.0))
+
     test("multilevel dijkstra works on a graph") {
-        new RandomGraphComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
-            val dir = Seq(1 -> 2, 2 -> 3, 3 -> 1, 3 -> 4, 4 -> 5, 5 -> 6, 6 -> 7, 7 -> 8, 8 -> 9, 9 -> 7, 9 -> 10, 8 -> 11)
-            val regs = Map(1 -> 1, 2 -> 1, 3 -> 1, 4 -> 2, 5 -> 2, 6 -> 2, 7 -> 3, 8 -> 3, 9 -> 3, 10 -> 3, 11 -> 3)
-            val undir = dir ++ dir.map(_.swap)
-            val weigh = undir.map(x => (x._1, x._2, 1.0))
-            val lowlevel = SimpleGraph(weigh, regs)
-            val upper = SimpleGraph(
-                (3, 4, 1.0),
-                (4, 6, 2.0),
-                (6, 7, 1.0))
+        new SimpleGraphComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
+
+            val lowlevel = new SimpleGraph(lowerlevel, lowerlevelregs)
+            val upper = SimpleGraph(upperlevel: _*)
             val levels = Seq(lowlevel, upper)
             val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 3.1)
-            /*info(iso.keySet.toString)
-            assert(iso.keySet == Set(1, 2, 3, 4, 5))
-            val iso2 = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 6.5)
-            info(iso2.toSeq.sortBy(_._1).toString)
-            assert(iso2.keySet == Set(1, 2, 3, 6, 7, 8, 9))*/
+            assert(iso.map(x => x.start -> x.end).toSet == Set(5 -> 6))
+            assert(math.abs(iso.toSeq.head.part - 0.1) < 0.01)
+            //assert(iso2.keySet == Set(1, 2, 3, 6, 7, 8, 9))
+        }
+    }
+
+    test("multilevel dijkstra does not ask for unneeded edges") {
+        new SimpleGraphComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
+            var init = true
+            val lowlevel = new SimpleGraph(lowerlevel, lowerlevelregs) {
+                override def neighbours(node: Int) = {
+                    if (node == 5 && !init)
+                        println(s"Asked for neighbours of $node")
+                    super.neighbours(node)
+                }
+            }
+            lowlevel.nodes.map(lowlevel.nodeRegion).map(_.map(_.diameter))
+            init = false
+            val upper = SimpleGraph(upperlevel: _*)
+            val levels = Seq(lowlevel, upper)
+            val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 6.5)
+            assert(iso.map(x => x.start -> x.end).toSet == Set(9 -> 10, 8 -> 11))
+            assert(iso.map(x => x.part).forall(x => math.abs(x - 0.5) <= 0.001))
         }
     }
 }

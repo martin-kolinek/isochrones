@@ -29,11 +29,12 @@ trait MultiLevelDijkstraComponent extends IsochroneComputerComponent {
                     res <- dijkstraComp(single).DijkstraAlgorithm.nodesWithin(regStart, limit)
                 } yield res
                 val fromUpperLevel = iso(singleResult, rest.tail, curLevel.nodeRegion, limit)
-                val dijkstraOnUndone = dijkstraComp(curLevel.filterRegions(fromUpperLevel.isRegionDone))
-                val borderNodes = dijkstraOnUndone.DijkstraAlgorithm.nodesWithin(fromUpperLevel.continueFrom, limit)
+                val dijkstraOnUndone = dijkstraComp(curLevel.filterRegions(x => !fromUpperLevel.isRegionDone(x)))
+                val borderNodes = dijkstraOnUndone.DijkstraAlgorithm.nodesWithin(fromUpperLevel.continueFrom, limit).toList
                 val doneRegions = (for {
-                    (nd, rem) <- borderNodes
-                    rg <- curLevel.nodeRegion(nd)
+                    (nd, cst) <- borderNodes
+                    rem = limit - cst
+                    rg <- lowerNodeRegion(nd)
                     if rg.diameter <= rem
                 } yield rg).toSet
                 FromUpperLevel(doneRegions.contains, borderNodes)

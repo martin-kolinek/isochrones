@@ -14,13 +14,14 @@ trait GraphWithRegionsType[Node, Region] extends GraphType[Node] {
     }
 }
 
-trait GraphWithRegionsComponent extends GraphComponent {
+trait GraphWithRegionsComponentBase extends GraphComponentBase {
     type RegionType <: Region
+}
+
+trait GraphWithRegionsComponent extends GraphComponent with GraphWithRegionsComponentBase {
     val graph: GraphWithRegionsType[NodeType, RegionType]
 }
 
-trait MultiLevelGraphComponent extends GraphComponentBase {
-    type RegionType <: Region
-
+trait MultiLevelGraphComponent extends GraphWithRegionsComponentBase {
     val levels: Seq[GraphWithRegionsType[NodeType, RegionType]]
 }
