@@ -1,6 +1,5 @@
 package org.isochrone.intersections
 
-import org.isochrone.db.IntersectionTableComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.OsmTableComponent
@@ -8,7 +7,7 @@ import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.db.DatabaseProvider
 
 trait IntersectionFinderComponent {
-    self: IntersectionTableComponent with RoadNetTableComponent with OsmTableComponent with DatabaseProvider =>
+    self: RoadNetTableComponent with OsmTableComponent with DatabaseProvider =>
 
     object IntersectionFinder {
         def intersectionsIn(top: Double, left: Double, bottom: Double, right: Double) = {
