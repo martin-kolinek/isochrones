@@ -4,6 +4,7 @@ import org.isochrone.db.OsmTableComponent
 import com.vividsolutions.jts.geom.Point
 import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.geom.GeometryFactory
+import com.vividsolutions.jts.geom.PrecisionModel
 
 class IntersectionCollection(input: Seq[(Long, Geometry, Long, Geometry, Long, Geometry, Long, Geometry)], maxNode: Long) {
     val nodeGeoms = (for {
@@ -25,7 +26,7 @@ class IntersectionCollection(input: Seq[(Long, Geometry, Long, Geometry, Long, G
         case (key, values) => key -> values.map(_._2).toSet
     }
 
-    val geomfact = new GeometryFactory
+    val geomfact = new GeometryFactory(new PrecisionModel, 4326)
 
     val intersectionPoints: Map[Intersection, Point] = (for {
         (a, ag, b, bg, c, cg, d, dg) <- input
@@ -35,7 +36,7 @@ class IntersectionCollection(input: Seq[(Long, Geometry, Long, Geometry, Long, G
 
     val intersectionNodes: Map[Intersection, Long] = (for {
         (a, _, b, _, c, _, d, _) <- input
-    } yield intersection(a, b, c, d)).toSet.zipWithIndex.map(x => x._1 -> (x._2.toLong + maxNode)).toMap
+    } yield intersection(a, b, c, d)).toSet.zipWithIndex.map(x => x._1 -> (x._2.toLong + 1 + maxNode)).toMap
 
     def intersectionsForEdge(start: Long, end: Long): Seq[Long] = {
         val intersections = edgeIntersections(Set(start, end))

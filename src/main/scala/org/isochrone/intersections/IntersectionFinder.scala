@@ -13,22 +13,27 @@ trait IntersectionFinderComponent {
     object IntersectionFinder {
         def intersectionsIn(top: Double, left: Double, bottom: Double, right: Double) = {
             for {
-                e1 <- roadNetTables.roadNet
-                e2 <- roadNetTables.roadNet
-                n1s <- osmTables.nodes if n1s.id === e1.start
-                n1e <- osmTables.nodes if n1e.id === e1.end
-                n2s <- osmTables.nodes if n2s.id === e2.start
-                n2e <- osmTables.nodes if n2e.id === e2.end
-                if n1s.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)) ||
-                    n1e.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom))
-                if n2s.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)) ||
-                    n2e.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom))
+                n1s <- osmTables.nodes
+                n1e <- osmTables.nodes
+                n2s <- osmTables.nodes
+                n2e <- osmTables.nodes
+                e1 <- roadNetTables.roadNet if n1s.id === e1.start && n1e.id === e1.end
+                e2 <- roadNetTables.roadNet if n2s.id === e2.start && n2e.id === e2.end
+                if n1s.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326) ||
+                    n1e.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326)
+                if n2s.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326) ||
+                    n2e.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326)
                 if e1.start =!= e2.start && e1.end =!= e2.end
                 if e1.start =!= e2.end && e1.end =!= e2.start
-                geom1 = (n1s.geom shortestLine n1e.geom).asColumnOf[Geometry]
-                geom2 = (n2s.geom shortestLine n2e.geom).asColumnOf[Geometry]
-                if geom1 intersects geom2
+                if (n1s.geom shortestLine n1e.geom).asColumnOf[Geometry].setSRID(4326) intersects
+                    (n2s.geom shortestLine n2e.geom).asColumnOf[Geometry].setSRID(4326)
             } yield (n1s.id, n1s.geom, n1e.id, n1e.geom, n2s.id, n2s.geom, n2e.id, n2e.geom)
+        }
+
+        def hasIntersections(top: Double, left: Double, bottom: Double, right: Double) = {
+            database.withSession { implicit s: Session =>
+                intersectionsIn(top, left, bottom, right).firstOption.isDefined
+            }
         }
 
         def removeIntersections(top: Double, left: Double, bottom: Double, right: Double) = {
