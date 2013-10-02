@@ -1,6 +1,7 @@
 package org.isochrone.db
 
 import org.isochrone.util.db.MyPostgresDriver.simple._
+import com.vividsolutions.jts.geom.Geometry
 
 class EdgeTable(name: String) extends Table[(Long, Long, Double)](name) {
     def start = column[Long]("start_node")
@@ -9,10 +10,11 @@ class EdgeTable(name: String) extends Table[(Long, Long, Double)](name) {
     def * = start ~ end ~ cost
 }
 
-class NodeTable(name: String) extends Table[(Long, Int)](name) {
+class NodeTable(name: String) extends Table[(Long, Int, Geometry)](name) {
     def id = column[Long]("id")
     def region = column[Int]("region")
-    def * = id ~ region
+    def geom = column[Geometry]("geom")
+    def * = id ~ region ~ geom
 }
 
 class RegionTable(name: String) extends Table[(Int, Double)](name) {

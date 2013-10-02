@@ -10,6 +10,7 @@ import org.isochrone.util.RandomGraphComponent
 class DijkstraIsochroneTest extends FunSuite {
     test("dijkstra isochrone finds an isochrone in star") {
         new SimpleGraphComponent with DefaultDijkstraProvider with DijkstraAlgorithmComponent with GraphComponent {
+            type NodeType = Int
             val edges = (1 to 10).map((0, _, 0.5)) ++ (1 to 10).map(x => (x, x + 10, 0.5))
             val graph = SimpleGraph(edges: _*)
             val iso = DijkstraHelpers.isochrone(0, 0.6).toList
@@ -45,7 +46,7 @@ class DijkstraIsochroneTest extends FunSuite {
 
     test("multilevel dijkstra works on a graph") {
         new SimpleGraphComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
-
+        	type NodeType = Int
             val lowlevel = new SimpleGraph(lowerlevel, lowerlevelregs)
             val upper = SimpleGraph(upperlevel: _*)
             val levels = Seq(lowlevel, upper)
@@ -58,6 +59,7 @@ class DijkstraIsochroneTest extends FunSuite {
 
     test("multilevel dijkstra does not ask for unneeded edges") {
         new SimpleGraphComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
+            type NodeType = Int
             var init = true
             val lowlevel = new SimpleGraph(lowerlevel, lowerlevelregs) {
                 override def neighbours(node: Int) = {

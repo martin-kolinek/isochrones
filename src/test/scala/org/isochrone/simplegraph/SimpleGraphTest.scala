@@ -6,6 +6,7 @@ import org.isochrone.dijkstra.DefaultDijkstraProvider
 class SimpleGraphTest extends FunSuite {
     test("SimpleGraph works") {
         new SimpleGraphComponent with DefaultDijkstraProvider {
+            type NodeType = Int
             val graph = SimpleGraph(
                 (1, 2, 0.1),
                 (2, 3, 0.2),
@@ -23,6 +24,7 @@ class SimpleGraphTest extends FunSuite {
 
     test("SimpleGraph returns empty list for nonexistent node") {
         new SimpleGraphComponent with DefaultDijkstraProvider {
+            type NodeType = Int
             val graph = SimpleGraph(
                 (1, 2, 0.1),
                 (2, 3, 0.2),
@@ -38,6 +40,7 @@ class SimpleGraphTest extends FunSuite {
 
     test("SimpleGraph works with regions") {
         new SimpleGraphComponent with DefaultDijkstraProvider {
+            type NodeType = Int
             val dir = Seq(
                 0 -> 1,
                 1 -> 2,

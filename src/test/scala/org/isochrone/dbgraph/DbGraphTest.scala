@@ -21,6 +21,9 @@ import org.isochrone.db.SingleSessionProvider
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.TestDatabaseComponent
 import org.isochrone.db.DefaultVisualizationTableComponent
+import com.vividsolutions.jts.geom.GeometryFactory
+import com.vividsolutions.jts.geom.PrecisionModel
+import com.vividsolutions.jts.geom.Coordinate
 
 trait RoadNetTableCreation extends BeforeAndAfterEach {
     self: Suite =>
@@ -33,11 +36,11 @@ trait RoadNetTableCreation extends BeforeAndAfterEach {
 }
 
 class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
-
+	val geomfact = new GeometryFactory(new PrecisionModel, 4326)
     test("DatabaseGraph retrieves neighbours") {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit s: Session =>
-                (1l to 5l).map((_, 1)).foreach(roadNetTables.roadNodes.insert(_))
+                (1l to 5l).map((_, 1, geomfact.createPoint(new Coordinate(0, 0)))).foreach(roadNetTables.roadNodes.insert(_))
                 roadNetTables.roadNet.insertAll(
                     (1, 2, 0.1),
                     (1, 3, 0.2),
@@ -58,7 +61,7 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
     test("DatabaseGraph return empty list for nonexistent nodes)") {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit session: Session =>
-                (1l to 5l).map((_, 1)).foreach(roadNetTables.roadNodes.insert(_))
+                (1l to 5l).map((_, 1, geomfact.createPoint(new Coordinate(0, 0)))).foreach(roadNetTables.roadNodes.insert(_))
                 roadNetTables.roadNet.insertAll(
                     (1, 2, 0.1),
                     (1, 3, 0.2),
@@ -79,7 +82,7 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
     test("DatabaseGraph does not retrieve region multiple times") {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit session: Session =>
-                (1l to 5l).map((_, 1)).foreach(roadNetTables.roadNodes.insert(_))
+                (1l to 5l).map((_, 1, geomfact.createPoint(new Coordinate(0, 0)))).foreach(roadNetTables.roadNodes.insert(_))
                 roadNetTables.roadNet.insertAll(
                     (1, 2, 0.1),
                     (1, 3, 0.2),
@@ -104,11 +107,11 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit session: Session =>
                 roadNetTables.roadNodes.insertAll(
-                    (1, 1),
-                    (2, 1),
-                    (3, 2),
-                    (4, 2),
-                    (5, 2))
+                    (1, 1, geomfact.createPoint(new Coordinate(0, 0))),
+                    (2, 1, geomfact.createPoint(new Coordinate(0, 0))),
+                    (3, 2, geomfact.createPoint(new Coordinate(0, 0))),
+                    (4, 2, geomfact.createPoint(new Coordinate(0, 0))),
+                    (5, 2, geomfact.createPoint(new Coordinate(0, 0))))
                 roadNetTables.roadNet.insertAll(
                     (1, 2, 0.1),
                     (2, 3, 0.2),

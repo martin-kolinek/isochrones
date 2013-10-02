@@ -19,10 +19,10 @@ trait IntersectionFinderComponent {
                 n2e <- osmTables.nodes
                 e1 <- roadNetTables.roadNet if n1s.id === e1.start && n1e.id === e1.end
                 e2 <- roadNetTables.roadNet if n2s.id === e2.start && n2e.id === e2.end
-                if n1s.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326) ||
-                    n1e.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326)
-                if n2s.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326) ||
-                    n2e.geom @&& makeBox(makePoint(left, top), makePoint(right, bottom)).setSRID(4326)
+                if n1s.geom @&& makeBox(makePoint(left, bottom), makePoint(right, top)).setSRID(4326) ||
+                    n1e.geom @&& makeBox(makePoint(left, bottom), makePoint(right, top)).setSRID(4326)
+                if n2s.geom @&& makeBox(makePoint(left, bottom), makePoint(right, top)).setSRID(4326) ||
+                    n2e.geom @&& makeBox(makePoint(left, bottom), makePoint(right, top)).setSRID(4326)
                 if e1.start =!= e2.start && e1.end =!= e2.end
                 if e1.start =!= e2.end && e1.end =!= e2.start
                 if (n1s.geom shortestLine n1e.geom).asColumnOf[Geometry].setSRID(4326) intersects

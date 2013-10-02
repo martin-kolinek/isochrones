@@ -15,7 +15,7 @@ import org.isochrone.dbgraph.DatabaseGraphComponent
 //import org.isochrone.partition.RegionAnalyzer
 trait HigherLevelGraphCreatorComponent {
     self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseGraphComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
-        
+
     object HigherLevelGraph {
         def createHigherLevelGraph(notification: Int => Unit = x => Unit) {
             database.withSession { implicit s: Session =>
@@ -36,11 +36,13 @@ trait HigherLevelGraphCreatorComponent {
             }
         }
 
-        def processRegion(region: Int, nodes: Seq[Long], session:Session) {
+        def processRegion(region: Int, nodes: Seq[Long], session: Session) {
             val analyzerComp = regionAnalyzerProvider.getAnalyzer(graph.singleRegion(DatabaseRegion(region)))
             var diam = 0.0
             for ((node, others) <- analyzerComp.RegionAnalyzer.borderNodeDistances(nodes.toSet)) {
-                higherRoadNetTables.roadNodes.insert(node -> 0)(session)
+                higherRoadNetTables.roadNodes.insert(for {
+                    nd <- roadNetTables.roadNodes if nd.id === node
+                } yield (nd.id, 0, nd.geom))(session)
                 for ((other, dist) <- others) {
                     higherRoadNetTables.roadNet.insert(node, other, dist)(session)
                 }

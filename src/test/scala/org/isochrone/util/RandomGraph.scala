@@ -6,7 +6,7 @@ import org.isochrone.dijkstra.DijkstraProvider
 
 trait RandomGraphComponent extends SimpleGraphComponent {
     self: DijkstraProvider =>
-
+    type NodeType = Int
     object RandomGraph {
         val rand = new Random()
 

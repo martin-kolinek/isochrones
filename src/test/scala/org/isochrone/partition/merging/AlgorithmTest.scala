@@ -13,6 +13,7 @@ import org.isochrone.dijkstra.DefaultDijkstraProvider
 class AlgorithmTest extends FunSuite {
     test("merging algorithm works with controlled functions") {
         new SimpleGraphComponent with GraphComponent with MergingPartitionerComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider {
+            type NodeType = Int
             val mergeAlgProps = new MergingAlgorithmProperties {
                 def mergePriorityFunc(c1: Cell, c2: Cell) = {
                     val merged = c1.nodes ++ c2.nodes
@@ -42,6 +43,7 @@ class AlgorithmTest extends FunSuite {
 
     test("Merging algorithm with bridge") {
         new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider with FunctionLibraryComponent {
+            type NodeType = Int
             val mergeAlgProps = new MergingAlgorithmProperties {
                 def mergePriorityFunc(c1: Cell, c2: Cell) = FunctionLibrary.mergePriority(c1, c2)
                 def partitionValueFunc(p: Partition) = FunctionLibrary.boundaryEdgesCellSize(4)(p)

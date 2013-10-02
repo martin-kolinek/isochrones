@@ -6,7 +6,6 @@ import org.isochrone.dijkstra.DijkstraProvider
 trait SimpleGraphComponent extends GraphComponentBase {
     self: DijkstraProvider =>
 
-    type NodeType = Int
     type RegionType = SimpleGraphRegion
 
     case class SimpleGraphRegion private[SimpleGraphComponent] (num: Int, sg: SimpleGraph) extends Region {
@@ -21,7 +20,7 @@ trait SimpleGraphComponent extends GraphComponentBase {
         override def toString = s"SimpleRegion($num, diam=$diameter)"
     }
 
-    class SimpleGraph (edges: Seq[(Int, Int, Double)], nodeRegions: Map[Int, Int]) extends GraphWithRegionsType[Int, SimpleGraphRegion] {
+    class SimpleGraph (edges: Seq[(NodeType, NodeType, Double)], nodeRegions: Map[NodeType, Int]) extends GraphWithRegionsType[NodeType, SimpleGraphRegion] {
         private val neigh = edges.groupBy(_._1).map { case (k, v) => (k, v.map(x => (x._2, x._3))) }
 
         val nodeRegionsProc = nodeRegions.mapValues(new SimpleGraphRegion(_, this))
@@ -37,17 +36,17 @@ trait SimpleGraphComponent extends GraphComponentBase {
 
         def nodes = (neigh.keys ++ neigh.values.flatMap(identity).map(_._1)).toSet
 
-        def neighbours(node: Int) = neigh.getOrElse(node, Seq())
+        def neighbours(node: NodeType) = neigh.getOrElse(node, Seq())
 
-        def nodeRegion(node: Int) = nodeRegionsProc.get(node)
+        def nodeRegion(node: NodeType) = nodeRegionsProc.get(node)
 
-        def nodeEccentricity(n: Int) = nodeEccentrities(n)
+        def nodeEccentricity(n: NodeType) = nodeEccentrities(n)
 
         override def toString = s"SimpleGraph($edges)"
     }
 
     object SimpleGraph {
-        def apply(edges: (Int, Int, Double)*) = new SimpleGraph(edges, (edges.map(_._1) ++ edges.map(_._2)).map(_ -> 0).toMap)
-        def apply(edges: Seq[(Int, Int, Double)], nodes: Map[Int, Int]) = new SimpleGraph(edges, nodes)
+        def apply(edges: (NodeType, NodeType, Double)*) = new SimpleGraph(edges, (edges.map(_._1) ++ edges.map(_._2)).map(_ -> 0).toMap)
+        def apply(edges: Seq[(NodeType, NodeType, Double)], nodes: Map[NodeType, Int]) = new SimpleGraph(edges, nodes)
     }
 }
