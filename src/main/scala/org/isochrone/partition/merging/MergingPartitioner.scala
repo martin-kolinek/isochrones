@@ -1,13 +1,14 @@
 package org.isochrone.partition.merging
 
 import org.isochrone.graphlib._
+import org.isochrone.partition.PartitionerComponent
 
-trait MergingPartitionerComponent extends PartitionComponent with CellComponent {
-	self:GraphComponent with MergingAlgorithmPropertiesComponent =>
-	    
-    object MergingPartitioner {
+trait MergingPartitionerComponent extends PartitionComponent with CellComponent with PartitionerComponent {
+    self: GraphComponent with MergingAlgorithmPropertiesComponent =>
+
+    object MergingPartitioner extends Partitioner {
         /* use merging algorithm to find the partition with maximum value */
-        def partition(stepNotification: (Int, Double) => Unit = (x, y) => Unit) = {
+        def partition() = {
             val part = Partition(graph.nodes)
             val trav = new Traversable[(Double, Set[Cell])] {
                 def foreach[U](func: ((Double, Set[Cell])) => U) {
@@ -16,7 +17,6 @@ trait MergingPartitionerComponent extends PartitionComponent with CellComponent 
                         val value = mergeAlgProps.partitionValueFunc(part)
                         func((value, part.cells))
                         lastSize = part.cells.size
-                        stepNotification(lastSize, value)
                         part.step();
                     }
                 }
@@ -24,4 +24,6 @@ trait MergingPartitionerComponent extends PartitionComponent with CellComponent 
             trav.maxBy(_._1)._2.map(_.nodes)
         }
     }
+
+    val partitioner = MergingPartitioner
 }

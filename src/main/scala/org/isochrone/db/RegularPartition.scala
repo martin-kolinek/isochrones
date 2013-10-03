@@ -14,12 +14,13 @@ trait RegularPartitionComponent {
             def dbBBox: Column[Geometry] = makeBox(makePoint(left, bottom), makePoint(right, top))
         }
         val (top, left, bottom, right) = database.withSession { implicit s: Session =>
-            sql"SELECT MAX(ST_Y(geom), MIN(ST_X(geom)), MIN(ST_Y(geom)), MAX(ST_X(geom)) FROM #${roadNetTables.roadNodes.tableName}".as[(Double, Double, Double, Double)].first
+            sql"SELECT MAX(ST_Y(geom)), MIN(ST_X(geom)), MIN(ST_Y(geom)), MAX(ST_X(geom)) FROM #${roadNetTables.roadNodes.tableName}".as[(Double, Double, Double, Double)].first
+
         }
 
         def regions: Traversable[BoundingBox] = for {
-            x <- left to right by regionSize
-            y <- bottom to top by regionSize
+            x <- left - regionSize / 10 to right by regionSize
+            y <- bottom - regionSize / 10 to top by regionSize
         } yield BoundingBox(y + regionSize, x, y, x + regionSize)
     }
 

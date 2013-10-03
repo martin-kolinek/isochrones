@@ -39,12 +39,7 @@ trait HigherLevelRoadNetTableComponent {
 }
 
 trait DefaultRoadNetTableComponent extends RoadNetTableComponent {
-    val roadNetTables = new RoadNetTables {
-        val roadNet = new EdgeTable("road_net")
-        val roadNetUndir = new EdgeTable("road_net_undir")
-        val roadNodes = new NodeTable("road_nodes")
-        val roadRegions = new RegionTable("road_regions")
-    }
+    val roadNetTables = new DefaultRoadNetTablesWithPrefix("")
 }
 
 trait MultiLevelRoadNetTableComponent {
@@ -52,15 +47,12 @@ trait MultiLevelRoadNetTableComponent {
 }
 
 trait DefaultTwoLevelRoadNetTableComponent {
-    val roadNetTableLevels = Seq(new RoadNetTables {
-        val roadNet = new EdgeTable("road_net")
-        val roadNetUndir = new EdgeTable("road_net_undir")
-        val roadNodes = new NodeTable("road_nodes")
-        val roadRegions = new RegionTable("road_regions") 
-    }, new RoadNetTables {
-        val roadNet = new EdgeTable("road_net_upper")
-        val roadNetUndir = new EdgeTable("road_net_undir_upper")
-        val roadNodes = new NodeTable("road_nodes_upper")
-        val roadRegions = new RegionTable("road_regions_upper") 
-    })
+    val roadNetTableLevels = Seq(new DefaultRoadNetTablesWithPrefix(""), new DefaultRoadNetTablesWithPrefix("upper_"))
+}
+
+class DefaultRoadNetTablesWithPrefix(prefix: String) extends RoadNetTables {
+    val roadNet = new EdgeTable(prefix + "road_net")
+    val roadNetUndir = new EdgeTable(prefix + "road_net_undir")
+    val roadNodes = new NodeTable(prefix + "road_nodes")
+    val roadRegions = new RegionTable(prefix + "road_regions")
 }

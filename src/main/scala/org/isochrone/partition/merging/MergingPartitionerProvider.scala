@@ -5,15 +5,9 @@ import org.isochrone.dbgraph.WithoutRegionsBoundedGraphComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.DatabaseProvider
 import org.isochrone.graphlib.GraphComponent
+import org.isochrone.partition.PartitionerComponent
 
-trait MergingPartitionerProvider {
-    self: RegularPartitionComponent =>
-    def createPartitioner(bbox: regularPartition.BoundingBox): MergingPartitionerComponent {
-        type NodeType = Long
-    }
-}
-
-trait DefaultMergingPartitionerProvider extends MergingPartitionerProvider with WithoutRegionsBoundedGraphComponent {
+trait DefaultMergingPartitionerProvider extends WithoutRegionsBoundedGraphComponent {
     self: RegularPartitionComponent with RoadNetTableComponent with DatabaseProvider =>
 
     def createPartitioner(bbox: regularPartition.BoundingBox) = new GraphComponent with MergingPartitionerComponent with DefaultMergingAlgPropertiesComponent with FunctionLibraryComponent {
