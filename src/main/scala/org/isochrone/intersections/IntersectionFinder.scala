@@ -13,10 +13,10 @@ trait IntersectionFinderComponent {
     object IntersectionFinder {
         def intersectionsIn(top: Double, left: Double, bottom: Double, right: Double) = {
             for {
-                n1s <- osmTables.nodes
-                n1e <- osmTables.nodes
-                n2s <- osmTables.nodes
-                n2e <- osmTables.nodes
+                n1s <- roadNetTables.roadNodes
+                n1e <- roadNetTables.roadNodes
+                n2s <- roadNetTables.roadNodes
+                n2e <- roadNetTables.roadNodes
                 e1 <- roadNetTables.roadNet if n1s.id === e1.start && n1e.id === e1.end
                 e2 <- roadNetTables.roadNet if n2s.id === e2.start && n2e.id === e2.end
                 if n1s.geom @&& makeBox(makePoint(left, bottom), makePoint(right, top)).setSRID(4326) ||
@@ -49,16 +49,19 @@ trait IntersectionFinderComponent {
                         new Timestamp(System.currentTimeMillis),
                         0l,
                         Map[String, String]())): _*))
+                roadNetTables.roadNodes.insertAll((collection.newForDb.map(x => (x._1, 0, x._2.asInstanceOf[Geometry])): _*))
                 for {
                     (start, _, end, _, _, _, _, _) <- pairs
                 } {
                     val nodes = collection.intersectionsForEdge(start, end)
-                    Query(roadNetTables.roadNet).filter(edg => edg.start === start && edg.end === end).delete
+                    val rnq = Query(roadNetTables.roadNet).filter(edg => edg.start === start && edg.end === end)
+                    val virt = rnq.map(_.virtual).firstOption.getOrElse(false)
+                    rnq.delete
                     for (Seq(ns, ne) <- (start +: nodes :+ end).sliding(2)) {
                         roadNetTables.roadNet.insert(for {
-                            sn <- osmTables.nodes if sn.id === ns
-                            en <- osmTables.nodes if en.id === ne
-                        } yield (sn.id, en.id, (sn.geom distanceSphere en.geom).asColumnOf[Double]))
+                            sn <- roadNetTables.roadNodes if sn.id === ns
+                            en <- roadNetTables.roadNodes if en.id === ne
+                        } yield (sn.id, en.id, (sn.geom distanceSphere en.geom).asColumnOf[Double], virt))
                     }
 
                 }

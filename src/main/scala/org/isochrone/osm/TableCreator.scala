@@ -15,26 +15,20 @@ trait TableCreatorComponent {
             database.withTransaction {
                 implicit s: Session =>
                     roadNetTables.roadNet.ddl.create
-                    roadNetTables.roadNetUndir.ddl.create
                     roadNetTables.roadNodes.ddl.create
                     roadNetTables.roadRegions.ddl.create
                     visualizationTables.roadNetVisualization.ddl.create
-                    visualizationTables.roadNetUndirVisualization.ddl.create
-                    for (tbl <- Seq(visualizationTables.roadNetVisualization, visualizationTables.roadNetUndirVisualization))
-                        Q.updateNA(s"""CREATE INDEX "ix_${tbl.tableName}" ON ${tbl.tableName} using GIST (linestring)""").execute
+                    Q.updateNA(s"""CREATE INDEX "ix_${visualizationTables.roadNetVisualization.tableName}" ON ${visualizationTables.roadNetVisualization.tableName} using GIST (linestring)""").execute
+                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}" ON ${roadNetTables.roadNodes.tableName} using GIST (geom)""").execute
             }
         }
         def drop() {
             database.withTransaction {
                 implicit s: Session =>
                     roadNetTables.roadNet.ddl.drop
-                    roadNetTables.roadNetUndir.ddl.drop
                     roadNetTables.roadNodes.ddl.drop
                     roadNetTables.roadRegions.ddl.drop
                     visualizationTables.roadNetVisualization.ddl.drop
-                    visualizationTables.roadNetUndirVisualization.ddl.drop
-                    for (tbl <- Seq(visualizationTables.roadNetVisualization, visualizationTables.roadNetUndirVisualization))
-                        Q.updateNA(s"""DROP INDEX "ix_${tbl.tableName}" """)
             }
         }
     }

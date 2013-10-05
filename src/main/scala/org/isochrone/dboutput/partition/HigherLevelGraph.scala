@@ -44,7 +44,7 @@ trait HigherLevelGraphCreatorComponent {
                     nd <- roadNetTables.roadNodes if nd.id === node
                 } yield (nd.id, 0, nd.geom))(session)
                 for ((other, dist) <- others) {
-                    higherRoadNetTables.roadNet.insert(node, other, dist)(session)
+                    higherRoadNetTables.roadNet.insert(node, other, dist, false)(session)
                 }
                 if (!others.isEmpty)
                     diam = math.max(diam, others.map(_._2).max)

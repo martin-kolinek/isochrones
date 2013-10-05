@@ -17,13 +17,11 @@ class RoadImporterTest extends FunSuite with TestDatabase {
                 //some nodes from way 24282589
                 assert(Query(roadNetTables.roadNet).filter(x => x.start === 262930213l && x.end === 262930214l).list.size == 1)
                 assert(Query(roadNetTables.roadNet).filter(x => x.end === 262930213l && x.start === 262930214l).list.size == 1)
-                assert(Query(roadNetTables.roadNetUndir).filter(x => x.start === 262930213l && x.end === 262930214l).list.size == 1)
-                assert(Query(roadNetTables.roadNetUndir).filter(x => x.end === 262930213l && x.start === 262930214l).list.size == 1)
                 //some nodes from way 194749394
-                assert(Query(roadNetTables.roadNet).filter(x => x.start === 249661252l && x.end === 55466850l).list.size == 1)
-                assert(Query(roadNetTables.roadNet).filter(x => x.end === 249661252l && x.start === 55466850l).list.size == 0)
-                assert(Query(roadNetTables.roadNetUndir).filter(x => x.start === 249661252l && x.end === 55466850l).list.size == 1)
-                assert(Query(roadNetTables.roadNetUndir).filter(x => x.end === 249661252l && x.start === 55466850l).list.size == 1)
+                val l1 = Query(roadNetTables.roadNet).filter(x => x.start === 249661252l && x.end === 55466850l).list
+                assert(l1.size == 1)
+                val l2 = Query(roadNetTables.roadNet).filter(x => x.end === 249661252l && x.start === 55466850l).list
+                assert(l2.size == 0)
             }
         }
     }

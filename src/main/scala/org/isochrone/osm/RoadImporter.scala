@@ -53,7 +53,7 @@ trait RoadImporterComponent {
                 (s, e) <- roadNetBareAll
                 sn <- osmTables.nodes if sn.id === s
                 en <- osmTables.nodes if en.id === e
-            } yield (s, e, (sn.geom distanceSphere en.geom).asColumnOf[Double])
+            } yield (s, e, (sn.geom distanceSphere en.geom).asColumnOf[Double], false)
         }
 
         val roads = for {
@@ -95,14 +95,6 @@ trait RoadImporterComponent {
             database.withTransaction { implicit s: Session =>
                 import roadNetTables._
                 roadNet.insert(roadNetQuery)
-                roadNetUndir.insert(Query(roadNet))
-                val todel = for {
-                    r <- roadNetUndir
-                    if Query(roadNetUndir).filter(r2 => r2.start === r.end && r2.end === r.start).exists
-                    if r.start < r.end
-                } yield r
-                todel.delete
-                roadNetUndir.insert(roadNetUndir.map(x => (x.end, x.start, x.cost)))
                 sqlu"""INSERT INTO #${roadNetTables.roadNodes.tableName}(id, region, geom)
                 SELECT DISTINCT n.id, 0, n.geom FROM #${roadNetTables.roadNet.tableName} rn 
                     inner join #${osmTables.nodes.tableName} n on rn.start_node = n.id OR rn.end_node = n.id

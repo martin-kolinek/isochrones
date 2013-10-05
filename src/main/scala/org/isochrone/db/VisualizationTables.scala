@@ -14,7 +14,6 @@ trait VisualizationTableComponent {
 	
 	trait VisualizationTables {
 	    val roadNetVisualization: RoadNetVisualization
-	    val roadNetUndirVisualization: RoadNetVisualization
 	}
 	
 	val visualizationTables: VisualizationTables
@@ -23,6 +22,5 @@ trait VisualizationTableComponent {
 trait DefaultVisualizationTableComponent extends VisualizationTableComponent {
     val visualizationTables = new VisualizationTables {
         val roadNetVisualization = new RoadNetVisualization("road_net_vis")
-        val roadNetUndirVisualization = new RoadNetVisualization("road_net_undir_vis")
     }
 }
