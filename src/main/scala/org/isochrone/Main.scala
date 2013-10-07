@@ -10,6 +10,7 @@ import org.isochrone.osm.RoadImporterComponent
 import org.isochrone.db.OsmTableComponent
 import org.isochrone.db.OnlyDatabaseParserComponent
 import org.isochrone.osm.RoadNetVisualizerComponent
+import org.isochrone.osm.DefaultCostAssignerComponent
 
 /*object Main extends ActionExecutor with DijkstraIsochroneComputer with Partitioner with HigherLevelCreator {
 	def main(args:Array[String]) {
@@ -40,7 +41,7 @@ object Main {
             case "dropdb" => new ActionComponent with OptionsBase with CompleteTableCreatorComponent {
                 val execute = tableCreator.drop _
             }
-            case "roadimport" => new ActionComponent with OptionsBase with FromOptionDatabaseComponent with OnlyDatabaseParserComponent with RoadImporterComponent with OsmTableComponent with DefaultRoadNetTableComponent {
+            case "roadimport" => new ActionComponent with OptionsBase with FromOptionDatabaseComponent with OnlyDatabaseParserComponent with RoadImporterComponent with OsmTableComponent with DefaultRoadNetTableComponent with DefaultCostAssignerComponent {
                 val execute = roadImporter.execute _
             } 
             case "roadvisualize" => new ActionComponent with OptionsBase with FromOptionDatabaseComponent with OnlyDatabaseParserComponent with RoadNetVisualizerComponent with DefaultRoadNetTableComponent with DefaultVisualizationTableComponent with OsmTableComponent {

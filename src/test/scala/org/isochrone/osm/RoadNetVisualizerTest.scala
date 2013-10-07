@@ -3,7 +3,7 @@ package org.isochrone.osm
 import org.scalatest.FunSuite
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.TestDatabase
-trait TestRoadNetVisualizerComponent extends RoadNetVisualizerComponent with TestRoadImporterComponent
+trait TestRoadNetVisualizerComponent extends RoadNetVisualizerComponent with TestRoadImporterComponent with DefaultCostAssignerComponent
 
 class RoadNetVisualizerTest extends FunSuite with TestDatabase {
     test("RoadNetVisualizer works") {

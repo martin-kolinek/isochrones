@@ -6,9 +6,10 @@ import org.isochrone.db.OsmTableComponent
 import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.db.DatabaseProvider
 import java.sql.Timestamp
+import org.isochrone.osm.CostAssignerComponent
 
 trait IntersectionFinderComponent {
-    self: RoadNetTableComponent with OsmTableComponent with DatabaseProvider =>
+    self: RoadNetTableComponent with OsmTableComponent with DatabaseProvider with CostAssignerComponent =>
 
     object IntersectionFinder {
         def intersectionsIn(top: Double, left: Double, bottom: Double, right: Double) = {
@@ -61,7 +62,7 @@ trait IntersectionFinderComponent {
                         roadNetTables.roadNet.insert(for {
                             sn <- roadNetTables.roadNodes if sn.id === ns
                             en <- roadNetTables.roadNodes if en.id === ne
-                        } yield (sn.id, en.id, (sn.geom distanceSphere en.geom).asColumnOf[Double], virt))
+                        } yield (sn.id, en.id, if (virt) getNoRoadCost(sn.geom, en.geom) else getRoadCost(sn.geom, en.geom), virt))
                     }
 
                 }
