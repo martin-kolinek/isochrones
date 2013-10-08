@@ -9,7 +9,7 @@ trait OnlyDatabaseParserComponent extends DatabaseOptionParsingComponent {
         def copyWithDb(db:String) = copy(database=db)
     } 
     
-    def parser:OptionParser[OptionConfig] = new OptionParser[OptionConfig]("jhkjh") with DatabaseParser {
+    def parser:OptionParser[OptionConfig] = new CommonOptionParser with DatabaseParser {
     	databaseOpt
     }
     

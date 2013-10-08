@@ -11,48 +11,28 @@ import org.isochrone.db.OsmTableComponent
 import org.isochrone.db.OnlyDatabaseParserComponent
 import org.isochrone.osm.RoadNetVisualizerComponent
 import org.isochrone.osm.DefaultCostAssignerComponent
+import org.isochrone.executors.DijkstraIsochroneComputer
+import org.isochrone.executors.HigherLevelCreator
+import org.isochrone.executors.RoadImportExecutor
+import org.isochrone.executors.RoadVisualizeExecutor
+import org.isochrone.executors.SchemaExecutor
 
-/*object Main extends ActionExecutor with DijkstraIsochroneComputer with Partitioner with HigherLevelCreator {
-	def main(args:Array[String]) {
-		execute(args.head, args.tail)
-	}
-}*/
-
-object Main {
-    val action = Set("hello")
-    
-    trait CompleteTableCreatorComponent extends OnlyDatabaseParserComponent with FromOptionDatabaseComponent with TableCreatorComponent with DefaultRoadNetTableComponent with DefaultVisualizationTableComponent {
-        self: ArgumentsProvider =>
-    }
-    
-    def createComponent(arguments: Seq[String]) = {
-        trait OptionsBase extends ArgumentParser with ArgumentsProvider {
-            self: OptionParserComponent =>
-            def args = arguments.tail
-        }
-
-        arguments.head match {
-            case "hello" => new ActionComponent {
-                val execute = () => println("hello")
-            }
-            case "createdb" => new ActionComponent with OptionsBase with CompleteTableCreatorComponent {
-                val execute = tableCreator.create _
-            }
-            case "dropdb" => new ActionComponent with OptionsBase with CompleteTableCreatorComponent {
-                val execute = tableCreator.drop _
-            }
-            case "roadimport" => new ActionComponent with OptionsBase with FromOptionDatabaseComponent with OnlyDatabaseParserComponent with RoadImporterComponent with OsmTableComponent with DefaultRoadNetTableComponent with DefaultCostAssignerComponent {
-                val execute = roadImporter.execute _
-            } 
-            case "roadvisualize" => new ActionComponent with OptionsBase with FromOptionDatabaseComponent with OnlyDatabaseParserComponent with RoadNetVisualizerComponent with DefaultRoadNetTableComponent with DefaultVisualizationTableComponent with OsmTableComponent {
-                val execute = visualizer.execute _
-            }
-        }
+object Main extends App
+        with DijkstraIsochroneComputer
+        with HigherLevelCreator
+        with RoadImportExecutor
+        with RoadVisualizeExecutor
+        with SchemaExecutor {
+    trait OptionsBase extends ArgumentParser with ArgumentsProvider {
+        self: OptionParserComponent =>
+        def arguments = args.tail
     }
 
-    def main(args: Array[String]) {
-        val comp = createComponent(args)
-
-        comp.execute()
-    }
+    val act = args.headOption.getOrElse("")
+    val acts = actions
+    if (!acts.contains(act)) {
+        println(s"Action $act not understood, possible actions:")
+        acts.keys.foreach(println)
+    } else
+        acts(act).execute()
 }
