@@ -1,6 +1,11 @@
 package org.isochrone
 
 trait ArgumentParser {
+    self: OptionParserComponentBase =>
+    def parsedConfig: OptionConfig
+}
+
+trait DefaultArgumentParser extends ArgumentParser {
     self: ArgumentsProvider with OptionParserComponent =>
 
     def parsedConfig = parser.parse(arguments, parserStart).getOrElse {

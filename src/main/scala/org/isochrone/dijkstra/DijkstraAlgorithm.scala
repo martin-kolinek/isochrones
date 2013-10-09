@@ -8,8 +8,9 @@ import scala.collection.mutable.TreeSet
 import org.isochrone.util._
 import org.isochrone.util.collection.mutable.IndexedPriorityQueue
 import org.isochrone.compute.IsochroneComputerComponent
+import org.isochrone.compute.SomeIsochroneComputerComponent
 
-trait DijkstraAlgorithmComponent extends IsochroneComputerComponent {
+trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIsochroneComputerComponent {
     self: GraphComponent =>
 
     object DijkstraAlgorithm extends IsochroneComputer {
@@ -43,8 +44,8 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent {
                 alg(start, (x: NodeType, y: Double) => func(x -> y))
             }
         }
-        
-        def nodesWithin(start:Traversable[(NodeType, Double)], max:Double) = compute(start).takeWhile(_._2 <= max) 
+
+        def nodesWithin(start: Traversable[(NodeType, Double)], max: Double) = compute(start).takeWhile(_._2 <= max)
 
         def isochrone(start: Traversable[(NodeType, Double)], max: Double) = {
             val nodes = nodesWithin(start, max).toSeq
@@ -67,6 +68,8 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent {
         def isochrone(start: NodeType, max: Double) =
             DijkstraAlgorithm.isochrone(Traversable(start -> 0.0), max)
     }
+
+    val isoComputer = DijkstraAlgorithm
 
 }
 

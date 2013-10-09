@@ -2,8 +2,9 @@ package org.isochrone.dijkstra
 
 import org.isochrone.graphlib._
 import org.isochrone.compute.IsochroneComputerComponent
+import org.isochrone.compute.SomeIsochroneComputerComponent
 
-trait MultiLevelDijkstraComponent extends IsochroneComputerComponent {
+trait MultiLevelDijkstraComponent extends IsochroneComputerComponent with SomeIsochroneComputerComponent {
     self: MultiLevelGraphComponent =>
 
     object MultilevelDijkstra extends IsochroneComputer {
@@ -54,6 +55,8 @@ trait MultiLevelDijkstraComponent extends IsochroneComputerComponent {
             } yield IsochroneEdge(nd, neigh, quotient)
         }
     }
+
+    val isoComputer = MultilevelDijkstra
 
 }
 

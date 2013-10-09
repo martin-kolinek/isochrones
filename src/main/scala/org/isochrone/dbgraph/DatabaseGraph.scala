@@ -10,10 +10,12 @@ import org.isochrone.graphlib.GraphComponent
 import org.isochrone.graphlib.GraphWithRegionsComponent
 import org.isochrone.graphlib.GraphWithRegionsType
 import org.isochrone.graphlib.Region
+import org.isochrone.graphlib.NodePositionComponent
+import org.isochrone.graphlib.NodePosition
 
-trait DatabaseGraphComponent extends GraphWithRegionsComponent {
+trait DatabaseGraphComponent extends GraphWithRegionsComponent with NodePositionComponent {
     self: RoadNetTableComponent with SessionProviderComponent =>
-    class DatabaseGraph(maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] {
+    class DatabaseGraph(maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] with NodePosition[NodeType] {
         private val regions = new LRUCache[RegionType, Traversable[NodeType]]((k, v, m) => {
             val ret = m.size > maxRegions
             if (ret)
@@ -23,6 +25,8 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent {
 
         private val neigh = new HashMap[NodeType, Traversable[(NodeType, Double)]]
 
+        private val nodePos = new HashMap[NodeType, (Double, Double)]
+
         private val nodesToRegions = new HashMap[NodeType, RegionType]
 
         private var retrievalscntr = 0
@@ -31,7 +35,10 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent {
         def removeRegion(nodes: Traversable[NodeType]) = for (n <- nodes) {
             nodesToRegions -= n
             neigh -= n
+            nodePos -= n
         }
+
+        def nodePosition(nd: Long) = nodePos.get(nd)
 
         def nodeRegion(node: NodeType) = {
             ensureRegion(node)
@@ -66,12 +73,13 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent {
 
         def retrieveRegion(region: RegionType) {
             val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
-            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region.num) yield n.id ~ e.end.? ~ e.cost.?
+            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region.num) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
             val list = q.list()(session)
             regions(region) = list.map(_._1)
+            nodePos ++= list.map(x => (x._1, (x._4.getInteriorPoint.getX, x._4.getInteriorPoint.getY)))
             val map = list.groupBy(_._1)
             for ((k, v) <- map) {
-                neigh(k) = v.collect { case (st, Some(en), Some(c)) => (en, c) }
+                neigh(k) = v.collect { case (st, Some(en), Some(c), _) => (en, c) }
                 nodesToRegions(k) = region
             }
         }

@@ -23,7 +23,7 @@ object Main extends App
         with RoadImportExecutor
         with RoadVisualizeExecutor
         with SchemaExecutor {
-    trait OptionsBase extends ArgumentParser with ArgumentsProvider {
+    trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>
         def arguments = args.tail
     }
