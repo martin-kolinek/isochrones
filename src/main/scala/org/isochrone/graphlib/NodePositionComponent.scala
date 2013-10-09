@@ -4,6 +4,6 @@ trait NodePosition[NodeType] {
     def nodePosition(nd: NodeType): Option[(Double, Double)]
 }
 
-trait NodePositionComponent extends GraphComponent {
-    val graph: NodePosition[NodeType] with GraphType[NodeType]
+trait NodePositionComponent extends GraphComponentBase {
+    val graph: NodePosition[NodeType]
 }

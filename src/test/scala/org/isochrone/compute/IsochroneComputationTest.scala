@@ -6,7 +6,7 @@ import org.isochrone.graphlib.GraphComponentBase
 
 class IsochroneComputationTest extends FunSuite {
     test("IsochroneComputation") {
-        val comp = new IsochronesComputationComponent with IsochroneParamsParsingComponent with SomeIsochroneComputerComponent with ArgumentParser with GraphComponentBase {
+        val comp = new DefaultIsochronesComputationComponent with IsochroneParamsParsingComponent with SomeIsochroneComputerComponent with ArgumentParser with GraphComponentBase {
             case class TestIsochroneParams(start: Int, limit: Double) extends IsochroneParams {
                 def withNewLimit(l: Double) = copy(limit = l)
                 def withNewStart(ns: Int) = copy(start = ns)
