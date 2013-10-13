@@ -30,6 +30,8 @@ libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-core" % "0.4
 
 libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2"
 
+libraryDependencies += "com.chuusai" % "shapeless" % "2.0.0-M1" cross CrossVersion.full
+
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
 parallelExecution in Test := false

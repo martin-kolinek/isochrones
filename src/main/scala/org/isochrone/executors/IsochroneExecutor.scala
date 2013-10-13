@@ -4,3 +4,6 @@ import org.isochrone.db.DatabaseOptionParsingComponent
 import org.isochrone.output.OutputOptionsParserComponent
 import org.isochrone.compute.IsochroneParamsParsingComponent
 
+/*trait DatabaseIsochroneOptionsComponent extends DatabaseOptionParsingComponent {
+ 	
+}*/

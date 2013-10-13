@@ -1,6 +1,5 @@
 package org.isochrone
 
-import org.isochrone.db.OnlyDatabaseParserComponent
 import org.isochrone.db.FromOptionDatabaseComponent
 import org.isochrone.osm.TableCreatorComponent
 import org.isochrone.db.VisualizationTableComponent
@@ -8,7 +7,6 @@ import org.isochrone.db.DefaultVisualizationTableComponent
 import org.isochrone.db.DefaultRoadNetTableComponent
 import org.isochrone.osm.RoadImporterComponent
 import org.isochrone.db.OsmTableComponent
-import org.isochrone.db.OnlyDatabaseParserComponent
 import org.isochrone.osm.RoadNetVisualizerComponent
 import org.isochrone.osm.DefaultCostAssignerComponent
 import org.isochrone.executors.DijkstraIsochroneComputer

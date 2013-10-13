@@ -1,20 +1,17 @@
 package org.isochrone.output
 
-import org.isochrone.OptionParserComponentBase
+import scopt.OptionParser
+import org.isochrone.OptionParserComponent
 import scopt.OptionParser
 
-trait OutputOptionsParserComponent extends OptionParserComponentBase {
-    trait OutputOptionConfig {
-        def file: Option[String]
-        def withFile(f: String): OptionConfig
-    }
+trait OutputOptionsParserComponent extends OptionParserComponent {
+    case class OutputOptionConfig(file: Option[String])
 
-    type OptionConfig <: OutputOptionConfig
+    val fileLens = registerConfig(OutputOptionConfig(None))
 
-    trait OutputOptionsParser {
-        self: OptionParser[OptionConfig] =>
-        def outputOpt = {
-            opt[String]('o', "output").action((x, c) => c.withFile(x))
-        }
+    val fileNameLens = fileLens >> 0
+
+    abstract override def parserOptions(pars: OptionParser[OptionConfig]) {
+        pars.opt[String]('o', "output").action((x, c) => fileNameLens.set(c)(Some(x)))
     }
 }

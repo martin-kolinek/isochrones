@@ -1,19 +1,37 @@
 package org.isochrone
 
 import scopt.OptionParser
+import shapeless.Lens
+import scopt.OptionParser
+import scopt.OptionParser
 
-trait OptionParserComponent extends OptionParserComponentBase {
+trait OptionParserComponent {
+    class OptionConfig private[OptionParserComponent] (private[OptionParserComponent] val m: Map[Int, Any]) {
+    }
 
-    def parser: OptionParser[OptionConfig]
+    final def parserStart = new OptionConfig(Map[Int, Any]())
 
-    def parserStart: OptionConfig
+    private var key = 0: Int
 
-}
+    protected final def registerConfig[T](init: T) = {
+        key += 1
+        val k = key
+        new Lens[OptionConfig, T] {
+            def get(c: OptionConfig) = {
+                if (c.m.contains(k))
+                    c.m(k).asInstanceOf[T]
+                else
+                    init
+            }
+            def set(c: OptionConfig)(v: T) = new OptionConfig(c.m + (k -> v))
+        }
+    }
 
-trait OptionParserComponentBase {
-    type OptionConfig
+    protected def parserOptions(pars: OptionParser[OptionConfig]): Unit = {
+        pars.help("help").text("print this usage help")
+    }
 
-    class CommonOptionParser extends OptionParser[OptionConfig]("") {
-        help("help") text ("print this help")
+    final def parser = new OptionParser[OptionConfig]("") {
+        parserOptions(this)
     }
 }

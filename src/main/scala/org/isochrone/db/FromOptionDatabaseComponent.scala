@@ -7,5 +7,5 @@ import org.isochrone.ArgumentParser
 trait FromOptionDatabaseComponent extends DatabaseProvider {
     self: DatabaseOptionParsingComponent with ArgumentParser =>
 
-    def database = Database.forURL("jdbc:postgresql:%s".format(parsedConfig.database), driver = "org.postgresql.Driver")
+    def database = Database.forURL("jdbc:postgresql:%s".format(dbNameLens.get(parsedConfig)), driver = "org.postgresql.Driver")
 }

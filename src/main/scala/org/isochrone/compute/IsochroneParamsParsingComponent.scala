@@ -4,28 +4,26 @@ import org.isochrone.OptionParserComponent
 import org.isochrone.graphlib.GraphComponentBase
 import scopt.OptionParser
 import scopt.Read
-import org.isochrone.OptionParserComponentBase
+import org.isochrone.OptionParserComponent
+import shapeless._
+import org.isochrone.graphlib.GraphComponent
 
-trait IsochroneParamsParsingComponent extends OptionParserComponentBase {
+trait IsochroneParamsParsingComponent extends OptionParserComponent {
     self: GraphComponentBase =>
 
-    type NodeType
+    case class IsochroneParams(start: NodeType, limit: Double)
 
-    trait IsochroneParams {
-        def start: NodeType
-        def withNewStart(ns: NodeType): OptionConfig
-        def limit: Double
-        def withNewLimit(l: Double): OptionConfig
-    }
+    val isoParamLens = registerConfig[IsochroneParams](null)
 
-    type OptionConfig <: IsochroneParams
+    def startNodeLens = (Lens[IsochroneParams] >> 0) compose isoParamLens
+    def limitLens = (Lens[IsochroneParams] >> 1) compose isoParamLens
 
     trait IsochroneParamsParser {
         self: OptionParser[OptionConfig] =>
 
         def isoOptions(implicit ev: Read[NodeType]) = {
-            opt[NodeType]('s', "start").action((x, c) => c.withNewStart(x))
-            opt[Double]('l', "limit").action((x, c) => c.withNewLimit(x))
+            opt[NodeType]('s', "start").action((x, c) => startNodeLens.set(c)(x))
+            opt[Double]('l', "limit").action((x, c) => limitLens.set(c)(x))
         }
     }
 }

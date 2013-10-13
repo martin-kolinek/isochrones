@@ -1,7 +1,7 @@
 package org.isochrone
 
 trait ArgumentParser {
-    self: OptionParserComponentBase =>
+    self: OptionParserComponent =>
     def parsedConfig: OptionConfig
 }
 

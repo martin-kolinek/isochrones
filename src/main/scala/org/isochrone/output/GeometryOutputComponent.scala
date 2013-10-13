@@ -10,7 +10,7 @@ trait GeometryOutputComponent {
     self: IsochroneOutputComponent with ArgumentParser with OutputOptionsParserComponent =>
 
     def output = {
-        parsedConfig.file match {
+        fileNameLens.get(parsedConfig) match {
             case Some(filename) => Resource.fromFile(filename)
             case None => System.out.asUnmanagedOutput
         }

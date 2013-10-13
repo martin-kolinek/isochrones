@@ -29,5 +29,5 @@ trait IsochronesComputationComponent extends IsochroneComputerComponentTypes {
 trait DefaultIsochronesComputationComponent extends IsochronesComputationComponent {
     self: IsochroneParamsParsingComponent with SomeIsochroneComputerComponent with ArgumentParser with GraphComponentBase =>
 
-    lazy val isochrone = isoComputer.isochrone(List(parsedConfig.start -> 0.0), parsedConfig.limit)
+    lazy val isochrone = isoComputer.isochrone(List(startNodeLens.get(parsedConfig) -> 0.0), limitLens.get(parsedConfig))
 }
