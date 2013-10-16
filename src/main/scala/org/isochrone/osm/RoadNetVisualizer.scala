@@ -18,7 +18,7 @@ insert into "$out"(start_node, end_node, direction, linestring)
     select sn.id, en.id, prn.direction, ST_MakeLine(sn.geom, en.geom) 
         from (select distinct rn.start_node, rn.end_node, case coalesce(rn2.start_node, 1) when 1 then 1 else 0 end as direction 
                 from "$rnet" rn 
-                    left join "$rnet" rn2 on rn2.start_node=rn.end_node and rn2.end_node=rn.start_node and rn2.virtual = false) prn
+                    left join "$rnet" rn2 on rn2.start_node=rn.end_node and rn2.end_node=rn.start_node and rn2.virtual = false where rn.virtual = false) prn
             inner join "$nodes" sn on sn.id = prn.start_node 
             inner join "$nodes" en on en.id = prn.end_node
         where prn.direction = 1 or prn.start_node<prn.end_node;"""
