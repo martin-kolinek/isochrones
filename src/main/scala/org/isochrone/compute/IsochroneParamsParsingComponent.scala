@@ -9,11 +9,11 @@ import shapeless._
 import org.isochrone.graphlib.GraphComponent
 
 trait IsochroneParamsParsingComponent extends OptionParserComponent {
-    self: GraphComponentBase =>
+    self: GraphComponent =>
 
     case class IsochroneParams(start: NodeType, limit: Double)
 
-    val isoParamLens = registerConfig[IsochroneParams](null)
+    lazy val isoParamLens = registerConfig(IsochroneParams(graph.nodes.head, 0.0))
 
     def startNodeLens = (Lens[IsochroneParams] >> 0) compose isoParamLens
     def limitLens = (Lens[IsochroneParams] >> 1) compose isoParamLens

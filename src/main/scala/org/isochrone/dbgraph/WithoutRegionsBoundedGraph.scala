@@ -25,7 +25,7 @@ trait WithoutRegionsBoundedGraphComponent extends GraphComponentBase with Simple
                 if n1.region === 0 && n2.region === 0
             } yield (n1.id, n2.id, e.cost)
             database.withSession { implicit s: Session =>
-                SimpleGraph(q.list :_*)
+                SimpleGraph(q.list: _*)
             }
         }
     }
