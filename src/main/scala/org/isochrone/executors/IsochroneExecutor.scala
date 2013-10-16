@@ -11,8 +11,9 @@ import org.isochrone.compute.SomeIsochroneComputerComponent
 import org.isochrone.graphlib.NodePositionComponent
 import org.isochrone.ArgumentParser
 import org.isochrone.graphlib.GraphComponent
+import org.isochrone.output.GeometryOutputComponent
 
-trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with PointIsochroneOutputComponent with IsochroneParamsParsingComponent with ArgumentParser {
+trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with PointIsochroneOutputComponent with IsochroneParamsParsingComponent with ArgumentParser with GeometryOutputComponent with OutputOptionsParserComponent {
     self: SomeIsochroneComputerComponent with GraphComponent with NodePositionComponent =>
 }
 

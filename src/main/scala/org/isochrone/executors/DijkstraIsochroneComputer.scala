@@ -9,16 +9,25 @@ import org.isochrone.output.GeometryOutputComponent
 import org.isochrone.dijkstra.DijkstraAlgorithmComponent
 import org.isochrone.compute.IsochronesComputationComponent
 import org.isochrone.compute.PointIsochroneOutputComponent
+import org.isochrone.db.FromOptionDatabaseComponent
+import org.isochrone.db.DatabaseOptionParsingComponent
+import org.isochrone.dbgraph.DatabaseGraphComponent
+import org.isochrone.db.DefaultRoadNetTableComponent
+import org.isochrone.db.SingleSessionProvider
 
 trait DijkstraIsochroneComputer extends ActionExecutor {
     self: Main.type =>
     abstract override def actions = {
         super.actions + ("dijkstra" -> new ActionComponent 
-                /*with GeometryOutputComponent 
-                with DijkstraAlgorithmComponent 
-                with IsochronesComputationComponent 
-                with PointIsochroneOutputComponent*/ {
-            val execute = () => println("dijkstra")
+        		with IsochroneExecutorCompoent
+        		with OptionsBase 
+        		with FromOptionDatabaseComponent
+        		with DatabaseGraphComponent
+        		with SingleSessionProvider
+        		with DefaultRoadNetTableComponent
+        		with DatabaseOptionParsingComponent
+        		with DijkstraAlgorithmComponent{
+            val execute = () => writeOutput()
         })
     }
 }
