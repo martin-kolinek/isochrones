@@ -5,15 +5,15 @@ import org.isochrone.ArgumentParser
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.graphlib.GraphComponent
 import org.isochrone.graphlib.GraphType
+import scopt.Read
+import org.isochrone.graphlib.GraphComponentBaseWithDefault
 
 class IsochroneComputationTest extends FunSuite {
     test("IsochroneComputation works") {
-        val comp = new DefaultIsochronesComputationComponent with SomeIsochroneComputerComponent with ArgumentParser with GraphComponent with IsochroneParamsParsingComponent {
+        val comp = new DefaultIsochronesComputationComponent with SomeIsochroneComputerComponent with ArgumentParser with GraphComponentBaseWithDefault with IsochroneParamsParsingComponent {
             type NodeType = Int
-            val graph = new GraphType[Int] {
-                def nodes = List(1)
-                def neighbours(nd: Int) = Nil
-            }
+            def noNode = 0
+            val readNodeType = implicitly[Read[NodeType]]
             def parsedConfig: OptionConfig = isoParamLens.set(parserStart)(IsochroneParams(0, 10))
             val isoComputer: IsochroneComputer = new IsochroneComputer {
                 def isochrone(start: Traversable[(Int, Double)], max: Double) = {

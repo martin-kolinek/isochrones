@@ -20,6 +20,7 @@ trait GeometryOutputComponent {
     val newline = sys.props("line.separator")
 
     def writeOutput() {
+        println(s"writing to $output")
         output.writeStrings(Iterable(s"id|geom$newline") ++ isochroneGeometry.toIterable.zipWithIndex.map {
             case (geom, idx) =>
                 s"$idx|${wkt.write(geom)}$newline"

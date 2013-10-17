@@ -12,6 +12,7 @@ trait OutputOptionsParserComponent extends OptionParserComponent {
     val fileNameLens = fileLens >> 0
 
     abstract override def parserOptions(pars: OptionParser[OptionConfig]) {
+        super.parserOptions(pars)
         pars.opt[String]('o', "output").action((x, c) => fileNameLens.set(c)(Some(x)))
     }
 }

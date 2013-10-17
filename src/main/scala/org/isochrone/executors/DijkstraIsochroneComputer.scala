@@ -14,6 +14,8 @@ import org.isochrone.db.DatabaseOptionParsingComponent
 import org.isochrone.dbgraph.DatabaseGraphComponent
 import org.isochrone.db.DefaultRoadNetTableComponent
 import org.isochrone.db.SingleSessionProvider
+import scopt.Read
+import org.isochrone.OptionParserComponent
 
 trait DijkstraIsochroneComputer extends ActionExecutor {
     self: Main.type =>
@@ -26,7 +28,11 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
         		with SingleSessionProvider
         		with DefaultRoadNetTableComponent
         		with DatabaseOptionParsingComponent
-        		with DijkstraAlgorithmComponent{
+        		with DijkstraAlgorithmComponent 
+        		with OptionParserComponent
+        		with GraphComponentBaseWithDefault {
+            def readNodeType = implicitly[Read[NodeType]]
+            def noNode = 0l
             val execute = () => writeOutput()
         })
     }
