@@ -7,6 +7,7 @@ import scopt.OptionParser
 
 trait OptionParserComponent {
     class OptionConfig private[OptionParserComponent] (private[OptionParserComponent] val m: Map[Int, Any]) {
+        override def toString = s"OptionConfig($m)"
     }
 
     final def parserStart = new OptionConfig(Map[Int, Any]())
@@ -18,12 +19,14 @@ trait OptionParserComponent {
         val k = key
         new Lens[OptionConfig, T] {
             def get(c: OptionConfig) = {
-                if (c.m.contains(k))
+                if (c.m.contains(k)) {
                     c.m(k).asInstanceOf[T]
-                else
+                } else
                     init
             }
-            def set(c: OptionConfig)(v: T) = new OptionConfig(c.m + (k -> v))
+            def set(c: OptionConfig)(v: T) = {
+                new OptionConfig(c.m + (k -> v))
+            }
         }
     }
 

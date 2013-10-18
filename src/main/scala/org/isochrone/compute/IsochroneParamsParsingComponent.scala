@@ -14,7 +14,7 @@ trait IsochroneParamsParsingComponent extends OptionParserComponent {
 
     case class IsochroneParams(start: NodeType, limit: Double)
 
-    val isoParamLens = registerConfig(IsochroneParams(noNode, 0.0))
+    lazy val isoParamLens = registerConfig(IsochroneParams(noNode, 0.0))
 
     def startNodeLens = (Lens[IsochroneParams] >> 0) compose isoParamLens
     def limitLens = (Lens[IsochroneParams] >> 1) compose isoParamLens

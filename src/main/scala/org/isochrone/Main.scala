@@ -32,5 +32,5 @@ object Main extends App
         println(s"Action $act not understood, possible actions:")
         acts.keys.foreach(println)
     } else
-        acts(act).execute()
+        acts(act)().execute()
 }

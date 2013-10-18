@@ -6,8 +6,8 @@ import org.isochrone.ArgumentParser
 import scalax.io.Resource
 import com.vividsolutions.jts.io.WKTWriter
 
-trait GeometryOutputComponent {
-    self: IsochroneOutputComponent with ArgumentParser with OutputOptionsParserComponent =>
+trait GeometryOutputComponent extends OutputOptionsParserComponent {
+    self: IsochroneOutputComponent with ArgumentParser =>
 
     def output = {
         fileNameLens.get(parsedConfig) match {

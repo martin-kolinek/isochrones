@@ -1,6 +1,5 @@
 package org.isochrone.executors
 
-import org.isochrone.db.DatabaseOptionParsingComponent
 import org.isochrone.output.OutputOptionsParserComponent
 import org.isochrone.compute.IsochroneParamsParsingComponent
 import org.isochrone.compute.IsochroneComputerComponent
@@ -14,7 +13,7 @@ import org.isochrone.graphlib.GraphComponent
 import org.isochrone.output.GeometryOutputComponent
 import org.isochrone.graphlib.GraphComponentBaseWithDefault
 
-trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with PointIsochroneOutputComponent with IsochroneParamsParsingComponent with ArgumentParser with GeometryOutputComponent with OutputOptionsParserComponent {
+trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with PointIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent {
     self: SomeIsochroneComputerComponent with GraphComponent with NodePositionComponent with GraphComponentBaseWithDefault =>
 }
 

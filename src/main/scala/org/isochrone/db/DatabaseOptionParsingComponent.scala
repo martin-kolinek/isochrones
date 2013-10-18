@@ -8,7 +8,7 @@ trait DatabaseOptionParsingComponent extends OptionParserComponent {
 
     case class DatabaseOption(db: String)
 
-    val dbLens: Lens[OptionConfig, DatabaseOption] = registerConfig(DatabaseOption(""))
+    lazy val dbLens: Lens[OptionConfig, DatabaseOption] = registerConfig(DatabaseOption(""))
 
     def defaultDatabaseOption = DatabaseOption("")
 

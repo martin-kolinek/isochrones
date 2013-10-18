@@ -5,19 +5,18 @@ import resource._
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.util._
 import org.isochrone.db.DatabaseProvider
-import org.isochrone.db.MultiLevelRoadNetTableComponent
 import org.isochrone.db.RoadNetTables
 import org.isochrone.db.RoadNetTables
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.HigherLevelRoadNetTableComponent
 import org.isochrone.partition.RegionAnalyzerProviderComponent
 import org.isochrone.dbgraph.DatabaseGraphComponent
-//import org.isochrone.partition.RegionAnalyzer
+
 trait HigherLevelGraphCreatorComponent {
     self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseGraphComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
 
     object HigherLevelGraph {
-        def createHigherLevelGraph(notification: Int => Unit = x => Unit) {
+        def createHigherLevelGraph() {
             database.withSession { implicit s: Session =>
                 val difRegs = for {
                     n1 <- roadNetTables.roadNodes
@@ -29,7 +28,6 @@ trait HigherLevelGraphCreatorComponent {
                     val regions = it.partitionBy(_._1)
                     for (regionNodes <- regions) {
                         val reg = regionNodes.head._1
-                        notification(reg)
                         processRegion(reg, regionNodes.map(_._2), s)
                     }
                 }

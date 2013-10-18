@@ -3,6 +3,9 @@ package org.isochrone.db
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import slick.jdbc.StaticQuery.interpolation
 import com.vividsolutions.jts.geom.Geometry
+import org.isochrone.OptionParserComponent
+import scopt.OptionParser
+import org.isochrone.ArgumentParser
 
 trait RegularPartitionComponent {
     self: RoadNetTableComponent with DatabaseProvider =>
@@ -25,4 +28,20 @@ trait RegularPartitionComponent {
     }
 
     val regularPartition: RegularPartition
+}
+
+trait RegularPartitionParserComponent extends OptionParserComponent {
+    lazy val regionSizeLens = registerConfig(0.5)
+
+    abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
+        super.parserOptions(pars)
+        pars.opt[Double]("region-size").action((x, c) => regionSizeLens.set(c)(x)).
+            text("the size of regions used in incremental actions (default = 0.5 degree)")
+    }
+}
+
+trait ConfigRegularPartitionComponent extends RegularPartitionParserComponent with RegularPartitionComponent {
+    self: ArgumentParser with RoadNetTableComponent with DatabaseProvider =>
+
+    val regularPartition = new RegularPartition(regionSizeLens.get(parsedConfig))
 }

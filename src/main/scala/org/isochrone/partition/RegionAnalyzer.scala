@@ -17,10 +17,19 @@ trait RegionAnalyzerComponent {
 
 trait RegionAnalyzerProviderComponent {
     trait RegionAnalyzerProvider {
-        def getAnalyzer[Node](graph:GraphType[Node]):RegionAnalyzerComponent with GraphComponent {
+        def getAnalyzer[Node](graph: GraphType[Node]): RegionAnalyzerComponent with GraphComponent {
             type NodeType = Node
         }
     }
-    
-    val regionAnalyzerProvider:RegionAnalyzerProvider
+
+    val regionAnalyzerProvider: RegionAnalyzerProvider
+}
+
+trait DefaultRegionAnalyzerProvider extends RegionAnalyzerProviderComponent {
+    val regionAnalyzerProvider = new RegionAnalyzerProvider {
+        def getAnalyzer[Node](grp: GraphType[Node]) = new RegionAnalyzerComponent with DijkstraAlgorithmComponent with GraphComponent {
+            type NodeType = Node
+            val graph = grp
+        }
+    }
 }

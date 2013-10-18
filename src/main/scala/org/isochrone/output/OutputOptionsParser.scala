@@ -7,7 +7,7 @@ import scopt.OptionParser
 trait OutputOptionsParserComponent extends OptionParserComponent {
     case class OutputOptionConfig(file: Option[String])
 
-    val fileLens = registerConfig(OutputOptionConfig(None))
+    lazy val fileLens = registerConfig(OutputOptionConfig(None))
 
     val fileNameLens = fileLens >> 0
 

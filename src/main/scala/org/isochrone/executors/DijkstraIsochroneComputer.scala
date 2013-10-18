@@ -16,18 +16,18 @@ import org.isochrone.db.DefaultRoadNetTableComponent
 import org.isochrone.db.SingleSessionProvider
 import scopt.Read
 import org.isochrone.OptionParserComponent
+import org.isochrone.db.ConfigRoadNetTableComponent
 
 trait DijkstraIsochroneComputer extends ActionExecutor {
     self: Main.type =>
     abstract override def actions = {
-        super.actions + ("dijkstra" -> new ActionComponent 
+        super.actions + ("dijkstra" --> new ActionComponent 
         		with IsochroneExecutorCompoent
         		with OptionsBase 
         		with FromOptionDatabaseComponent
         		with DatabaseGraphComponent
         		with SingleSessionProvider
-        		with DefaultRoadNetTableComponent
-        		with DatabaseOptionParsingComponent
+        		with ConfigRoadNetTableComponent
         		with DijkstraAlgorithmComponent 
         		with OptionParserComponent
         		with GraphComponentBaseWithDefault {
