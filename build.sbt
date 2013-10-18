@@ -22,8 +22,7 @@ libraryDependencies += "com.github.tminglei" % "slick-pg_2.10.1" % "0.1.3"
 
 libraryDependencies += "com.github.scopt" %% "scopt" % "3.1.0"
 
-libraryDependencies ++= List("org.slf4j" % "slf4j-nop" % "1.6.6"
-                            ,"org.xerial" % "sqlite-jdbc" % "3.7.2"
+libraryDependencies ++= List("org.xerial" % "sqlite-jdbc" % "3.7.2"
 			    ,"postgresql" % "postgresql" % "9.1-901.jdbc4")
 			    
 libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2"
@@ -31,6 +30,11 @@ libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-core" % "0.4
 libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2"
 
 libraryDependencies += "com.chuusai" % "shapeless" % "2.0.0-M1" cross CrossVersion.full
+
+libraryDependencies ++= List("com.typesafe" %% "scalalogging-slf4j" % "1.0.1",
+	"org.slf4j" % "slf4j-api" % "1.7.5",
+	"ch.qos.logback" % "logback-classic" % "1.0.13",
+	"ch.qos.logback" % "logback-core" % "1.0.13")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 

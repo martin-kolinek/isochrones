@@ -7,14 +7,16 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.OptionParserComponent
 import scopt.OptionParser
 import org.isochrone.ArgumentParser
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait IncrementalPartitionComponent {
     self: BBoxPartitionerProvider with RegularPartitionComponent with RoadNetTableComponent with DatabaseProvider =>
 
-    class IncrementalPartitioner(bufferSize: Int) {
+    class IncrementalPartitioner(bufferSize: Int) extends Logging {
         def partition() {
             database.withSession { implicit s: Session =>
                 for (bbox <- regularPartition.regions) {
+                    logger.info(s"Partitioning region $bbox")
                     val bboxNodes = roadNetTables.roadNodes.filter(_.geom @&& bbox.dbBBox).map(_.id).to[Set]
                     val partition = createPartitioner(bbox.withBuffer(bufferSize)).partitioner.partition()
                     val regionsInBBox = partition.filter(_.exists(bboxNodes.contains)).toSeq

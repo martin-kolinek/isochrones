@@ -2,11 +2,12 @@ package org.isochrone.partition.merging
 
 import org.isochrone.graphlib._
 import org.isochrone.partition.PartitionerComponent
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait MergingPartitionerComponent extends PartitionComponent with CellComponent with PartitionerComponent {
     self: GraphComponent with MergingAlgorithmPropertiesComponent =>
 
-    object MergingPartitioner extends Partitioner {
+    object MergingPartitioner extends Partitioner with Logging {
         /* use merging algorithm to find the partition with maximum value */
         def partition() = {
             val part = Partition(graph.nodes)
@@ -17,6 +18,8 @@ trait MergingPartitionerComponent extends PartitionComponent with CellComponent 
                         val value = mergeAlgProps.partitionValueFunc(part)
                         func((value, part.cells))
                         lastSize = part.cells.size
+                        if (lastSize % 100 == 0)
+                            logger.info(s"partition size: $lastSize")
                         part.step();
                     }
                 }

@@ -14,8 +14,9 @@ import org.isochrone.executors.HigherLevelCreator
 import org.isochrone.executors.RoadImportExecutor
 import org.isochrone.executors.RoadVisualizeExecutor
 import org.isochrone.executors.SchemaExecutor
+import com.typesafe.scalalogging.slf4j.Logging
 
-object Main extends App
+object Main extends App with Logging
         with DijkstraIsochroneComputer
         with HigherLevelCreator
         with RoadImportExecutor
@@ -31,6 +32,8 @@ object Main extends App
     if (!acts.contains(act)) {
         println(s"Action $act not understood, possible actions:")
         acts.keys.foreach(println)
-    } else
+    } else {
+        logger.info(s"Starting $act")
         acts(act)().execute()
+    }
 }
