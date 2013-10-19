@@ -11,11 +11,12 @@ import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.HigherLevelRoadNetTableComponent
 import org.isochrone.partition.RegionAnalyzerProviderComponent
 import org.isochrone.dbgraph.DatabaseGraphComponent
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait HigherLevelGraphCreatorComponent {
     self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseGraphComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
 
-    object HigherLevelGraph {
+    object HigherLevelGraph extends Logging {
         def createHigherLevelGraph() {
             database.withSession { implicit s: Session =>
                 val difRegs = for {
@@ -23,11 +24,13 @@ trait HigherLevelGraphCreatorComponent {
                     n2 <- roadNetTables.roadNodes if n1.region =!= n2.region
                     e <- roadNetTables.roadNet if e.start === n1.id && e.end === n2.id
                 } yield (n1, n2, e)
+                logger.info("Adding cross region edges")
                 higherRoadNetTables.roadNet.insert(difRegs.map(_._3))
                 for (it <- managed(difRegs.sortBy(_._1.region).map(x => x._1.region -> x._1.id).elements)) {
                     val regions = it.partitionBy(_._1)
                     for (regionNodes <- regions) {
                         val reg = regionNodes.head._1
+                        logger.info(s"Processing region $reg")
                         processRegion(reg, regionNodes.map(_._2), s)
                     }
                 }

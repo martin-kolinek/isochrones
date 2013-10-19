@@ -41,6 +41,6 @@ trait HigherLevelCreator extends ActionExecutor {
 	        with DefaultRegionAnalyzerProvider
 	        with FromOptionDatabaseComponent
 	        with SingleSessionProvider {
-	    val execute = () => {}
+	    val execute = () => HigherLevelGraph.createHigherLevelGraph()
 	})
 }

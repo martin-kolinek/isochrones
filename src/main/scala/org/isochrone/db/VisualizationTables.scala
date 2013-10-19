@@ -2,6 +2,7 @@ package org.isochrone.db
 
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import com.vividsolutions.jts.geom.LineString
+import org.isochrone.ArgumentParser
 
 trait VisualizationTableComponent {
 	class RoadNetVisualization(name:String) extends Table[(Long, Long, Int, LineString)](name) {
@@ -22,5 +23,12 @@ trait VisualizationTableComponent {
 trait DefaultVisualizationTableComponent extends VisualizationTableComponent {
     val visualizationTables = new VisualizationTables {
         val roadNetVisualization = new RoadNetVisualization("road_net_vis")
+    }
+}
+
+trait ConfigVisualizationTableComponent extends VisualizationTableComponent with RoadNetTableParsingComponent {
+    self: ArgumentParser =>
+    val visualizationTables = new VisualizationTables {
+        val roadNetVisualization = new RoadNetVisualization(roadNetPrefixLens.get(parsedConfig) + "road_net_vis")
     }
 }

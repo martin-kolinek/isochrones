@@ -9,11 +9,12 @@ import org.isochrone.db.DefaultVisualizationTableComponent
 import org.isochrone.ActionComponent
 import org.isochrone.db.DatabaseOptionParsingComponent
 import org.isochrone.db.ConfigRoadNetTableComponent
+import org.isochrone.db.ConfigVisualizationTableComponent
 
 trait SchemaExecutor extends ActionExecutor {
     self: Main.type =>
 
-    trait CompleteTableCreatorComponent extends ActionComponent with FromOptionDatabaseComponent with TableCreatorComponent with ConfigRoadNetTableComponent with DefaultVisualizationTableComponent with OptionsBase {
+    trait CompleteTableCreatorComponent extends ActionComponent with FromOptionDatabaseComponent with TableCreatorComponent with ConfigRoadNetTableComponent with ConfigVisualizationTableComponent with OptionsBase {
     }
 
     abstract override def actions = super.actions + ("createdb" --> new CompleteTableCreatorComponent {
