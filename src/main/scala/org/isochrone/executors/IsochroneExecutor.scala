@@ -14,6 +14,7 @@ import org.isochrone.output.GeometryOutputComponent
 import org.isochrone.graphlib.GraphComponentBaseWithDefault
 
 trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with PointIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent {
-    self: SomeIsochroneComputerComponent with GraphComponent with NodePositionComponent with GraphComponentBaseWithDefault =>
+    self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault =>
+    val execute = () => writeOutput()
 }
 

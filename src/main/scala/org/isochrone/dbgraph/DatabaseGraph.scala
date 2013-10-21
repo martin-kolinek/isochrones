@@ -9,13 +9,19 @@ import org.isochrone.db.SessionProviderComponent
 import org.isochrone.graphlib.GraphComponent
 import org.isochrone.graphlib.GraphWithRegionsComponent
 import org.isochrone.graphlib.GraphWithRegionsType
-import org.isochrone.graphlib.Region
 import org.isochrone.graphlib.NodePositionComponent
 import org.isochrone.graphlib.NodePosition
+import org.isochrone.graphlib.GraphWithRegionsComponentBase
+import org.isochrone.OptionParserComponent
+import scopt.OptionParser
+import org.isochrone.ArgumentParser
+import org.isochrone.graphlib.MultiLevelGraphComponent
+import org.isochrone.db.MultiLevelRoadNetTableComponent
+import org.isochrone.db.RoadNetTables
 
-trait DatabaseGraphComponent extends GraphWithRegionsComponent with NodePositionComponent {
-    self: RoadNetTableComponent with SessionProviderComponent =>
-    class DatabaseGraph(maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] with NodePosition[NodeType] {
+trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
+    self: SessionProviderComponent =>
+    class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] with NodePosition[NodeType] {
         private val regions = new LRUCache[RegionType, Traversable[NodeType]]((k, v, m) => {
             val ret = m.size > maxRegions
             if (ret)
@@ -68,12 +74,12 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent with NodePosition
         def retrieveNode(node: NodeType) {
             retrievalscntr += 1
             val q = roadNetTables.roadNodes.filter(_.id === node).map(_.region)
-            q.list()(session).map(x => retrieveRegion(DatabaseRegion(x)))
+            q.list()(session).map(x => retrieveRegion(x))
         }
 
         def retrieveRegion(region: RegionType) {
             val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
-            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region.num) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
+            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
             val list = q.list()(session)
             regions(region) = list.map(_._1)
             nodePos ++= list.map(x => (x._1, (x._4.getInteriorPoint.getX, x._4.getInteriorPoint.getY)))
@@ -95,17 +101,41 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponent with NodePosition
 
         def nodeEccentricity(n: Long) = (for {
             r <- nodeRegion(n)
-            d <- regionDiameters.get(r.num)
+            d <- regionDiameters.get(r)
         } yield d).getOrElse(Double.PositiveInfinity)
+
+        def regionDiameter(rg: Int) = regionDiameters(rg)
     }
 
     type NodeType = Long
 
-    case class DatabaseRegion(num: Int) extends Region {
-        def diameter = roadNetTables.roadRegions.filter(x => x.id === num).map(_.diameter).firstOption(session).getOrElse(Double.PositiveInfinity)
+    type RegionType = Int
+}
+
+trait NodeCacheSizeParserComponent extends OptionParserComponent {
+    lazy val nodeCacheSizeLens = registerConfig(500)
+
+    abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
+        super.parserOptions(pars)
+        pars.opt[Int]("node-cache").action((x, c) => nodeCacheSizeLens.set(c)(x))
     }
+}
 
-    type RegionType = DatabaseRegion
+trait ConfigDatabaseGraphComponent extends GraphWithRegionsComponent with DatabaseGraphComponent with NodeCacheSizeParserComponent with NodePositionComponent {
+    self: RoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
 
-    val graph = new DatabaseGraph(500)
+    val graph = new DatabaseGraph(roadNetTables, nodeCacheSizeLens.get(parsedConfig))
+}
+
+trait DefaultDatabaseGraphComponent extends GraphWithRegionsComponent with DatabaseGraphComponent with NodePositionComponent {
+    self: RoadNetTableComponent with SessionProviderComponent =>
+    val graph = new DatabaseGraph(roadNetTables, 500)
+}
+
+trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphComponent with NodePositionComponent with DatabaseGraphComponent with NodeCacheSizeParserComponent {
+    self: MultiLevelRoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
+
+    val levels = roadNetTableLevels.map(x => new DatabaseGraph(x, nodeCacheSizeLens.get(parsedConfig)))
+    
+    val graph = levels.head
 }

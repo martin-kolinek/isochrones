@@ -8,7 +8,7 @@ trait SimpleGraphComponent extends GraphComponentBase {
 
     type RegionType = SimpleGraphRegion
 
-    case class SimpleGraphRegion private[SimpleGraphComponent] (num: Int, sg: SimpleGraph) extends Region {
+    case class SimpleGraphRegion private[SimpleGraphComponent] (num: Int, sg: SimpleGraph) {
         lazy val diameter = {
             val eccs = sg.nodes.filter(x => sg.nodeRegion(x) == Some(this)).map(sg.nodeEccentricity)
             if (eccs.isEmpty)
@@ -16,11 +16,11 @@ trait SimpleGraphComponent extends GraphComponentBase {
             else
                 eccs.max
         }
-        
+
         override def toString = s"SimpleRegion($num, diam=$diameter)"
     }
 
-    class SimpleGraph (edges: Seq[(NodeType, NodeType, Double)], nodeRegions: Map[NodeType, Int]) extends GraphWithRegionsType[NodeType, SimpleGraphRegion] {
+    class SimpleGraph(edges: Seq[(NodeType, NodeType, Double)], nodeRegions: Map[NodeType, Int]) extends GraphWithRegionsType[NodeType, SimpleGraphRegion] {
         private val neigh = edges.groupBy(_._1).map { case (k, v) => (k, v.map(x => (x._2, x._3))) }
 
         val nodeRegionsProc = nodeRegions.mapValues(new SimpleGraphRegion(_, this))
@@ -41,6 +41,8 @@ trait SimpleGraphComponent extends GraphComponentBase {
         def nodeRegion(node: NodeType) = nodeRegionsProc.get(node)
 
         def nodeEccentricity(n: NodeType) = nodeEccentrities(n)
+
+        def regionDiameter(rg: RegionType) = rg.diameter
 
         override def toString = s"SimpleGraph($edges)"
     }

@@ -14,7 +14,7 @@ import org.isochrone.dbgraph.DatabaseGraphComponent
 import com.typesafe.scalalogging.slf4j.Logging
 
 trait HigherLevelGraphCreatorComponent {
-    self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseGraphComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
+    self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseGraphComponent with GraphWithRegionsComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
 
     object HigherLevelGraph extends Logging {
         def createHigherLevelGraph() {
@@ -38,7 +38,7 @@ trait HigherLevelGraphCreatorComponent {
         }
 
         def processRegion(region: Int, nodes: Seq[Long], session: Session) {
-            val analyzerComp = regionAnalyzerProvider.getAnalyzer(graph.singleRegion(DatabaseRegion(region)))
+            val analyzerComp = regionAnalyzerProvider.getAnalyzer(graph.singleRegion(region))
             var diam = 0.0
             for ((node, others) <- analyzerComp.RegionAnalyzer.borderNodeDistances(nodes.toSet)) {
                 higherRoadNetTables.roadNodes.insert(for {

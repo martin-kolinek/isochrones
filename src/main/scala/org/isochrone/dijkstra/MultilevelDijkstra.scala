@@ -17,7 +17,7 @@ trait MultiLevelDijkstraComponent extends IsochroneComputerComponent with SomeIs
 
         private case class FromUpperLevel(isRegionDone: RegionType => Boolean, continueFrom: Traversable[(NodeType, Double)])
 
-        private def iso(start: Traversable[(NodeType, Double)], rest: List[GraphWithRegionsType[NodeType, RegionType]], lowerNodeRegion: NodeType => Option[RegionType], limit: Double): FromUpperLevel = {
+        private def iso(start: Traversable[(NodeType, Double)], rest: List[GraphWithRegionsType[NodeType, RegionType]], lowerLevel: Option[GraphWithRegionsType[NodeType, RegionType]], limit: Double): FromUpperLevel = {
             if (rest.isEmpty) FromUpperLevel(x => false, start)
             else {
                 val curLevel = rest.head
@@ -29,21 +29,22 @@ trait MultiLevelDijkstraComponent extends IsochroneComputerComponent with SomeIs
                     single = curLevel.singleRegion(reg)
                     res <- dijkstraComp(single).DijkstraAlgorithm.nodesWithin(regStart, limit)
                 } yield res
-                val fromUpperLevel = iso(singleResult, rest.tail, curLevel.nodeRegion, limit)
+                val fromUpperLevel = iso(singleResult, rest.tail, Some(curLevel), limit)
                 val dijkstraOnUndone = dijkstraComp(curLevel.filterRegions(x => !fromUpperLevel.isRegionDone(x)))
                 val borderNodes = dijkstraOnUndone.DijkstraAlgorithm.nodesWithin(fromUpperLevel.continueFrom, limit).toList
                 val doneRegions = (for {
                     (nd, cst) <- borderNodes
                     rem = limit - cst
-                    rg <- lowerNodeRegion(nd)
-                    if rg.diameter <= rem
+                    rg <- lowerLevel.flatMap(_.nodeRegion(nd))
+                    diam <- lowerLevel.map(_.regionDiameter(rg))
+                    if diam <= rem
                 } yield rg).toSet
                 FromUpperLevel(doneRegions.contains, borderNodes)
             }
         }
 
         def isochrone(start: Traversable[(NodeType, Double)], limit: Double) = {
-            val res = iso(start, levels.toList, nd => None, limit)
+            val res = iso(start, levels.toList, None, limit)
             val nodeSet = res.continueFrom.map(_._1).toSet
             for {
                 (nd, cost) <- res.continueFrom

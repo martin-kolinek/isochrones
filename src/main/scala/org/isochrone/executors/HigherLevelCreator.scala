@@ -17,6 +17,7 @@ import org.isochrone.partition.DefaultRegionAnalyzerProvider
 import org.isochrone.db.SingleSessionProvider
 import org.isochrone.partition.merging.ConfigMergingPartitionerProvider
 import org.isochrone.OptionParserComponent
+import org.isochrone.dbgraph.ConfigDatabaseGraphComponent
 
 trait HigherLevelCreator extends ActionExecutor {
     self: Main.type =>
@@ -36,7 +37,7 @@ trait HigherLevelCreator extends ActionExecutor {
 	        with OptionsBase
 	        with HigherLevelGraphCreatorComponent 
 	        with ConfigRoadNetTableComponent
-	        with DatabaseGraphComponent
+	        with ConfigDatabaseGraphComponent
 	        with HigherConfigRoadNetTableComponent
 	        with DefaultRegionAnalyzerProvider
 	        with FromOptionDatabaseComponent

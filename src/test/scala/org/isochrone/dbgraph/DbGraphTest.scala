@@ -36,7 +36,7 @@ trait RoadNetTableCreation extends BeforeAndAfterEach {
 }
 
 class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
-	val geomfact = new GeometryFactory(new PrecisionModel, 4326)
+    val geomfact = new GeometryFactory(new PrecisionModel, 4326)
     test("DatabaseGraph retrieves neighbours") {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit s: Session =>
@@ -51,7 +51,7 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
             }
         }
 
-        new DatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent with DefaultRoadNetTableComponent {
+        new DefaultRoadNetTableComponent with DefaultDatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent {
             val neigh = graph.neighbours(2)
             assert(neigh.size == 2)
             assert(neigh.toSet == Set((1, 0.5), (4, 0.3)))
@@ -72,7 +72,7 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
             }
         }
 
-        new DatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent with DefaultRoadNetTableComponent {
+        new DefaultRoadNetTableComponent with DefaultDatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent {
             assert(graph.neighbours(5).size == 0)
             val neigh = graph.neighbours(10)
             assert(neigh.size == 0)
@@ -92,7 +92,7 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
                     (4, 5, 0.6, false))
             }
         }
-        new DatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent with DefaultRoadNetTableComponent {
+        new DefaultRoadNetTableComponent with DefaultDatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent {
             assert(graph.neighbours(5).size == 0)
             assert(graph.neighbours(5).size == 0)
             assert(graph.neighbours(5).size == 0)
@@ -123,7 +123,7 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
             }
         }
         new DatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent with DefaultRoadNetTableComponent {
-            override val graph = new DatabaseGraph(1)
+            val graph = new DatabaseGraph(roadNetTables, 1)
             val neigh = graph.neighbours(2)
             assert(neigh.size == 2)
             assert(neigh.toSet == Set((3, 0.2), (4, 0.3)))

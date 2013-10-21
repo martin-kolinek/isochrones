@@ -5,6 +5,8 @@ import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.OptionParserComponent
 import scopt.OptionParser
 import org.isochrone.ArgumentParser
+import shapeless.Lens
+import scopt.OptionParser
 
 class EdgeTable(name: String) extends Table[(Long, Long, Double, Boolean)](name) {
     def start = column[Long]("start_node")
@@ -78,4 +80,27 @@ trait HigherRoadNetTableParsingComponent extends OptionParserComponent {
         super.parserOptions(pars)
         pars.opt[String]('h', "higher").action((x, c) => higherRoadNetPrefixLens.set(c)(x))
     }
+}
+
+trait MultiLevelRoadNetTableParsingComponent extends OptionParserComponent {
+    lazy val multiLevelRoadNetPrefixLens = registerConfig(List(""))
+
+    def multiLevelRoadNetPrefixStrLens = new Lens[List[String], String] {
+        def get(lst: List[String]) = lst.mkString(",")
+        def set(l: List[String])(str: String) = str.split(",").toList
+    }.compose(multiLevelRoadNetPrefixLens)
+
+    abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
+        super.parserOptions(pars)
+        pars.opt[String]("road-levels").action((x, c) => multiLevelRoadNetPrefixStrLens.set(c)(x))
+    }
+}
+
+trait MultiLevelRoadNetTableComponent {
+    val roadNetTableLevels: List[RoadNetTables]
+}
+
+trait ConfigMultiLevelRoadNetTableComponent extends MultiLevelRoadNetTableComponent with MultiLevelRoadNetTableParsingComponent {
+    self: ArgumentParser =>
+    val roadNetTableLevels = multiLevelRoadNetPrefixLens.get(parsedConfig).map(x => new DefaultRoadNetTablesWithPrefix(x))
 }
