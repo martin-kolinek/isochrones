@@ -18,14 +18,18 @@ import org.isochrone.ArgumentParser
 import org.isochrone.graphlib.MultiLevelGraphComponent
 import org.isochrone.db.MultiLevelRoadNetTableComponent
 import org.isochrone.db.RoadNetTables
+import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.util.Timing
 
 trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
     self: SessionProviderComponent =>
-    class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] with NodePosition[NodeType] {
+    class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] with NodePosition[NodeType] with Logging {
         private val regions = new LRUCache[RegionType, Traversable[NodeType]]((k, v, m) => {
             val ret = m.size > maxRegions
-            if (ret)
+            if (ret) {
+                logger.debug(s"Removing region $k")
                 removeRegion(v)
+            }
             ret
         })
 
@@ -78,15 +82,18 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
         }
 
         def retrieveRegion(region: RegionType) {
-            val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
-            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
-            val list = q.list()(session)
-            regions(region) = list.map(_._1)
-            nodePos ++= list.map(x => (x._1, (x._4.getInteriorPoint.getX, x._4.getInteriorPoint.getY)))
-            val map = list.groupBy(_._1)
-            for ((k, v) <- map) {
-                neigh(k) = v.collect { case (st, Some(en), Some(c), _) => (en, c) }
-                nodesToRegions(k) = region
+            Timing.timeLogged(logger, x => s"retrieveRegion($region) took $x") {
+                val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
+                val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
+                logger.debug(s"Region select: ${q.selectStatement}")
+                val list = q.list()(session)
+                regions(region) = list.map(_._1)
+                nodePos ++= list.map(x => (x._1, (x._4.getInteriorPoint.getX, x._4.getInteriorPoint.getY)))
+                val map = list.groupBy(_._1)
+                for ((k, v) <- map) {
+                    neigh(k) = v.collect { case (st, Some(en), Some(c), _) => (en, c) }
+                    nodesToRegions(k) = region
+                }
             }
         }
 
@@ -136,6 +143,6 @@ trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphC
     self: MultiLevelRoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
 
     val levels = roadNetTableLevels.map(x => new DatabaseGraph(x, nodeCacheSizeLens.get(parsedConfig)))
-    
+
     val graph = levels.head
 }

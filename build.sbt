@@ -43,3 +43,5 @@ parallelExecution in Test := false
 testOptions in Test += Tests.Argument("-oF")
 
 fork := true
+
+connectInput in run := true

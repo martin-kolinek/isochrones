@@ -22,18 +22,29 @@ object Main extends App with Logging
         with RoadImportExecutor
         with RoadVisualizeExecutor
         with SchemaExecutor {
+
     trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>
-        def arguments = args.tail
+        def arguments = noProfArgs.tail
     }
 
-    val act = args.headOption.getOrElse("")
+    def noProfArgs =
+        if (profile) args.tail
+        else args
+
+    def profile = args.headOption.getOrElse("") == "prof"
+
+    val act = noProfArgs.headOption.getOrElse("")
     val acts = actions
     if (!acts.contains(act)) {
         println(s"Action $act not understood, possible actions:")
         acts.keys.foreach(println)
     } else {
-        logger.info(s"Starting $act")
+        if (profile) {
+            logger.info(s"Press enter to execute $act")
+            readLine()
+        }
+        logger.info(s"Executing $act")
         acts(act)().execute()
     }
 }

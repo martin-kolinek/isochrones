@@ -18,8 +18,11 @@ trait TableCreatorComponent {
                     roadNetTables.roadNodes.ddl.create
                     roadNetTables.roadRegions.ddl.create
                     visualizationTables.roadNetVisualization.ddl.create
-                    Q.updateNA(s"""CREATE INDEX "ix_${visualizationTables.roadNetVisualization.tableName}" ON ${visualizationTables.roadNetVisualization.tableName} using GIST (linestring)""").execute
-                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}" ON ${roadNetTables.roadNodes.tableName} using GIST (geom)""").execute
+                    Q.updateNA(s"""CREATE INDEX "ix_${visualizationTables.roadNetVisualization.tableName}" ON "${visualizationTables.roadNetVisualization.tableName}" using GIST (linestring)""").execute
+                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}" ON "${roadNetTables.roadNodes.tableName}" using GIST (geom)""").execute
+                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}_id" ON "${roadNetTables.roadNodes.tableName}"(id)""").execute()
+                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}_region_id" ON "${roadNetTables.roadNodes.tableName}"(region, id)""").execute()
+                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNet.tableName}_id" ON "${roadNetTables.roadNet.tableName}"(start_node, end_node)""").execute()
             }
         }
         def drop() {
