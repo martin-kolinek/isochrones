@@ -15,13 +15,15 @@ import org.isochrone.executors.RoadImportExecutor
 import org.isochrone.executors.RoadVisualizeExecutor
 import org.isochrone.executors.SchemaExecutor
 import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.executors.IntersectionRemoverExecutor
 
 object Main extends App with Logging
         with DijkstraIsochroneComputer
         with HigherLevelCreator
         with RoadImportExecutor
         with RoadVisualizeExecutor
-        with SchemaExecutor {
+        with SchemaExecutor
+        with IntersectionRemoverExecutor {
 
     trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>
