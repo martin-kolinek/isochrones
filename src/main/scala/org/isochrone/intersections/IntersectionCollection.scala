@@ -5,11 +5,16 @@ import com.vividsolutions.jts.geom.Point
 import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.geom.GeometryFactory
 import com.vividsolutions.jts.geom.PrecisionModel
+import com.vividsolutions.jts.geom.LineString
 
-class IntersectionCollection(input: Seq[(Long, Geometry, Long, Geometry, Long, Geometry, Long, Geometry)], maxNode: Long) {
+class IntersectionCollection(input: Seq[(Long, Long, LineString, Long, Long, LineString)], maxNode: Long) {
+
     val nodeGeoms = (for {
-        (a, ag, b, bg, c, cg, d, dg) <- input
-    } yield Seq(a -> ag, b -> bg, c -> cg, d -> dg)).flatten.toMap
+        (a, b, abg, c, d, cdg) <- input
+    } yield Seq(a -> abg.asInstanceOf[LineString].getStartPoint,
+        b -> abg.getEndPoint,
+        c -> cdg.getStartPoint,
+        d -> cdg.getEndPoint)).flatten.toMap
 
     type Edge = Set[Long]
 
@@ -20,7 +25,7 @@ class IntersectionCollection(input: Seq[(Long, Geometry, Long, Geometry, Long, G
     def intersection(a: Long, b: Long, c: Long, d: Long) = Set(edge(a, b), edge(c, d))
 
     val edgeIntersections: Map[Edge, Set[Intersection]] = (for {
-        (a, _, b, _, c, _, d, _) <- input
+        (a, b, _, c, d, _) <- input
         inters = intersection(a, b, c, d)
     } yield Seq(edge(a, b) -> inters, edge(c, d) -> inters)).flatten.groupBy(_._1).map {
         case (key, values) => key -> values.map(_._2).toSet
@@ -29,13 +34,13 @@ class IntersectionCollection(input: Seq[(Long, Geometry, Long, Geometry, Long, G
     val geomfact = new GeometryFactory(new PrecisionModel, 4326)
 
     val intersectionPoints: Map[Intersection, Point] = (for {
-        (a, ag, b, bg, c, cg, d, dg) <- input
-        abline = geomfact.createLineString(Array(ag.getCoordinate, bg.getCoordinate))
-        cdline = geomfact.createLineString(Array(cg.getCoordinate, dg.getCoordinate))
+        (a, b, abg, c, d, cdg) <- input
+        abline = geomfact.createLineString(Array(abg.getStartPoint.getCoordinate, abg.getEndPoint.getCoordinate))
+        cdline = geomfact.createLineString(Array(cdg.getStartPoint.getCoordinate, cdg.getEndPoint.getCoordinate))
     } yield Set(edge(a, b), edge(c, d)) -> (abline intersection cdline).getInteriorPoint).toMap
 
     val intersectionNodes: Map[Intersection, Long] = (for {
-        (a, _, b, _, c, _, d, _) <- input
+        (a, b, _, c, d, _) <- input
     } yield intersection(a, b, c, d)).toSet.zipWithIndex.map(x => x._1 -> (x._2.toLong + 1 + maxNode)).toMap
 
     def intersectionsForEdge(start: Long, end: Long): Seq[Long] = {
