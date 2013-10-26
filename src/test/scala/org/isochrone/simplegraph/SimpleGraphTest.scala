@@ -62,4 +62,14 @@ class SimpleGraphTest extends FunSuite {
         }
     }
 
+    test("SimpleGraph simpleRegion works") {
+        new SimpleGraphComponent with DefaultDijkstraProvider {
+            type NodeType = Int
+            val graph = SimpleGraph(Seq((0, 1, 1.0), (1, 2, 1.0), (2, 0, 1.0)), Map(0 -> 1, 1 -> 1, 2 -> 2))
+            val sing = graph.singleRegion(graph.nodeRegion(0).get)
+            assert(sing.nodes.toSet == Set(0, 1))
+            assert(sing.neighbours(1).size == 0)
+            assert(sing.neighbours(0).size == 1)
+        }
+    }
 }

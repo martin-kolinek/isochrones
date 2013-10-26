@@ -46,8 +46,8 @@ class DijkstraIsochroneTest extends FunSuite {
 
     test("multilevel dijkstra works on a graph") {
         new SimpleGraphComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
-        	type NodeType = Int
-            val lowlevel = new SimpleGraph(lowerlevel, lowerlevelregs)
+            type NodeType = Int
+            val lowlevel = SimpleGraph(lowerlevel, lowerlevelregs)
             val upper = SimpleGraph(upperlevel: _*)
             val levels = Seq(lowlevel, upper)
             val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 3.1)
@@ -61,7 +61,7 @@ class DijkstraIsochroneTest extends FunSuite {
         new SimpleGraphComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
             type NodeType = Int
             var init = true
-            val lowlevel = new SimpleGraph(lowerlevel, lowerlevelregs) {
+            val lowlevel = new SimpleGraph(lowerlevel, lowerlevelregs, lowerlevelregs.map(_._1 -> (0.0, 0.0)).toMap) {
                 override def neighbours(node: Int) = {
                     if (node == 5 && !init)
                         println(s"Asked for neighbours of $node")

@@ -24,7 +24,7 @@ import org.isochrone.util.Timing
 trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
     self: SessionProviderComponent =>
     class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int) extends GraphWithRegionsType[Long, RegionType] with NodePosition[NodeType] with Logging {
-        private val regions = new LRUCache[RegionType, Traversable[NodeType]]((k, v, m) => {
+        private val regionMap = new LRUCache[RegionType, Traversable[NodeType]]((k, v, m) => {
             val ret = m.size > maxRegions
             if (ret) {
                 logger.debug(s"Removing region $k")
@@ -32,6 +32,8 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
             }
             ret
         })
+
+        def regions = regionDiameters.map(_._1)
 
         private val neigh = new HashMap[NodeType, Traversable[(NodeType, Double)]]
 
@@ -48,7 +50,17 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
             nodePos -= n
         }
 
-        def nodePosition(nd: Long) = nodePos.get(nd)
+        def regionNodes(rg: RegionType) = {
+            ensureRegion(rg)
+            regionMap(rg)
+        }
+
+        def ensureRegion(rg: RegionType) {
+            if (!regionMap.contains(rg))
+                retrieveRegion(rg)
+        }
+
+        def nodePosition(nd: Long) = nodePos(nd)
 
         def nodeRegion(node: NodeType) = {
             ensureRegion(node)
@@ -71,7 +83,7 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
         def neighbours(node: NodeType) = {
             ensureInMemory(node)
             if (nodesToRegions.contains(node))
-                regions.updateUsage(nodesToRegions(node))
+                regionMap.updateUsage(nodesToRegions(node))
             neigh.getOrElse(node, Seq())
         }
 
@@ -87,7 +99,7 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
                 val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
                 logger.debug(s"Region select: ${q.selectStatement}")
                 val list = q.list()(session)
-                regions(region) = list.map(_._1)
+                regionMap(region) = list.map(_._1)
                 nodePos ++= list.map(x => (x._1, (x._4.getInteriorPoint.getX, x._4.getInteriorPoint.getY)))
                 val map = list.groupBy(_._1)
                 for ((k, v) <- map) {
@@ -132,11 +144,13 @@ trait ConfigDatabaseGraphComponent extends GraphWithRegionsComponent with Databa
     self: RoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
 
     val graph = new DatabaseGraph(roadNetTables, nodeCacheSizeLens.get(parsedConfig))
+    val nodePos = graph
 }
 
 trait DefaultDatabaseGraphComponent extends GraphWithRegionsComponent with DatabaseGraphComponent with NodePositionComponent {
     self: RoadNetTableComponent with SessionProviderComponent =>
     val graph = new DatabaseGraph(roadNetTables, 500)
+    val nodePos = graph
 }
 
 trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphComponent with NodePositionComponent with DatabaseGraphComponent with NodeCacheSizeParserComponent {
@@ -145,4 +159,5 @@ trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphC
     val levels = roadNetTableLevels.map(x => new DatabaseGraph(x, nodeCacheSizeLens.get(parsedConfig)))
 
     val graph = levels.head
+    val nodePos = graph
 }

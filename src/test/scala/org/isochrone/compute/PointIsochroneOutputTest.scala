@@ -10,8 +10,8 @@ class PointIsochroneOutputTest extends FunSuite {
         val comp = new PointIsochroneOutputComponent with IsochronesComputationComponent with NodePositionComponent {
             type NodeType = Int
             def isochrone = List(IsochroneEdge(1, 2, 0.5), IsochroneEdge(4, 7, 0.4), IsochroneEdge(5, 6, 1), IsochroneEdge(1, 3, 0))
-            val graph = new NodePosition[NodeType] {
-                def nodePosition(nd: Int) = Some((nd.toDouble, nd.toDouble + 1))
+            val nodePos = new NodePosition[NodeType] {
+                def nodePosition(nd: Int) = (nd.toDouble, nd.toDouble + 1)
             }
         }
 

@@ -17,8 +17,8 @@ trait PointIsochroneOutputComponent extends IsochroneOutputComponent {
 
     lazy val isochroneGeometry = for {
         IsochroneEdge(a, b, part) <- isochrone
-        (x1, y1) <- graph.nodePosition(a)
-        (x2, y2) <- graph.nodePosition(b)
+        (x1, y1) = nodePos.nodePosition(a)
+        (x2, y2) = nodePos.nodePosition(b)
         x = x1 + (x2 - x1) * part
         y = y1 + (y2 - y1) * part
     } yield geomFact.createPoint(new Coordinate(x, y))

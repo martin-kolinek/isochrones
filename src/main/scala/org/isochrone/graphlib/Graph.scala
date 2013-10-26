@@ -6,6 +6,7 @@ trait GraphType[Node] {
 }
 
 trait GraphComponent extends GraphComponentBase {
+
     val graph: GraphType[NodeType]
 }
 
@@ -15,4 +16,5 @@ trait GraphComponentBaseWithDefault extends GraphComponentBase {
 
 trait GraphComponentBase {
     type NodeType
+    type Graph
 }

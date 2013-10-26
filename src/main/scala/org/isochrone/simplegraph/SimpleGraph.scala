@@ -20,10 +20,10 @@ trait SimpleGraphComponent extends GraphComponentBase {
         override def toString = s"SimpleRegion($num, diam=$diameter)"
     }
 
-    class SimpleGraph(edges: Seq[(NodeType, NodeType, Double)], nodeRegions: Map[NodeType, Int]) extends GraphWithRegionsType[NodeType, SimpleGraphRegion] {
+    class SimpleGraph(edges: Seq[(NodeType, NodeType, Double)], nodeRegions: Map[NodeType, Int], nodePositions: Map[NodeType, (Double, Double)]) extends GraphWithRegionsType[NodeType, SimpleGraphRegion] with NodePosition[NodeType] {
         private val neigh = edges.groupBy(_._1).map { case (k, v) => (k, v.map(x => (x._2, x._3))) }
 
-        val nodeRegionsProc = nodeRegions.mapValues(new SimpleGraphRegion(_, this))
+        val nodeRegionsProc = nodeRegions.mapValues(SimpleGraphRegion(_, this))
 
         lazy val nodeEccentrities = {
             val x = for {
@@ -44,11 +44,16 @@ trait SimpleGraphComponent extends GraphComponentBase {
 
         def regionDiameter(rg: RegionType) = rg.diameter
 
+        def regions = nodeRegionsProc.map(_._2).toSet
+
+        def nodePosition(nd: NodeType) = nodePositions(nd)
+
         override def toString = s"SimpleGraph($edges)"
     }
 
     object SimpleGraph {
-        def apply(edges: (NodeType, NodeType, Double)*) = new SimpleGraph(edges, (edges.map(_._1) ++ edges.map(_._2)).map(_ -> 0).toMap)
-        def apply(edges: Seq[(NodeType, NodeType, Double)], nodes: Map[NodeType, Int]) = new SimpleGraph(edges, nodes)
+        def apply(edges: (NodeType, NodeType, Double)*) = new SimpleGraph(edges, (edges.map(_._1) ++ edges.map(_._2)).map(_ -> 0).toMap, (edges.map(_._1) ++ edges.map(_._2)).map(_ -> (0.0 -> 0.0)).toMap)
+        def apply(edges: Seq[(NodeType, NodeType, Double)], nodes: Map[NodeType, Int]) = new SimpleGraph(edges, nodes, nodes.map(_._1 -> (0.0 -> 0.0)).toMap)
+        def apply(edges: Seq[(NodeType, NodeType, Double)], regions: Map[NodeType, Int], positions: Map[NodeType, (Double, Double)]) = new SimpleGraph(edges, regions, positions)
     }
 }

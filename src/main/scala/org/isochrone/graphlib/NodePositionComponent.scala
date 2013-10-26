@@ -1,9 +1,9 @@
 package org.isochrone.graphlib
 
 trait NodePosition[NodeType] {
-    def nodePosition(nd: NodeType): Option[(Double, Double)]
+    def nodePosition(nd: NodeType): (Double, Double)
 }
 
 trait NodePositionComponent extends GraphComponentBase {
-    val graph: NodePosition[NodeType]
+    val nodePos: NodePosition[NodeType]
 }

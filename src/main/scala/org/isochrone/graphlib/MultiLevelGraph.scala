@@ -12,8 +12,10 @@ trait GraphWithRegionsType[Node, Region] extends GraphType[Node] {
 
     def filterRegions(func: Region => Boolean) = new GraphType[Node] {
         def neighbours(nd: Node) = self.neighbours(nd).filter(x => self.nodeRegion(x._1).filter(func).isDefined)
-        def nodes = self.nodes.filter(x => self.nodeRegion(x).map(func).isDefined)
+        def nodes = self.nodes.filter(x => self.nodeRegion(x).filter(func).isDefined)
     }
+
+    def regions: Traversable[Region]
 }
 
 trait GraphWithRegionsComponentBase extends GraphComponentBase {
