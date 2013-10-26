@@ -21,10 +21,12 @@ trait RegularPartitionComponent {
 
         }
 
-        def regions: Traversable[BoundingBox] = for {
+        def regions = for {
             x <- left - regionSize / 10 to right by regionSize
             y <- bottom - regionSize / 10 to top by regionSize
         } yield BoundingBox(y + regionSize, x, y, x + regionSize)
+
+        val regionCount = regions.size
     }
 
     val regularPartition: RegularPartition

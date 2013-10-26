@@ -8,12 +8,13 @@ import org.isochrone.ArgumentParser
 import shapeless.Lens
 import scopt.OptionParser
 
-class EdgeTable(name: String) extends Table[(Long, Long, Double, Boolean)](name) {
+class EdgeTable(name: String) extends Table[(Long, Long, Double, Boolean, Geometry)](name) {
     def start = column[Long]("start_node")
     def end = column[Long]("end_node")
     def cost = column[Double]("cost")
     def virtual = column[Boolean]("virtual")
-    def * = start ~ end ~ cost ~ virtual
+    def geom = column[Geometry]("geom")
+    def * = start ~ end ~ cost ~ virtual ~ geom
 }
 
 class NodeTable(name: String) extends Table[(Long, Int, Geometry)](name) {

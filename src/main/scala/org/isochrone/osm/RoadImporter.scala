@@ -8,6 +8,7 @@ import org.isochrone.db.DatabaseProvider
 import org.isochrone.ActionComponent
 import org.isochrone.ActionComponent
 import org.isochrone.db.EdgeTable
+import com.vividsolutions.jts.geom.Geometry
 
 trait RoadImporterComponent {
     self: OsmTableComponent with RoadNetTableComponent with DatabaseProvider with CostAssignerComponent =>
@@ -53,15 +54,15 @@ trait RoadImporterComponent {
                 (s, e) <- roadNetBareAll
                 sn <- osmTables.nodes if sn.id === s
                 en <- osmTables.nodes if en.id === e
-            } yield (s, e, getRoadCost(sn.geom, en.geom), false)
+            } yield (s, e, getRoadCost(sn.geom, en.geom), false, sn.geom.shortestLine(en.geom).asColumnOf[Geometry])
         }
-        
+
         val backRoads = for {
             rn <- roadNetTables.roadNet
             if !Query(roadNetTables.roadNet).filter(rn2 => rn2.start === rn.end && rn2.end === rn.start).exists
             sn <- roadNetTables.roadNodes if sn.id === rn.start
             en <- roadNetTables.roadNodes if en.id === rn.end
-        } yield (rn.end, rn.start, getNoRoadCost(sn.geom, en.geom), true)
+        } yield (rn.end, rn.start, getNoRoadCost(sn.geom, en.geom), true, en.geom.shortestLine(sn.geom).asColumnOf[Geometry])
 
         def execute() {
             database.withTransaction { implicit s: Session =>

@@ -15,8 +15,8 @@ trait IncrementalPartitionComponent {
     class IncrementalPartitioner(bufferSize: Int) extends Logging {
         def partition() {
             database.withSession { implicit s: Session =>
-                for (bbox <- regularPartition.regions) {
-                    logger.info(s"Partitioning region $bbox")
+                for ((bbox, i) <- regularPartition.regions.zipWithIndex) {
+                    logger.info(s"Partitioning region $bbox ($i/${regularPartition.regionCount})")
                     val bboxNodes = roadNetTables.roadNodes.filter(_.geom @&& bbox.dbBBox).map(_.id).to[Set]
                     val partition = createPartitioner(bbox.withBuffer(bufferSize)).partitioner.partition()
                     val regionsInBBox = partition.filter(_.exists(bboxNodes.contains)).toSeq

@@ -12,6 +12,7 @@ import org.isochrone.db.HigherLevelRoadNetTableComponent
 import org.isochrone.partition.RegionAnalyzerProviderComponent
 import org.isochrone.dbgraph.DatabaseGraphComponent
 import com.typesafe.scalalogging.slf4j.Logging
+import com.vividsolutions.jts.geom.Geometry
 
 trait HigherLevelGraphCreatorComponent {
     self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseGraphComponent with GraphWithRegionsComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
@@ -45,7 +46,11 @@ trait HigherLevelGraphCreatorComponent {
                     nd <- roadNetTables.roadNodes if nd.id === node
                 } yield (nd.id, 0, nd.geom))(session)
                 for ((other, dist) <- others) {
-                    higherRoadNetTables.roadNet.insert(node, other, dist, false)(session)
+                    val q = for {
+                        sn <- roadNetTables.roadNodes if sn.id === node
+                        en <- roadNetTables.roadNodes if en.id === other
+                    } yield (sn.id, en.id, dist, false, sn.geom.shortestLine(en.geom).asColumnOf[Geometry])
+                    higherRoadNetTables.roadNet.insert(q)(session)
                 }
                 if (!others.isEmpty)
                     diam = math.max(diam, others.map(_._2).max)

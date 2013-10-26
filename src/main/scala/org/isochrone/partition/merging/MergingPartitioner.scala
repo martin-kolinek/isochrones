@@ -24,7 +24,10 @@ trait MergingPartitionerComponent extends PartitionComponent with CellComponent 
                     }
                 }
             }
-            trav.maxBy(_._1)._2.map(_.nodes)
+            if (trav.isEmpty)
+                Set()
+            else
+                trav.maxBy(_._1)._2.map(_.nodes)
         }
     }
 

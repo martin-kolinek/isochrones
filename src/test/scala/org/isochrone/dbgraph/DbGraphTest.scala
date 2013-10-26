@@ -37,17 +37,22 @@ trait RoadNetTableCreation extends BeforeAndAfterEach {
 
 class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
     val geomfact = new GeometryFactory(new PrecisionModel, 4326)
+
+    def addNeededCols(sq: (Long, Long, Double)*) = sq.map {
+        case (a, b, c) => (a, b, c, false, geomfact.createLineString(Array(new Coordinate(0, 0), new Coordinate(1, 1))))
+    }
+
     test("DatabaseGraph retrieves neighbours") {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit s: Session =>
                 (1l to 5l).map((_, 1, geomfact.createPoint(new Coordinate(0, 0)))).foreach(roadNetTables.roadNodes.insert(_))
-                roadNetTables.roadNet.insertAll(
-                    (1, 2, 0.1, false),
-                    (1, 3, 0.2, false),
-                    (2, 4, 0.3, false),
-                    (3, 2, 0.4, false),
-                    (2, 1, 0.5, false),
-                    (4, 5, 0.6, false))
+                val edges = Seq()
+                roadNetTables.roadNet.insertAll(addNeededCols((1, 2, 0.1),
+                    (1, 3, 0.2),
+                    (2, 4, 0.3),
+                    (3, 2, 0.4),
+                    (2, 1, 0.5),
+                    (4, 5, 0.6)): _*)
             }
         }
 
@@ -62,13 +67,13 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit session: Session =>
                 (1l to 5l).map((_, 1, geomfact.createPoint(new Coordinate(0, 0)))).foreach(roadNetTables.roadNodes.insert(_))
-                roadNetTables.roadNet.insertAll(
-                    (1, 2, 0.1, false),
-                    (1, 3, 0.2, false),
-                    (2, 4, 0.3, false),
-                    (3, 2, 0.4, false),
-                    (2, 1, 0.5, false),
-                    (4, 5, 0.6, false))
+                roadNetTables.roadNet.insertAll(addNeededCols(
+                    (1, 2, 0.1),
+                    (1, 3, 0.2),
+                    (2, 4, 0.3),
+                    (3, 2, 0.4),
+                    (2, 1, 0.5),
+                    (4, 5, 0.6)): _*)
             }
         }
 
@@ -83,13 +88,13 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit session: Session =>
                 (1l to 5l).map((_, 1, geomfact.createPoint(new Coordinate(0, 0)))).foreach(roadNetTables.roadNodes.insert(_))
-                roadNetTables.roadNet.insertAll(
-                    (1, 2, 0.1, false),
-                    (1, 3, 0.2, false),
-                    (2, 4, 0.3, false),
-                    (3, 2, 0.4, false),
-                    (2, 1, 0.5, false),
-                    (4, 5, 0.6, false))
+                roadNetTables.roadNet.insertAll(addNeededCols(
+                    (1, 2, 0.1),
+                    (1, 3, 0.2),
+                    (2, 4, 0.3),
+                    (3, 2, 0.4),
+                    (2, 1, 0.5),
+                    (4, 5, 0.6)): _*)
             }
         }
         new DefaultRoadNetTableComponent with DefaultDatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent {
@@ -112,14 +117,14 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
                     (3, 2, geomfact.createPoint(new Coordinate(0, 0))),
                     (4, 2, geomfact.createPoint(new Coordinate(0, 0))),
                     (5, 2, geomfact.createPoint(new Coordinate(0, 0))))
-                roadNetTables.roadNet.insertAll(
-                    (1, 2, 0.1, false),
-                    (2, 3, 0.2, false),
-                    (2, 4, 0.3, false),
-                    (5, 2, 0.4, false),
-                    (5, 3, 0.5, false),
-                    (4, 5, 0.6, false),
-                    (3, 5, 0.7, false))
+                roadNetTables.roadNet.insertAll(addNeededCols(
+                    (1, 2, 0.1),
+                    (2, 3, 0.2),
+                    (2, 4, 0.3),
+                    (5, 2, 0.4),
+                    (5, 3, 0.5),
+                    (4, 5, 0.6),
+                    (3, 5, 0.7)): _*)
             }
         }
         new DatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent with DefaultRoadNetTableComponent {

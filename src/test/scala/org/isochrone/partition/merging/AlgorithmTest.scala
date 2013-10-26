@@ -41,6 +41,14 @@ class AlgorithmTest extends FunSuite {
         }
     }
 
+    test("Merging algorithm works with empty graph") {
+        new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with DefaultDijkstraProvider with DefaultMergingAlgPropertiesComponent {
+            type NodeType = Int
+            val graph = SimpleGraph()
+            assert(MergingPartitioner.partition() == Set())
+        }
+    }
+
     test("Merging algorithm with bridge") {
         new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider with FunctionLibraryComponent {
             type NodeType = Int

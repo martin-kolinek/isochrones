@@ -7,11 +7,12 @@ import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.db.DatabaseProvider
 import java.sql.Timestamp
 import org.isochrone.osm.CostAssignerComponent
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait IntersectionFinderComponent {
     self: RoadNetTableComponent with OsmTableComponent with DatabaseProvider with CostAssignerComponent =>
 
-    object IntersectionFinder {
+    object IntersectionFinder extends Logging {
         def intersectionsIn(top: Double, left: Double, bottom: Double, right: Double) = {
             for {
                 n1s <- roadNetTables.roadNodes
@@ -62,7 +63,11 @@ trait IntersectionFinderComponent {
                         roadNetTables.roadNet.insert(for {
                             sn <- roadNetTables.roadNodes if sn.id === ns
                             en <- roadNetTables.roadNodes if en.id === ne
-                        } yield (sn.id, en.id, if (virt) getNoRoadCost(sn.geom, en.geom) else getRoadCost(sn.geom, en.geom), virt))
+                        } yield (sn.id,
+                            en.id,
+                            if (virt) getNoRoadCost(sn.geom, en.geom) else getRoadCost(sn.geom, en.geom),
+                            virt,
+                            sn.geom.shortestLine(en.geom).asColumnOf[Geometry]))
                     }
 
                 }

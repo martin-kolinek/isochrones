@@ -12,8 +12,8 @@ trait IncrementalIntersectionRemoverComponent extends IntersectionFinderComponen
 
     object IncrementalIntersectionRemover extends Logging {
         def removeIntersections() {
-            for (reg <- regularPartition.regions) {
-                logger.info(s"Removing intersections in $reg")
+            for ((reg, i) <- regularPartition.regions.zipWithIndex) {
+                logger.info(s"Removing intersections in $reg ($i/${regularPartition.regionCount})")
                 IntersectionFinder.removeIntersections(reg.top, reg.left, reg.bottom, reg.right)
             }
         }
