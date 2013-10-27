@@ -14,7 +14,6 @@ class EdgeTable(name: String) extends Table[(Long, Long, Double, Boolean, Geomet
     def cost = column[Double]("cost")
     def virtual = column[Boolean]("virtual")
     def geom = column[Geometry]("geom")
-    val pk = primaryKey(s"pk_$tableName", start ~ end)
     def * = start ~ end ~ cost ~ virtual ~ geom
 }
 

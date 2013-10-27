@@ -23,7 +23,7 @@ insert into "$out"(start_node, end_node, direction, linestring)
             inner join "$nodes" en on en.id = prn.end_node
         where prn.direction = 1 or prn.start_node<prn.end_node;"""
 
-                Q.updateNA(insertQuery(visualizationTables.roadNetVisualization.tableName, roadNetTables.roadNet.tableName, osmTables.nodes.tableName)).execute
+                Q.updateNA(insertQuery(visualizationTables.roadNetVisualization.tableName, roadNetTables.roadNet.tableName, roadNetTables.roadNodes.tableName)).execute
             }
         }
     }

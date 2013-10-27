@@ -37,14 +37,6 @@ trait IntersectionFinderComponent {
                 val pairs = intersectionsIn(top, left, bottom, right).list
                 val maxid = Query(Query(roadNetTables.roadNodes).map(_.id).max).firstOption.flatten.getOrElse(0l)
                 val collection = new IntersectionCollection(pairs, maxid)
-                osmTables.nodes.insertAll((collection.newForDb.map(
-                    x => (x._1,
-                        x._2.asInstanceOf[Geometry],
-                        0,
-                        0,
-                        new Timestamp(System.currentTimeMillis),
-                        0l,
-                        Map[String, String]())): _*))
                 roadNetTables.roadNodes.insertAll((collection.newForDb.map(x => (x._1, 0, x._2.asInstanceOf[Geometry])): _*))
                 for {
                     (start, end) <- pairs.map(x => (x._1, x._2)).distinct

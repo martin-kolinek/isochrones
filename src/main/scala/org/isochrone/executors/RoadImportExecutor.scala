@@ -19,10 +19,8 @@ trait RoadImportExecutor extends ActionExecutor with Logging {
         val execute = () => {
             logger.info("Importing roads")
             roadImporter.execute()
-            logger.info("Removing duplicit edges")
-            DuplicitRemover.removeDupEdges()
-            logger.info("Removing duplicit nodes")
-            DuplicitRemover.removeDupNodes()
+            logger.info("Removing duplicates")
+            DuplicitRemover.removeDuplicates()
         }
     })
 }
