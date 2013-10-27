@@ -14,11 +14,12 @@ class EdgeTable(name: String) extends Table[(Long, Long, Double, Boolean, Geomet
     def cost = column[Double]("cost")
     def virtual = column[Boolean]("virtual")
     def geom = column[Geometry]("geom")
+    val pk = primaryKey(s"pk_$tableName", start ~ end)
     def * = start ~ end ~ cost ~ virtual ~ geom
 }
 
 class NodeTable(name: String) extends Table[(Long, Int, Geometry)](name) {
-    def id = column[Long]("id")
+    def id = column[Long]("id", O.PrimaryKey)
     def region = column[Int]("region")
     def geom = column[Geometry]("geom")
     def * = id ~ region ~ geom
