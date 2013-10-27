@@ -23,6 +23,7 @@ trait TableCreatorComponent {
                     Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}_id" ON "${roadNetTables.roadNodes.tableName}"(id)""").execute()
                     Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}_region_id" ON "${roadNetTables.roadNodes.tableName}"(region, id)""").execute()
                     Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNet.tableName}_id" ON "${roadNetTables.roadNet.tableName}"(start_node, end_node)""").execute()
+                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNet.tableName}" ON "${roadNetTables.roadNet.tableName}" using GIST (geom)""").execute()
             }
         }
         def drop() {
