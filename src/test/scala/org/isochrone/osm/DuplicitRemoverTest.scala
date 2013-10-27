@@ -30,8 +30,11 @@ class DuplicitRemoverTest extends FunSuite with TestDatabase {
     test("removing duplicate edges works") {
         val comp = new TestDupRem {}
         comp.DuplicitRemover.removeDupEdges()
+        comp.DuplicitRemover.removeDupNodes()
         comp.database.withTransaction { implicit s: Session =>
-            assert(Query(comp.roadNetTables.roadNet).list.size == 1)
+            val lst = Query(comp.roadNetTables.roadNet).list
+            info(lst.toString)
+            assert(lst.size == 1)
         }
     }
 }
