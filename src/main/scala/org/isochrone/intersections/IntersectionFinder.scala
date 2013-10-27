@@ -35,7 +35,7 @@ trait IntersectionFinderComponent {
         def removeIntersections(top: Double, left: Double, bottom: Double, right: Double) = {
             database.withSession { implicit s: Session =>
                 val pairs = intersectionsIn(top, left, bottom, right).list
-                val maxid = Query(Query(osmTables.nodes).map(_.id).max).firstOption.flatten.getOrElse(0l)
+                val maxid = Query(Query(roadNetTables.roadNodes).map(_.id).max).firstOption.flatten.getOrElse(0l)
                 val collection = new IntersectionCollection(pairs, maxid)
                 osmTables.nodes.insertAll((collection.newForDb.map(
                     x => (x._1,
@@ -47,12 +47,13 @@ trait IntersectionFinderComponent {
                         Map[String, String]())): _*))
                 roadNetTables.roadNodes.insertAll((collection.newForDb.map(x => (x._1, 0, x._2.asInstanceOf[Geometry])): _*))
                 for {
-                    (start, end, _, _, _, _) <- pairs
+                    (start, end) <- pairs.map(x => (x._1, x._2)).distinct
                 } {
                     val nodes = collection.intersectionsForEdge(start, end)
                     val rnq = Query(roadNetTables.roadNet).filter(edg => edg.start === start && edg.end === end)
                     val virt = rnq.map(_.virtual).firstOption.getOrElse(false)
                     rnq.delete
+                    logger.debug(s"Creating chain from $start to $end via $nodes")
                     for (Seq(ns, ne) <- (start +: nodes :+ end).sliding(2)) {
                         roadNetTables.roadNet.insert(for {
                             sn <- roadNetTables.roadNodes if sn.id === ns
