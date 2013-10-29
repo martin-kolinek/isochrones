@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 trait AreaSaverComponent extends AreaIdentifierComponent {
     self: GraphWithRegionsComponent with NodePositionComponent with DatabaseProvider with RoadNetTableComponent =>
 
-    type NodeType = Long
+    type NodeType <: Long
 
     object AreaSaver extends Logging {
         def saveAreas() = {
@@ -23,7 +23,7 @@ trait AreaSaverComponent extends AreaIdentifierComponent {
                 } {
                     if (areaId % 100 == 0 && seq == 0)
                         logger.info(s"Saving area $areaId")
-                    roadNetTables.roadAreas.insert((areaId, pt, seq))
+                    roadNetTables.roadAreas.insert((areaId, pt.asInstanceOf[Long], seq))
                 }
             }
         }

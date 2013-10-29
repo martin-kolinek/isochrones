@@ -63,10 +63,10 @@ trait AreaIdentifierComponent extends AreaComponent {
                 })
             logger.debug(s"Picked $next")
             if (next.map(done.regionDone).getOrElse(true)) {
-                logger.debug(s"Abort area $part")
+                logger.debug(s"Abort area")
                 (None, done)
             } else if (next.get == firstNode) {
-                logger.debug(s"Completed area $part")
+                logger.debug(s"Completed area")
                 (Some(Area(part)), done.withEdge(last -> next.get))
             } else
                 completeArea(next.get :: part, firstNode, done.withEdge(last -> next.get))
@@ -76,7 +76,7 @@ trait AreaIdentifierComponent extends AreaComponent {
         def startingEdgesAreas(edges: List[(NodeType, NodeType)], done: DoneEdgesSet, current: List[Area]): (List[Area], DoneEdgesSet) = {
             edges match {
                 case Nil => current -> done
-                case (edge @ (start, end)) :: tail => {
+                case (edge@(start, end)) :: tail => {
                     if (done.contains(edge))
                         startingEdgesAreas(tail, done, current)
                     else {

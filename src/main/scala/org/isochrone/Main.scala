@@ -17,6 +17,7 @@ import org.isochrone.executors.SchemaExecutor
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.executors.IntersectionRemoverExecutor
 import org.isochrone.executors.ConnectorExecutor
+import org.isochrone.executors.AreaExecutor
 
 object Main extends App with Logging
         with DijkstraIsochroneComputer
@@ -25,7 +26,8 @@ object Main extends App with Logging
         with RoadVisualizeExecutor
         with SchemaExecutor
         with IntersectionRemoverExecutor
-        with ConnectorExecutor {
+        with ConnectorExecutor
+        with AreaExecutor {
 
     trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>

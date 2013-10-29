@@ -20,4 +20,6 @@
 	</root>
 	<logger name="scala.slick" level="off">
 	</logger>
+	<logger name="org.isochrone.dbgraph" level="off">
+	</logger>
 </configuration>

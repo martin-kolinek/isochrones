@@ -60,7 +60,10 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
                 retrieveRegion(rg)
         }
 
-        def nodePosition(nd: Long) = nodePos(nd)
+        def nodePosition(nd: Long) = {
+            ensureRegion(nd)
+            nodePos(nd)
+        }
 
         def nodeRegion(node: NodeType) = {
             ensureRegion(node)
@@ -106,6 +109,18 @@ trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
                     neigh(k) = v.collect { case (st, Some(en), Some(c), _) => (en, c) }
                     nodesToRegions(k) = region
                 }
+            }
+        }
+
+        override def singleRegion(rg: Int) = {
+            val supGraph = super.singleRegion(rg)
+            new GraphType[NodeType] {
+                def nodes = {
+                    ensureRegion(rg)
+                    regionMap(rg)
+                }
+
+                def neighbours(nd: NodeType) = supGraph.neighbours(nd)
             }
         }
 
