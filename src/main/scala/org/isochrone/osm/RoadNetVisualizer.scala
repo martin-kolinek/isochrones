@@ -9,7 +9,7 @@ import scala.slick.jdbc.{ StaticQuery => Q }
 import org.isochrone.ActionComponent
 
 trait RoadNetVisualizerComponent {
-    self: RoadNetTableComponent with DatabaseProvider with OsmTableComponent with VisualizationTableComponent =>
+    self: RoadNetTableComponent with DatabaseProvider with VisualizationTableComponent =>
     object visualizer {
         def execute() {
             database.withTransaction { implicit s: Session =>
@@ -21,8 +21,13 @@ insert into "$out"(start_node, end_node, direction, linestring)
                     left join "$rnet" rn2 on rn2.start_node=rn.end_node and rn2.end_node=rn.start_node and rn2.virtual = false where rn.virtual = false) prn
             inner join "$nodes" sn on sn.id = prn.start_node 
             inner join "$nodes" en on en.id = prn.end_node
-        where prn.direction = 1 or prn.start_node<prn.end_node;"""
-
+        where prn.direction = 1 or prn.start_node<prn.end_node
+    union 
+    select distinct on (rn.start_node, rn.end_node) rn.start_node, rn.end_node, 2, rn.geom
+        from "$rnet" rn inner join
+             "$rnet" rn2 on rn.start_node = rn2.end_node and rn.end_node = rn2.start_node
+        where rn.virtual = true and rn2.virtual = true and (rn.start_node < rn2.start_node or (rn.start_node = rn2.start_node and rn.end_node < rn2.end_node));"""
+                Query(visualizationTables.roadNetVisualization).delete
                 Q.updateNA(insertQuery(visualizationTables.roadNetVisualization.tableName, roadNetTables.roadNet.tableName, roadNetTables.roadNodes.tableName)).execute
             }
         }

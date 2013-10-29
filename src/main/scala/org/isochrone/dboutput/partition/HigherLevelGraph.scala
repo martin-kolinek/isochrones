@@ -19,7 +19,8 @@ trait HigherLevelGraphCreatorComponent {
 
     object HigherLevelGraph extends Logging {
         def createHigherLevelGraph() {
-            database.withSession { implicit s: Session =>
+            database.withTransaction { implicit s: Session =>
+                Query(roadNetTables.roadRegions).delete
                 val difRegs = for {
                     n1 <- roadNetTables.roadNodes
                     n2 <- roadNetTables.roadNodes if n1.region =!= n2.region

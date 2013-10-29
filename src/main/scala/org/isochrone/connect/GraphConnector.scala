@@ -8,9 +8,10 @@ import com.typesafe.scalalogging.slf4j.Logging
 import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.db.RoadNetTables
 import scala.annotation.tailrec
+import org.isochrone.osm.CostAssignerComponent
 
 trait GraphConnectorComponent {
-    self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseProvider =>
+    self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseProvider with CostAssignerComponent =>
 
     object GraphConnector extends Logging {
         def findClosestNodes(st: Set[Int])(implicit s: Session) = {
@@ -45,7 +46,7 @@ trait GraphConnectorComponent {
             tbls.roadNet.insert(for {
                 n1 <- tbls.roadNodes if n1.id === a
                 n2 <- tbls.roadNodes if n2.id === b
-            } yield (n1.id, n2.id, 0.0, false, n1.geom.shortestLine(n2.geom).asColumnOf[Geometry]))
+            } yield (n1.id, n2.id, getNoRoadCost(n1.geom, n2.geom), true, n1.geom.shortestLine(n2.geom).asColumnOf[Geometry]))
         }
 
         def tryInsertNode(a: Long)(implicit s: Session) {

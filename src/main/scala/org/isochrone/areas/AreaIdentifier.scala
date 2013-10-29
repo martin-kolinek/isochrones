@@ -110,7 +110,7 @@ trait AreaIdentifierComponent extends AreaComponent {
 
         def getAreasForRegions(rgs: List[RegionType], last: Seq[Area], done: DoneEdgesSet): (List[RegionType], Seq[Area], DoneEdgesSet) = {
             val rg = rgs.head
-            logger.debug(s"Computing areas for region $rg")
+            logger.info(s"Computing areas for region $rg")
             val nodes = graph.singleRegion(rg).nodes.toList
             logger.debug(s"Nodes for region: $nodes")
             val areas = areasForNodes(nodes, done, Nil)

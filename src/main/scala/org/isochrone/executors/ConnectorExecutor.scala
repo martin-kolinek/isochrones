@@ -8,6 +8,7 @@ import org.isochrone.db.HigherConfigRoadNetTableComponent
 import org.isochrone.db.FromOptionDatabaseComponent
 import org.isochrone.OptionParserComponent
 import org.isochrone.ActionComponent
+import org.isochrone.osm.DefaultCostAssignerComponent
 
 trait ConnectorExecutor extends ActionExecutor {
     self: Main.type =>
@@ -19,7 +20,8 @@ trait ConnectorExecutor extends ActionExecutor {
                              with ConfigRoadNetTableComponent 
                              with HigherConfigRoadNetTableComponent 
                              with FromOptionDatabaseComponent 
-                             with OptionParserComponent {
+                             with OptionParserComponent
+                             with DefaultCostAssignerComponent { 
                 val execute = () => GraphConnector.connectGraph()
             })
 }
