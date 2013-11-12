@@ -31,6 +31,8 @@ libraryDependencies += "com.github.scala-incubator.io" %% "scala-io-file" % "0.4
 
 libraryDependencies += "com.chuusai" % "shapeless" % "2.0.0-M1" cross CrossVersion.full
 
+libraryDependencies += "org.spire-math" %% "spire" % "0.6.0"
+
 libraryDependencies ++= List("com.typesafe" %% "scalalogging-slf4j" % "1.0.1",
 	"org.slf4j" % "slf4j-api" % "1.7.5",
 	"ch.qos.logback" % "logback-classic" % "1.0.13",
