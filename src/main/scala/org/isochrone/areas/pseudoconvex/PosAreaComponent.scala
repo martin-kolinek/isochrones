@@ -63,6 +63,11 @@ trait PosAreaComponent {
             Area(it.toList)
         }
 
+        lazy val edgeSet = {
+            val nds = points.map(_.nd)
+            (nds :+ nds.head).sliding(2).map(_.toSet).toSet
+        }
+        
         def toLinearRing = geomFact.createLinearRing((points :+ points.head).map(ptToCoordinate).toArray)
     }
 }
