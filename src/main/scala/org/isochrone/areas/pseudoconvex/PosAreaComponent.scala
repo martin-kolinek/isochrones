@@ -42,7 +42,11 @@ trait PosAreaComponent {
 
     private def ptToCoordinate(pt: PointWithPosition) = new Coordinate(pt.pos.x, pt.pos.y)
 
-    case class Area(points: List[PointWithPosition]) {
+    case class EdgeWithCost(nds: Set[NodeType], cost: Double)
+
+    case class Area(points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) {
+        def cost(nd1: NodeType, nd2: NodeType) = costs((nd1, nd2))
+
         lazy val minDist = {
             val pairs = for {
                 PointWithPosition(n1, p1) <- points
@@ -60,14 +64,14 @@ trait PosAreaComponent {
                 val mid = (lv middleVect rv) :* dist
                 PointWithPosition(c.nd, c.pos + mid)
             }
-            Area(it.toList)
+            Area(it.toList, costs)
         }
 
         lazy val edgeSet = {
             val nds = points.map(_.nd)
             (nds :+ nds.head).sliding(2).map(_.toSet).toSet
         }
-        
+
         def toLinearRing = geomFact.createLinearRing((points :+ points.head).map(ptToCoordinate).toArray)
     }
 }

@@ -41,7 +41,7 @@ class PosAreaComponentTest extends FunSuite {
 
     test("simple area is linearring") {
         new PtsComponent {
-            val simple = Area(List(0, 1, 2, 3).map(pts))
+            val simple = Area(List(0, 1, 2, 3).map(pts), Map())
             info(simple.toLinearRing.toString)
             assert(simple.toLinearRing.isValid)
         }
@@ -49,7 +49,7 @@ class PosAreaComponentTest extends FunSuite {
 
     test("shrinking an area creates a linearring") {
         new PtsComponent {
-            val area = Area(List(0, 1, 4, 1, 2, 3).map(pts))
+            val area = Area(List(0, 1, 4, 1, 2, 3).map(pts), Map())
             assert(!area.toLinearRing.isValid)
             val shr = area.shrink(0.01)
             info(shr.toLinearRing.toString)
@@ -59,7 +59,7 @@ class PosAreaComponentTest extends FunSuite {
 
     test("shrinking a more difficult area creates a linearring") {
         new PtsComponent {
-            val area = Area(List(0, 1, 4, 5, 4, 6, 4, 1, 2, 3).map(pts))
+            val area = Area(List(0, 1, 4, 5, 4, 6, 4, 1, 2, 3).map(pts), Map())
             assert(!area.toLinearRing.isValid)
             val shrinked = area.shrink(0.01)
             val lr = shrinked.toLinearRing
