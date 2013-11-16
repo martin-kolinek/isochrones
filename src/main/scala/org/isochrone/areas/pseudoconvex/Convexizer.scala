@@ -4,6 +4,7 @@ import org.isochrone.graphlib.GraphComponentBase
 import shapeless.Lens
 import org.isochrone.graphlib.GraphType
 import org.isochrone.dijkstra.DijkstraProvider
+import scala.annotation.tailrec
 
 trait ConvexizerComponent extends PosAreaComponent {
     self: GraphComponentBase =>
@@ -55,10 +56,26 @@ trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent {
         }
     }
 
-    trait HertelMehlhortModConvexizer {
+    object HertelMehlhortModConvexizer extends Convexizer {
+        @tailrec
+        private def conv(ar: AreaWithDiagonalsGraph, diags: List[EdgeWithCost], needed: List[EdgeWithCost]): List[EdgeWithCost] = diags match {
+            case Nil => needed
+            case candidate :: rest => {
+                val Seq(a, b) = candidate.nds.toSeq
+                val noedg = ar.withoutEdge(a, b)
+                val comp = dijkstraForGraph(noedg)
+                if (comp.DijkstraHelpers.nodesWithin(a, candidate.cost).map(_._1).exists(b == _))
+                    conv(noedg, rest, needed)
+                else
+                    conv(ar, rest, candidate :: needed)
+            }
+        }
+
         def convexize(ar: Area, diagonals: Traversable[EdgeWithCost]) = {
-            val comp = dijkstraForGraph(???)
-            ???
+            val grp = AreaWithDiagonalsGraph(ar, diagonals)
+            conv(grp, diagonals.toList, Nil)
         }
     }
+
+    val convexizer = HertelMehlhortModConvexizer
 }

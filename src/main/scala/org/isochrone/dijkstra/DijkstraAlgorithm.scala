@@ -67,6 +67,8 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
     object DijkstraHelpers {
         def isochrone(start: NodeType, max: Double) =
             DijkstraAlgorithm.isochrone(Traversable(start -> 0.0), max)
+        def nodesWithin(start: NodeType, max: Double) =
+            DijkstraAlgorithm.nodesWithin(Traversable(start -> 0.0), max)
     }
 
     val isoComputer = DijkstraAlgorithm
