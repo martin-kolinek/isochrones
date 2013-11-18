@@ -12,6 +12,8 @@ trait ConvexizerComponent extends PosAreaComponent {
     trait Convexizer {
         def convexize(ar: Area, diagonals: Traversable[EdgeWithCost]): Traversable[EdgeWithCost]
     }
+
+    val convexizer: Convexizer
 }
 
 trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent {

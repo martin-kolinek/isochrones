@@ -72,6 +72,10 @@ trait PosAreaComponent {
             (nds :+ nds.head).sliding(2).map(_.toSet).toSet
         }
 
-        def toLinearRing = geomFact.createLinearRing((points :+ points.head).map(ptToCoordinate).toArray)
+        private def coords = (points :+ points.head).map(ptToCoordinate).toArray
+        def toLinearRing = geomFact.createLinearRing(coords)
+        def toLineString = geomFact.createLineString(coords)
+
+        override def toString = s"${points.map(_.nd)}, ${toLineString.toString}"
     }
 }
