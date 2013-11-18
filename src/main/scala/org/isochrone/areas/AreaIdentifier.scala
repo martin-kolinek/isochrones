@@ -54,7 +54,7 @@ trait AreaIdentifierComponent extends AreaComponent {
                         val xx = nx - lx
                         val yy = ny - ly
                         val newAngle = math.atan2(yy, xx)
-                        val ret = normalizeAngle(newAngle - lastAngle)
+                        val ret = normalizeAngle(lastAngle - newAngle)
                         logger.debug(s"Neighbour $neigh ($nx, $ny), with n - l = ($xx, $yy), newAngle = $newAngle, diff = $ret")
                         if (neigh == before)
                             Double.MaxValue
