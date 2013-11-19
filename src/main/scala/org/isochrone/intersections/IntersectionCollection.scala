@@ -11,7 +11,7 @@ class IntersectionCollection(input: Seq[(Long, Long, LineString, Long, Long, Lin
 
     val nodeGeoms = (for {
         (a, b, abg, c, d, cdg) <- input
-    } yield Seq(a -> abg.asInstanceOf[LineString].getStartPoint,
+    } yield Seq(a -> abg.getStartPoint,
         b -> abg.getEndPoint,
         c -> cdg.getStartPoint,
         d -> cdg.getEndPoint)).flatten.toMap

@@ -16,5 +16,4 @@ trait GraphComponentBaseWithDefault extends GraphComponentBase {
 
 trait GraphComponentBase {
     type NodeType
-    type Graph
 }

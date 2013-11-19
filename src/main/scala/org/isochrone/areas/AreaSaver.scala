@@ -7,8 +7,9 @@ import org.isochrone.db.RoadNetTableComponent
 import scala.slick.session.Session
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.graphlib.GraphComponentBase
 
-trait AreaSaverComponent extends AreaIdentifierComponent {
+trait AreaSaverComponent extends AreaIdentifierComponent with GraphComponentBase {
     self: GraphWithRegionsComponent with NodePositionComponent with DatabaseProvider with RoadNetTableComponent =>
 
     type NodeType <: Long
@@ -16,6 +17,7 @@ trait AreaSaverComponent extends AreaIdentifierComponent {
     object AreaSaver extends Logging {
         def saveAreas() = {
             database.withTransaction { implicit s: Session =>
+                Query(roadNetTables.roadAreas).delete
                 for {
                     (area, i) <- AreaIdentifier.allAreas.zipWithIndex
                     areaId = (i + 1).toLong
@@ -23,7 +25,7 @@ trait AreaSaverComponent extends AreaIdentifierComponent {
                 } {
                     if (areaId % 100 == 0 && seq == 0)
                         logger.info(s"Saving area $areaId")
-                    roadNetTables.roadAreas.insert((areaId, pt.asInstanceOf[Long], seq))
+                    roadNetTables.roadAreas.insert((areaId, pt, seq))
                 }
             }
         }

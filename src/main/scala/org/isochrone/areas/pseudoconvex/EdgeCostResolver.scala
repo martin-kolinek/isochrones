@@ -15,8 +15,8 @@ trait EdgeCostResolverComponent extends PosAreaComponent {
     val resolver: EdgeCostResolver
 }
 
-trait DbEdgeCostResolverComponent extends EdgeCostResolverComponent {
-    self: GraphComponentBase with DatabaseProvider with RoadNetTableComponent with CostAssignerComponent =>
+trait DbEdgeCostResolverComponent extends EdgeCostResolverComponent with GraphComponentBase {
+    self: DatabaseProvider with RoadNetTableComponent with CostAssignerComponent =>
 
     type NodeType <: Long
 
@@ -29,10 +29,10 @@ trait DbEdgeCostResolverComponent extends EdgeCostResolverComponent {
             } yield getNoRoadCost(n1.geom, n2.geom)
             database.withSession { implicit s: Session =>
                 for ((a, b) <- edgs.toList)
-                    yield EdgeWithCost(Set(a, b), q(a.asInstanceOf[Long] -> b.asInstanceOf[Long]).first)
+                    yield EdgeWithCost(Set(a, b), q(a -> b).first)
             }
         }
     }
-    
-    val resolver = DbEdgeCostResolver 
+
+    val resolver = DbEdgeCostResolver
 }
