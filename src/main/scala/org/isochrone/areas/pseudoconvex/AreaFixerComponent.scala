@@ -19,14 +19,17 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
             database.withTransaction { implicit s: Session =>
                 var i = 1
                 for (ar <- shrinkedReader.areas) {
-                    logger.info(s"Working on area nr. $i")
+                    logger.info(s"Working on area nr. $i with size ${ar.points.size}")
                     i += 1
-                    if (!ar.toLinearRing.isValid)
+                    val norm = ar.normalize
+                    if (!norm.toLinearRing.isValid)
                         throw new Exception(s"Area $ar not forming valid linear ring")
-                    val diagonals = triangulator.triangulate(ar)
+                    logger.debug("triangulating")
+                    val diagonals = triangulator.triangulate(norm)
+                    logger.debug("resolving edges")
                     val diagsWithCosts = resolver.resolve(diagonals)
+                    logger.debug("filtering")
                     val filtered = convexizer.convexize(ar, diagsWithCosts)
-
                     def q(n1: Long, n2: Long) = for {
                         nd1 <- roadNetTables.roadNodes if nd1.id === n1
                         nd2 <- roadNetTables.roadNodes if nd2.id === n2
@@ -39,7 +42,9 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
                         roadNetTables.roadNet.insert(q(a, b))
                         roadNetTables.roadNet.insert(q(b, a))
                     }
+                    logger.debug("Done with this area")
                 }
+                logger.debug("Done with cycle")
             }
         }
     }

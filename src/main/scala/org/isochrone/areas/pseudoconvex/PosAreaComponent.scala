@@ -10,6 +10,7 @@ import scalaz.syntax.id._
 import com.vividsolutions.jts.geom.GeometryFactory
 import com.vividsolutions.jts.geom.PrecisionModel
 import com.vividsolutions.jts.geom.Coordinate
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait PosAreaComponent {
     self: GraphComponentBase =>
@@ -44,10 +45,11 @@ trait PosAreaComponent {
 
     case class EdgeWithCost(nds: Set[NodeType], cost: Double)
 
-    case class Area(points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) {
+    case class Area(points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) extends Logging {
         def cost(nd1: NodeType, nd2: NodeType) = costs((nd1, nd2))
 
         lazy val minDist = {
+            logger.debug(s"minDist of area of size: ${points.size}")
             val pairs = for {
                 PointWithPosition(n1, p1) <- points
                 PointWithPosition(n2, p2) <- points if n1 != n2
@@ -75,6 +77,35 @@ trait PosAreaComponent {
         private def coords = (points :+ points.head).map(ptToCoordinate).toArray
         def toLinearRing = geomFact.createLinearRing(coords)
         def toLineString = geomFact.createLineString(coords)
+
+        private case class BoundBox(top: Double, left: Double, bottom: Double, right: Double) {
+            val width = top - bottom
+            val height = right - left
+            lazy val longer = {
+                math.max(width, height)
+            }
+
+            lazy val center = {
+                List(top - height / 2, left + width / 2)
+            }
+        }
+
+        private lazy val bounds = {
+            val top = points.map(_.pos.y).max
+            val left = points.map(_.pos.x).min
+            val bottom = points.map(_.pos.y).min
+            val right = points.map(_.pos.x).max
+            BoundBox(top, left, bottom, right)
+        }
+
+        def normalize = {
+            def normPoint(pt: PointWithPosition) = {
+                val pos = (pt.pos - bounds.center) :/ bounds.longer
+                PointWithPosition(pt.nd, pos)
+            }
+
+            Area(points.map(normPoint), costs)
+        }
 
         override def toString = s"${points.map(_.nd)}, ${toLineString.toString}"
     }

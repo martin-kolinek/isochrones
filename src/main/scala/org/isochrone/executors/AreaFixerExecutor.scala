@@ -23,6 +23,7 @@ trait AreaFixerExecutor extends ActionExecutor {
         
     abstract override def actions = super.actions + ("areafix" --> new ActionComponent
         with OptionsBase
+        with ConfigShrinkRatioComponent
 		with AreaFixerComponent 
 		with Poly2TriTriangulatorComponent
 		with HertelMehlhortModConvexizerComponent 
@@ -31,11 +32,10 @@ trait AreaFixerExecutor extends ActionExecutor {
 		with DbEdgeCostResolverComponent
 		with DbAreaReaderComponent
 		with DefaultCostAssignerComponent
-		with FromOptionDatabaseComponent 
+		with FromOptionDatabaseComponent
 		with AreaShrinkerComponent
 		with DefaultDijkstraProvider
 		with SingleSessionProvider
-		with ConfigShrinkRatioComponent
 		with OptionParserComponent {
     	val execute = () => AreaFixer.fixAreas()
     })
