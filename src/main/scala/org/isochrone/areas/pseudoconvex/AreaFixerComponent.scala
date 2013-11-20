@@ -7,9 +7,10 @@ import org.isochrone.osm.CostAssignerComponent
 import org.isochrone.graphlib.GraphComponentBase
 import com.vividsolutions.jts.geom.Geometry
 import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.db.SessionProviderComponent
 
 trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
-    self: TriangulatorComponent with EdgeCostResolverComponent with ConvexizerComponent with AreaReaderComponent with DatabaseProvider with RoadNetTableComponent with CostAssignerComponent with AreaShrinkerComponent =>
+    self: TriangulatorComponent with EdgeCostResolverComponent with ConvexizerComponent with AreaReaderComponent with DatabaseProvider with RoadNetTableComponent with CostAssignerComponent =>
 
     override type NodeType <: Long
 
@@ -48,4 +49,10 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
             }
         }
     }
+}
+
+trait AreaFixerReaderComponent extends DbAreaReaderComponent with AreaShrinkerComponent with AreaNormalizerComponent {
+    self: RoadNetTableComponent with GraphComponentBase with SessionProviderComponent with ShrinkingRatioComponent =>
+
+    val reader = new DbAreaReader with ShrinkedReader with AreaNormalizer
 }

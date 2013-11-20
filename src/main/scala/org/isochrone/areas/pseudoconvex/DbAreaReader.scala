@@ -50,6 +50,4 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
             }
         }
     }
-
-    val reader = new DbAreaReader
 }

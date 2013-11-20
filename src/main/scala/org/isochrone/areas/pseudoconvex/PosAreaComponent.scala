@@ -48,22 +48,13 @@ trait PosAreaComponent {
     case class Area(points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) extends Logging {
         def cost(nd1: NodeType, nd2: NodeType) = costs((nd1, nd2))
 
-        lazy val minDist = {
-            logger.debug(s"minDist of area of size: ${points.size}")
-            val pairs = for {
-                PointWithPosition(n1, p1) <- points
-                PointWithPosition(n2, p2) <- points if n1 != n2
-            } yield (p1 - p2).norm
-            pairs.min
-        }
         def shrink(rat: Double) = {
             val l1 :: l2 :: rest = points
             val corners = (points ++ List(l1, l2)).sliding(3)
             val it = for (List(l, c, r) <- corners) yield {
-                val dist = minDist * rat
                 val lv = (l.pos - c.pos)
                 val rv = (r.pos - c.pos)
-                val mid = (lv middleVect rv) :* dist
+                val mid = (lv middleVect rv) :* rat
                 PointWithPosition(c.nd, c.pos + mid)
             }
             Area(it.toList, costs)
