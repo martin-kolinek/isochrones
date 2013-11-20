@@ -12,8 +12,8 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
 
     type NodeType = Long
 
-    class DbAreaReader extends AreaReader {
-        def areas = {
+    trait DbAreaReader extends AreaReader {
+        def areas: TraversableOnce[Area] = {
             val q = for {
                 n <- roadNetTables.roadNodes
                 a <- roadNetTables.roadAreas if a.nodeId === n.id

@@ -17,6 +17,7 @@ import org.isochrone.dijkstra.DefaultDijkstraProvider
 import org.isochrone.db.SingleSessionProvider
 import org.isochrone.OptionParserComponent
 import org.isochrone.areas.pseudoconvex.ConfigShrinkRatioComponent
+import org.isochrone.areas.pseudoconvex.AreaFixerReaderComponent
 
 trait AreaFixerExecutor extends ActionExecutor {
     self: Main.type =>
@@ -24,6 +25,7 @@ trait AreaFixerExecutor extends ActionExecutor {
     abstract override def actions = super.actions + ("areafix" --> new ActionComponent
         with OptionsBase
         with ConfigShrinkRatioComponent
+        with AreaFixerReaderComponent
 		with AreaFixerComponent 
 		with Poly2TriTriangulatorComponent
 		with HertelMehlhortModConvexizerComponent 

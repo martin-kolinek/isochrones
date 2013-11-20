@@ -19,7 +19,7 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
         def fixAreas() {
             database.withTransaction { implicit s: Session =>
                 var i = 1
-                for (ar <- shrinkedReader.areas) {
+                for (ar <- reader.areas) {
                     logger.info(s"Working on area nr. $i with size ${ar.points.size}")
                     i += 1
                     val norm = ar.normalize
@@ -51,7 +51,7 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
     }
 }
 
-trait AreaFixerReaderComponent extends DbAreaReaderComponent with AreaShrinkerComponent with AreaNormalizerComponent {
+trait AreaFixerReaderComponent extends DbAreaReaderComponent with AreaShrinkerComponent with AreaNormalizerComponent with PosAreaComponent {
     self: RoadNetTableComponent with GraphComponentBase with SessionProviderComponent with ShrinkingRatioComponent =>
 
     val reader = new DbAreaReader with ShrinkedReader with AreaNormalizer

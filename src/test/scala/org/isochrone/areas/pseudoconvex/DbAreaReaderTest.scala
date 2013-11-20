@@ -15,6 +15,7 @@ class DbAreaReaderTest extends FunSuite with TestDatabase {
 
     test("DbAreaReader reads areas") {
         new DbAreaReaderComponent with RoadNetTableComponent with SingleSessionProvider with TestDatabaseComponent with GraphComponentBase {
+            val reader = new DbAreaReader {}
             val roadNetTables = new DefaultRoadNetTablesWithPrefix("ar_")
             val lst = reader.areas.toList
             assert(lst.size == 2)
