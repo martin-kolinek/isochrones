@@ -53,6 +53,12 @@ class AreaIdentifierTest extends FunSuite with Logging {
         (r1.map(x => x -> 1) ++ r2.map(x => x -> 2)).toMap
     }
 
+    val regions2 = {
+        val r1 = (1 to 13).filterNot(_ == 9)
+        val r2 = Seq(9)
+        (r1.map(x => x -> 1) ++ r2.map(x => x -> 2)).toMap
+    }
+
     test("Area identifier works") {
         new SimpleGraphComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
             type NodeType = Int
@@ -88,6 +94,32 @@ class AreaIdentifierTest extends FunSuite with Logging {
             graph.nodeEccentrities
             init = false
             info(AreaIdentifier.allAreas.head.toString)
+        }
+    }
+
+    test("Area identifier works with regions of size 1") {
+        new SimpleGraphComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
+            type NodeType = Int
+            val graph = new SimpleGraph(edges, regions, positions) {
+                def regForNr(nr: Int) = super.regions.find(_.num == nr).get
+                override def regions = List(2, 1).map(regForNr)
+            }
+            info(graph.regions.toList.toString)
+            val nodePos = graph
+            val expectedAreas = Set(
+                Area(List(1, 2, 6, 5)),
+                Area(List(2, 3, 7, 6)),
+                Area(List(3, 4, 13, 12, 7)),
+                Area(List(5, 6, 11, 10, 9, 10, 8)),
+                Area(List(6, 7, 12, 11)),
+                Area(List(8, 10, 11, 12, 13, 4, 3, 2, 1, 5)))
+
+            val areas = AreaIdentifier.allAreas
+            val set = areas.toSet
+            assert(set.size == areas.size)
+            info(set.toString)
+            info(expectedAreas.toString)
+            assert(expectedAreas == areas.toSet)
         }
     }
 }

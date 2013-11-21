@@ -44,7 +44,7 @@ trait SimpleGraphComponent extends GraphComponentBase {
 
         def regionDiameter(rg: RegionType) = rg.diameter
 
-        def regions = nodeRegionsProc.map(_._2).toSet
+        def regions: Traversable[RegionType] = nodeRegionsProc.map(_._2).toSet
 
         def nodePosition(nd: NodeType) = nodePositions(nd)
 
