@@ -21,12 +21,13 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
                 var i = 1
                 for (ar <- reader.areas) {
                     logger.info(s"Working on area nr. $i with size ${ar.points.size}")
+                    logger.debug(s"area = $ar")
+                    logger.debug(s"norm = ${ar.normalize}")
                     i += 1
-                    val norm = ar.normalize
-                    if (!norm.toLinearRing.isValid)
+                    if (!ar.toLinearRing.isValid)
                         throw new Exception(s"Area $ar not forming valid linear ring")
                     logger.debug("triangulating")
-                    val diagonals = triangulator.triangulate(norm)
+                    val diagonals = triangulator.triangulate(ar)
                     logger.debug("resolving edges")
                     val diagsWithCosts = resolver.resolve(diagonals)
                     logger.debug("filtering")
@@ -54,5 +55,5 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
 trait AreaFixerReaderComponent extends DbAreaReaderComponent with AreaShrinkerComponent with AreaNormalizerComponent with PosAreaComponent {
     self: RoadNetTableComponent with GraphComponentBase with SessionProviderComponent with ShrinkingRatioComponent =>
 
-    val reader = new DbAreaReader with ShrinkedReader with AreaNormalizer
+    val reader = new DbAreaReader with AreaNormalizer with ShrinkedReader
 }

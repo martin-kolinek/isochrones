@@ -67,4 +67,16 @@ class PosAreaComponentTest extends FunSuite {
             assert(lr.isValid)
         }
     }
+
+    test("normalize works") {
+        new PosAreaComponent with GraphComponentBase {
+            type NodeType = Int
+            val area = Area(List(PointWithPosition(1, List(48.0, 17.0)),
+                PointWithPosition(1, List(48.0, 16.99)),
+                PointWithPosition(1, List(47.99, 16.99))), Map())
+            val norm = area.normalize
+            info(norm.toString)
+            assert(norm.points.map(_.pos).forall(x => x.norm <= 1))
+        }
+    }
 }

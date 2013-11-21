@@ -5,7 +5,7 @@ import org.isochrone.OptionParserComponent
 import scopt.OptionParser
 import org.isochrone.ArgumentParser
 
-trait AreaShrinkerComponent extends AreaReaderComponent with PosAreaComponent  {
+trait AreaShrinkerComponent extends AreaReaderComponent with PosAreaComponent {
     self: GraphComponentBase with ShrinkingRatioComponent =>
 
     trait ShrinkedReader extends AreaReader {
@@ -18,11 +18,11 @@ trait ShrinkingRatioComponent {
 }
 
 trait ShrinkRatioParserComponent extends OptionParserComponent {
-    val amountLens = registerConfig(0.01)
+    val amountLens = registerConfig(0.000001)
     abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
         super.parserOptions(pars)
         pars.opt[Double]("shrink-amount").
-            text("The ratio from minimum distance between points in area used to shrink areas for polygonization (default = 0.01)").
+            text("The ratio from minimum distance between points in area used to shrink areas for polygonization (default = 0.000001)").
             action((x, c) => amountLens.set(c)(x))
     }
 }

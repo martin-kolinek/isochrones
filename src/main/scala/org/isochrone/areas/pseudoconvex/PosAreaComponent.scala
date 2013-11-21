@@ -70,14 +70,14 @@ trait PosAreaComponent {
         def toLineString = geomFact.createLineString(coords)
 
         private case class BoundBox(top: Double, left: Double, bottom: Double, right: Double) {
-            val width = top - bottom
-            val height = right - left
+            val height = top - bottom
+            val width = right - left
             lazy val longer = {
                 math.max(width, height)
             }
 
             lazy val center = {
-                List(top - height / 2, left + width / 2)
+                List(left + width / 2, bottom + height / 2)
             }
         }
 
@@ -94,7 +94,6 @@ trait PosAreaComponent {
                 val pos = (pt.pos - bounds.center) :/ bounds.longer
                 PointWithPosition(pt.nd, pos)
             }
-
             Area(points.map(normPoint), costs)
         }
 
