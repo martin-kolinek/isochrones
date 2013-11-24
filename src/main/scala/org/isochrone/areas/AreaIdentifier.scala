@@ -36,8 +36,8 @@ trait AreaIdentifierComponent extends AreaComponent {
         }
 
         @tailrec
-        def completeArea(part: List[NodeType], firstNode: NodeType, done: DoneEdgesSet): (Option[Area], DoneEdgesSet) = {
-            val (last :: before :: _) = part
+        def completeArea(part: List[NodeType], firstEdge: (NodeType, NodeType), done: DoneEdgesSet): (Option[Area], DoneEdgesSet) = {
+            val (last :: (before :: _)) = part
             val (lx, ly) = nodePos.nodePosition(last)
             val (bx, by) = nodePos.nodePosition(before)
             val x = bx - lx
@@ -45,7 +45,7 @@ trait AreaIdentifierComponent extends AreaComponent {
 
             val lastAngle = math.atan2(y, x)
             logger.debug(s"Investigating neighbours of $last ($lx, $ly), b = $before ($bx, $by), with b - l = ($x, $y), lastAngle = $lastAngle")
-            val filtered = graph.neighbours(last).map(_._1).filter(x => !done.contains(last -> x))
+            val filtered = graph.neighbours(last).map(_._1).filter(x => !done.contains(last -> x) || last -> x == firstEdge)
             val next =
                 if (filtered.isEmpty) None
                 else Some(filtered.minBy {
@@ -65,22 +65,25 @@ trait AreaIdentifierComponent extends AreaComponent {
             if (next.map(done.regionDone).getOrElse(true)) {
                 logger.debug(s"Abort area")
                 (None, done)
-            } else if (next.get == firstNode) {
+            } else if ((last, next.get) == firstEdge) {
                 logger.debug(s"Completed area")
-                (Some(Area(part)), done.withEdge(last -> next.get))
+                assert(part.tail.size > 2)
+                if (part.size <= 2)
+                    throw new Exception("should not happen")
+                (Some(Area(part.tail)), done.withEdge(last -> next.get))
             } else
-                completeArea(next.get :: part, firstNode, done.withEdge(last -> next.get))
+                completeArea(next.get :: part, firstEdge, done.withEdge(last -> next.get))
         }
 
         @tailrec
         def startingEdgesAreas(edges: List[(NodeType, NodeType)], done: DoneEdgesSet, current: List[Area]): (List[Area], DoneEdgesSet) = {
             edges match {
                 case Nil => current -> done
-                case (edge@(start, end)) :: tail => {
+                case (edge @ (start, end)) :: tail => {
                     if (done.contains(edge))
                         startingEdgesAreas(tail, done, current)
                     else {
-                        val (area, newDone) = completeArea(List(end, start), start, done.withEdge(start -> end))
+                        val (area, newDone) = completeArea(List(end, start), edge, done.withEdge(start -> end))
                         val newList = area match {
                             case None => current
                             case Some(ar) => ar :: current

@@ -34,7 +34,7 @@ trait SimpleGraphComponent extends GraphComponentBase {
             x.toMap
         }
 
-        def nodes = (neigh.keys ++ neigh.values.flatMap(identity).map(_._1)).toSet
+        def nodes: Traversable[NodeType] = (neigh.keys ++ neigh.values.flatMap(identity).map(_._1)).toSet
 
         def neighbours(node: NodeType) = neigh.getOrElse(node, Seq())
 
