@@ -9,7 +9,7 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.graphlib.GraphComponentBase
 
-trait AreaSaverComponent extends AreaIdentifierComponent with GraphComponentBase {
+trait AreaSaverComponent extends AreaIdentifierComponent with AreaCheckerComponent with GraphComponentBase {
     self: GraphWithRegionsComponent with NodePositionComponent with DatabaseProvider with RoadNetTableComponent =>
 
     type NodeType <: Long
@@ -25,6 +25,7 @@ trait AreaSaverComponent extends AreaIdentifierComponent with GraphComponentBase
                 } {
                     if (areaId % 100 == 0 && seq == 0)
                         logger.info(s"Saving area $areaId")
+                    assert(!AreaChecker.areaHasDiagonals(area))
                     roadNetTables.roadAreas.insert((areaId, pt, seq))
                 }
             }
