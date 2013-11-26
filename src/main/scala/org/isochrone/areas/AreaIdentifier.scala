@@ -17,17 +17,33 @@ trait AreaIdentifierComponent extends AreaComponent {
 
     object AreaIdentifier extends Logging {
 
-        class DoneEdgesSet(doneEdges: Set[(NodeType, NodeType)], doneRegions: Set[RegionType]) {
-            def this() = this(Set(), Set())
+        class DoneEdgesSet(private val doneEdges: Set[(NodeType, NodeType)], private val doneRegions: Set[RegionType], currentRegion: Option[RegionType]) {
+            def this() = this(Set(), Set(), None)
 
-            def withEdge(edg: (NodeType, NodeType)) = new DoneEdgesSet(doneEdges + edg, doneRegions)
-            def finishRegion(reg: RegionType) = new DoneEdgesSet(Set(), doneRegions + reg)
+            def withEdge(edg: (NodeType, NodeType)) = new DoneEdgesSet(doneEdges + edg, doneRegions, currentRegion)
+            def finishRegion(reg: RegionType) = new DoneEdgesSet(Set(), doneRegions + reg, currentRegion)
 
             def contains(edg: (NodeType, NodeType)) = {
                 doneEdges.contains(edg)
             }
 
             def regionDone(nd: NodeType) = graph.nodeRegion(nd).map(doneRegions.contains).getOrElse(true)
+
+            def invalidated(other: DoneEdgesSet) = {
+                def edgeNotInCurrentRegion(edg: (NodeType, NodeType)) = {
+                    val (n1, n2) = edg
+                    val sq = for {
+                        n <- Seq(n1, n2)
+                        r <- graph.nodeRegion(n)
+                    } yield Some(r) != currentRegion
+                    sq == Seq(true, true)
+                }
+
+                val wholeInDoneRegion = doneEdges.filter(edgeNotInCurrentRegion)
+                new DoneEdgesSet(other.doneEdges ++ wholeInDoneRegion, other.doneRegions, currentRegion)
+            }
+
+            def withCurrentRegion(r: RegionType) = new DoneEdgesSet(doneEdges, doneRegions, Some(r))
         }
 
         def normalizeAngle(angle: Double) = {
@@ -68,8 +84,6 @@ trait AreaIdentifierComponent extends AreaComponent {
             } else if ((last, next.get) == firstEdge) {
                 logger.debug(s"Completed area")
                 assert(part.tail.size > 2)
-                if (part.size <= 2)
-                    throw new Exception("should not happen")
                 (Some(Area(part.tail)), done.withEdge(last -> next.get))
             } else
                 completeArea(next.get :: part, firstEdge, done.withEdge(last -> next.get))
@@ -84,11 +98,10 @@ trait AreaIdentifierComponent extends AreaComponent {
                         startingEdgesAreas(tail, done, current)
                     else {
                         val (area, newDone) = completeArea(List(end, start), edge, done.withEdge(start -> end))
-                        val newList = area match {
-                            case None => current
-                            case Some(ar) => ar :: current
+                        area match {
+                            case None => startingEdgesAreas(tail, newDone.invalidated(done), current)
+                            case Some(ar) => startingEdgesAreas(tail, newDone, ar :: current)
                         }
-                        startingEdgesAreas(tail, newDone, newList)
                     }
 
                 }
@@ -116,7 +129,7 @@ trait AreaIdentifierComponent extends AreaComponent {
             logger.info(s"Computing areas for region $rg")
             val nodes = graph.singleRegion(rg).nodes.toList
             logger.debug(s"Nodes for region: $nodes")
-            val areas = areasForNodes(nodes, done, Nil)
+            val areas = areasForNodes(nodes, done.withCurrentRegion(rg), Nil)
             (rgs.tail, areas, done.finishRegion(rg))
         }
 
