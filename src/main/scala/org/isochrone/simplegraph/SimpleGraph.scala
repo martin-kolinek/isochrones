@@ -55,10 +55,5 @@ trait SimpleGraphComponent extends GraphComponentBase {
         def apply(edges: (NodeType, NodeType, Double)*) = new SimpleGraph(edges, (edges.map(_._1) ++ edges.map(_._2)).map(_ -> 0).toMap, (edges.map(_._1) ++ edges.map(_._2)).map(_ -> (0.0 -> 0.0)).toMap)
         def apply(edges: Seq[(NodeType, NodeType, Double)], nodes: Map[NodeType, Int]) = new SimpleGraph(edges, nodes, nodes.map(_._1 -> (0.0 -> 0.0)).toMap)
         def apply(edges: Seq[(NodeType, NodeType, Double)], regions: Map[NodeType, Int], positions: Map[NodeType, (Double, Double)]) = new SimpleGraph(edges, regions, positions)
-
-        def undirNoCost(edges: (NodeType, NodeType)*) = {
-            val undir = edges ++ edges.map(_.swap)
-            apply(undir.map(x => (x._1, x._2, 1.0)): _*)
-        }
     }
 }
