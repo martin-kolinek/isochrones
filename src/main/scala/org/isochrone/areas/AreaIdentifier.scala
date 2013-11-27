@@ -40,7 +40,8 @@ trait AreaIdentifierComponent extends AreaComponent {
                 }
 
                 val wholeInDoneRegion = doneEdges.filter(edgeNotInCurrentRegion)
-                new DoneEdgesSet(other.doneEdges ++ wholeInDoneRegion, other.doneRegions, currentRegion)
+                //new DoneEdgesSet(other.doneEdges ++ wholeInDoneRegion, other.doneRegions, currentRegion)
+                other
             }
 
             def withCurrentRegion(r: RegionType) = new DoneEdgesSet(doneEdges, doneRegions, Some(r))

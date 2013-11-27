@@ -31,7 +31,7 @@ trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
                     logger.debug("resolving edges")
                     val diagsWithCosts = resolver.resolve(diagonals)
                     logger.debug("filtering")
-                    val filtered = convexizer.convexize(ar, diagsWithCosts)
+                    val filtered = diagsWithCosts // convexizer.convexize(ar, diagsWithCosts)
                     def q(n1: Long, n2: Long) = for {
                         nd1 <- roadNetTables.roadNodes if nd1.id === n1
                         nd2 <- roadNetTables.roadNodes if nd2.id === n2
