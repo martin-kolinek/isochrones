@@ -17,7 +17,7 @@ trait ConvexizerComponent extends PosAreaComponent {
 }
 
 trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent {
-    self: GraphComponentBase with DijkstraProvider =>
+    self: GraphComponentBase with DijkstraProvider with AllCostsForAreaComponent =>
 
     class AreaWithDiagonalsGraph(mp: Map[NodeType, Seq[(NodeType, Double)]]) extends GraphType[NodeType] {
         def withoutEdge(n1: NodeType, n2: NodeType) = {
@@ -60,22 +60,31 @@ trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent {
 
     object HertelMehlhortModConvexizer extends Convexizer {
         @tailrec
-        private def conv(ar: AreaWithDiagonalsGraph, diags: List[EdgeWithCost], needed: List[EdgeWithCost]): List[EdgeWithCost] = diags match {
+        private def conv(ar: AreaWithDiagonalsGraph, allCosts: List[EdgeWithCost], diags: List[EdgeWithCost], needed: List[EdgeWithCost]): List[EdgeWithCost] = diags match {
             case Nil => needed
             case candidate :: rest => {
                 val Seq(a, b) = candidate.nds.toSeq
                 val noedg = ar.withoutEdge(a, b)
                 val comp = dijkstraForGraph(noedg)
-                if (comp.DijkstraHelpers.nodesWithin(a, candidate.cost).map(_._1).exists(b == _))
-                    conv(noedg, rest, needed)
+                val notRequired = allCosts.flatMap { e =>
+                    val Seq(a, b) = e.nds.toSeq
+                    Seq((a, b, e.cost), (b, a, e.cost))
+                }.forall {
+                    case (a, b, cost) => {
+                        val noedgCost = comp.DijkstraHelpers.distance(a, b)
+                        noedgCost <= cost
+                    }
+                }
+                if (notRequired)
+                    conv(noedg, allCosts, rest, needed)
                 else
-                    conv(ar, rest, candidate :: needed)
+                    conv(ar, allCosts, rest, candidate :: needed)
             }
         }
 
         def convexize(ar: Area, diagonals: Traversable[EdgeWithCost]) = {
             val grp = AreaWithDiagonalsGraph(ar, diagonals)
-            conv(grp, diagonals.toList, Nil)
+            conv(grp, allCostsForArea(ar).toList, diagonals.toList, Nil)
         }
     }
 

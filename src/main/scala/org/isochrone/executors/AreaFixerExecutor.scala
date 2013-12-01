@@ -18,6 +18,7 @@ import org.isochrone.db.SingleSessionProvider
 import org.isochrone.OptionParserComponent
 import org.isochrone.areas.pseudoconvex.ConfigShrinkRatioComponent
 import org.isochrone.areas.pseudoconvex.AreaFixerReaderComponent
+import org.isochrone.areas.pseudoconvex.DbAllCostsForAreaComponent
 
 trait AreaFixerExecutor extends ActionExecutor {
     self: Main.type =>
@@ -28,7 +29,8 @@ trait AreaFixerExecutor extends ActionExecutor {
         with AreaFixerReaderComponent
 		with AreaFixerComponent 
 		with Poly2TriTriangulatorComponent
-		with HertelMehlhortModConvexizerComponent 
+		with HertelMehlhortModConvexizerComponent
+		with DbAllCostsForAreaComponent
 		with ConfigRoadNetTableComponent
 		with GraphComponentBase
 		with DbEdgeCostResolverComponent
@@ -39,6 +41,7 @@ trait AreaFixerExecutor extends ActionExecutor {
 		with DefaultDijkstraProvider
 		with SingleSessionProvider
 		with OptionParserComponent {
+        override type NodeType = Long
     	val execute = () => AreaFixer.fixAreas()
     })
 }

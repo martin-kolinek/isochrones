@@ -45,7 +45,7 @@ trait PosAreaComponent {
 
     case class EdgeWithCost(nds: Set[NodeType], cost: Double)
 
-    case class Area(points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) extends Logging {
+    case class Area(id:Long, points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) extends Logging {
         def cost(nd1: NodeType, nd2: NodeType) = costs((nd1, nd2))
 
         def shrink(rat: Double) = {
@@ -57,7 +57,7 @@ trait PosAreaComponent {
                 val mid = (lv middleVect rv) :* rat
                 PointWithPosition(c.nd, c.pos + mid)
             }
-            Area(it.toList, costs)
+            Area(id, it.toList, costs)
         }
 
         lazy val edgeSet = {
@@ -94,7 +94,7 @@ trait PosAreaComponent {
                 val pos = (pt.pos - bounds.center) :/ bounds.longer
                 PointWithPosition(pt.nd, pos)
             }
-            Area(points.map(normPoint), costs)
+            Area(id, points.map(normPoint), costs)
         }
 
         override def toString = s"${points.map(_.nd)}, ${toLineString.toString}"

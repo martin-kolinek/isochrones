@@ -46,7 +46,7 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
                 val csts = (costs :+ finCost).flatMap {
                     case (_, n1, n2, c1, c2) => List((n1, n2) -> c1, (n2, n1) -> c2)
                 }.toMap
-                Area(pts, csts)
+                Area(l.head._1, pts, csts)
             }
         }
     }

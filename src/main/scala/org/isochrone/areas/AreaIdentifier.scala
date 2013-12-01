@@ -29,7 +29,6 @@ trait AreaIdentifierComponent extends AreaComponent {
 
             def regionDone(nd: NodeType) = graph.nodeRegion(nd).map(doneRegions.contains).getOrElse(true)
 
-
             def withCurrentRegion(r: RegionType) = new DoneEdgesSet(doneEdges, doneRegions, Some(r))
         }
 

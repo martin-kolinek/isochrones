@@ -41,7 +41,7 @@ class PosAreaComponentTest extends FunSuite {
 
     test("simple area is linearring") {
         new PtsComponent {
-            val simple = Area(List(0, 1, 2, 3).map(pts), Map())
+            val simple = Area(0, List(0, 1, 2, 3).map(pts), Map())
             info(simple.toLinearRing.toString)
             assert(simple.toLinearRing.isValid)
         }
@@ -49,7 +49,7 @@ class PosAreaComponentTest extends FunSuite {
 
     test("shrinking an area creates a linearring") {
         new PtsComponent {
-            val area = Area(List(0, 1, 4, 1, 2, 3).map(pts), Map())
+            val area = Area(0, List(0, 1, 4, 1, 2, 3).map(pts), Map())
             assert(!area.toLinearRing.isValid)
             val shr = area.shrink(0.01)
             info(shr.toLinearRing.toString)
@@ -59,7 +59,7 @@ class PosAreaComponentTest extends FunSuite {
 
     test("shrinking a more difficult area creates a linearring") {
         new PtsComponent {
-            val area = Area(List(0, 1, 4, 5, 4, 6, 4, 1, 2, 3).map(pts), Map())
+            val area = Area(0, List(0, 1, 4, 5, 4, 6, 4, 1, 2, 3).map(pts), Map())
             assert(!area.toLinearRing.isValid)
             val shrinked = area.shrink(0.01)
             val lr = shrinked.toLinearRing
@@ -71,7 +71,7 @@ class PosAreaComponentTest extends FunSuite {
     test("normalize works") {
         new PosAreaComponent with GraphComponentBase {
             type NodeType = Int
-            val area = Area(List(PointWithPosition(1, List(48.0, 17.0)),
+            val area = Area(0, List(PointWithPosition(1, List(48.0, 17.0)),
                 PointWithPosition(1, List(48.0, 16.99)),
                 PointWithPosition(1, List(47.99, 16.99))), Map())
             val norm = area.normalize
