@@ -29,20 +29,6 @@ trait AreaIdentifierComponent extends AreaComponent {
 
             def regionDone(nd: NodeType) = graph.nodeRegion(nd).map(doneRegions.contains).getOrElse(true)
 
-            def invalidated(other: DoneEdgesSet) = {
-                def edgeNotInCurrentRegion(edg: (NodeType, NodeType)) = {
-                    val (n1, n2) = edg
-                    val sq = for {
-                        n <- Seq(n1, n2)
-                        r <- graph.nodeRegion(n)
-                    } yield Some(r) != currentRegion
-                    sq == Seq(true, true)
-                }
-
-                val wholeInDoneRegion = doneEdges.filter(edgeNotInCurrentRegion)
-                //new DoneEdgesSet(other.doneEdges ++ wholeInDoneRegion, other.doneRegions, currentRegion)
-                other
-            }
 
             def withCurrentRegion(r: RegionType) = new DoneEdgesSet(doneEdges, doneRegions, Some(r))
         }
@@ -100,7 +86,7 @@ trait AreaIdentifierComponent extends AreaComponent {
                     else {
                         val (area, newDone) = completeArea(List(end, start), edge, done.withEdge(start -> end))
                         area match {
-                            case None => startingEdgesAreas(tail, newDone.invalidated(done), current)
+                            case None => startingEdgesAreas(tail, done, current)
                             case Some(ar) => startingEdgesAreas(tail, newDone, ar :: current)
                         }
                     }
