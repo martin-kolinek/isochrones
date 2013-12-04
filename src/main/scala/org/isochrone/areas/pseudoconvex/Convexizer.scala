@@ -5,6 +5,7 @@ import shapeless.Lens
 import org.isochrone.graphlib.GraphType
 import org.isochrone.dijkstra.DijkstraProvider
 import scala.annotation.tailrec
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait ConvexizerComponent extends PosAreaComponent {
     self: GraphComponentBase =>
@@ -58,11 +59,12 @@ trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent {
         }
     }
 
-    object HertelMehlhortModConvexizer extends Convexizer {
+    object HertelMehlhortModConvexizer extends Convexizer with Logging {
         @tailrec
         private def conv(ar: AreaWithDiagonalsGraph, allCosts: List[EdgeWithCost], diags: List[EdgeWithCost], needed: List[EdgeWithCost]): List[EdgeWithCost] = diags match {
             case Nil => needed
             case candidate :: rest => {
+                logger.debug(s"processing edge $candidate, remaining ${rest.size}")
                 val Seq(a, b) = candidate.nds.toSeq
                 val noedg = ar.withoutEdge(a, b)
                 val comp = dijkstraForGraph(noedg)

@@ -21,6 +21,7 @@ trait DbAllCostsForAreaComponent extends AllCostsForAreaComponent with GraphComp
             ar2 <- roadNetTables.roadAreas if ar1.id === ar2.id && ar1.nodeId < ar2.nodeId
             n1 <- roadNetTables.roadNodes if n1.id === ar1.nodeId
             n2 <- roadNetTables.roadNodes if n2.id === ar2.nodeId
+            if ar1.id === ar.id
         } yield (n1.id, n2.id, getNoRoadCost(n1.geom, n2.geom))
         q.list()(session).map {
             case (a, b, cost) => EdgeWithCost(Set(a, b), cost)
