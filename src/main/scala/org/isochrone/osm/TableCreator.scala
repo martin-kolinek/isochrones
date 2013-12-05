@@ -32,6 +32,7 @@ trait TableCreatorComponent extends RoadNetPrimaryKeyCreator {
                     roadNetTables.roadRegions.ddl.create
                     visualizationTables.roadNetVisualization.ddl.create
                     roadNetTables.roadAreas.ddl.create
+                    roadNetTables.areaGeoms.ddl.create
                     createRoadNetPrimaryKey
                     Q.updateNA(s"""CREATE INDEX "ix_${visualizationTables.roadNetVisualization.tableName}" ON "${visualizationTables.roadNetVisualization.tableName}" using GIST (linestring)""").execute
                     Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}" ON "${roadNetTables.roadNodes.tableName}" using GIST (geom)""").execute
@@ -47,6 +48,7 @@ trait TableCreatorComponent extends RoadNetPrimaryKeyCreator {
                     roadNetTables.roadRegions.ddl.drop
                     roadNetTables.roadAreas.ddl.drop
                     visualizationTables.roadNetVisualization.ddl.drop
+                    roadNetTables.areaGeoms.ddl.drop
 
             }
         }

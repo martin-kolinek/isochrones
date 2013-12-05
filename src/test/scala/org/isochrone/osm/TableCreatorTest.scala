@@ -21,7 +21,10 @@ class TableCreatorTest extends FunSuite with TestDatabase {
         import comp._
         Seq(Query(roadNetTables.roadNet),
             Query(roadNetTables.roadNodes),
-            Query(visualizationTables.roadNetVisualization))
+            Query(visualizationTables.roadNetVisualization),
+            Query(roadNetTables.roadAreas),
+            Query(roadNetTables.roadRegions),
+            Query(roadNetTables.areaGeoms))
     }
 
     test("TableCreator creates tables") {

@@ -25,7 +25,7 @@ trait AreaSaverComponent extends AreaIdentifierComponent with GraphComponentBase
                 } {
                     if (areaId % 100 == 0 && seq == 0)
                         logger.info(s"Saving area $areaId")
-                    roadNetTables.roadAreas.insert((areaId, pt, seq))
+                    roadNetTables.roadAreas.insert((areaId, pt, seq, 0.0))
                 }
             }
         }

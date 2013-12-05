@@ -30,11 +30,18 @@ class RegionTable(name: String) extends Table[(Int, Double)](name) {
     def * = id ~ diameter
 }
 
-class AreaTable(name: String) extends Table[(Long, Long, Int)](name) {
+class AreaTable(name: String) extends Table[(Long, Long, Int, Double)](name) {
     def id = column[Long]("id")
     def nodeId = column[Long]("node_id")
     def sequenceNo = column[Int]("sequence_no")
-    def * = id ~ nodeId ~ sequenceNo
+    def costToCover = column[Double]("cost_to_cover")
+    def * = id ~ nodeId ~ sequenceNo ~ costToCover
+}
+
+class AreaGeometriesTable(name: String) extends Table[(Long, Geometry)](name) {
+    def id = column[Long]("id")
+    def geom = column[Geometry]("geom")
+    def * = id ~ geom
 }
 
 trait RoadNetTables {
@@ -42,6 +49,7 @@ trait RoadNetTables {
     val roadNodes: NodeTable
     val roadRegions: RegionTable
     val roadAreas: AreaTable
+    val areaGeoms: AreaGeometriesTable
 }
 
 trait RoadNetTableComponent {
@@ -61,6 +69,7 @@ class DefaultRoadNetTablesWithPrefix(prefix: String) extends RoadNetTables {
     val roadNodes = new NodeTable(prefix + "road_nodes")
     val roadRegions = new RegionTable(prefix + "road_regions")
     val roadAreas = new AreaTable(prefix + "road_areas")
+    val areaGeoms = new AreaGeometriesTable(prefix + "area_geoms")
 }
 
 trait ConfigRoadNetTableComponent extends RoadNetTableComponent with RoadNetTableParsingComponent {
