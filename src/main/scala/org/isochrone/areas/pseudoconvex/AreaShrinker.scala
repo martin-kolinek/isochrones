@@ -4,6 +4,8 @@ import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.OptionParserComponent
 import scopt.OptionParser
 import org.isochrone.ArgumentParser
+import org.isochrone.areas.PosAreaComponent
+import org.isochrone.areas.AreaReaderComponent
 
 trait AreaShrinkerComponent extends AreaReaderComponent with PosAreaComponent {
     self: GraphComponentBase with ShrinkingRatioComponent =>

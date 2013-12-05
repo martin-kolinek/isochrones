@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Coordinate
 import spire.syntax.normedVectorSpace._
 import spire.std.double._
 import spire.std.seq._
+import org.isochrone.areas.PosAreaComponent
 
 class PosAreaComponentTest extends FunSuite {
     trait PtsComponent extends PosAreaComponent with GraphComponentBase {

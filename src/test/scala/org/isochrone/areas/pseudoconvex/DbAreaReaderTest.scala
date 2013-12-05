@@ -10,6 +10,7 @@ import org.isochrone.db.TestDatabaseComponent
 import org.isochrone.db.TestDatabase
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.db.DefaultRoadNetTablesWithPrefix
+import org.isochrone.areas.DbAreaReaderComponent
 
 class DbAreaReaderTest extends FunSuite with TestDatabase {
 

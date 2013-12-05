@@ -9,7 +9,7 @@ import org.isochrone.areas.pseudoconvex.HertelMehlhortModConvexizerComponent
 import org.isochrone.db.ConfigRoadNetTableComponent
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.areas.pseudoconvex.DbEdgeCostResolverComponent
-import org.isochrone.areas.pseudoconvex.DbAreaReaderComponent
+import org.isochrone.areas.DbAreaReaderComponent
 import org.isochrone.osm.DefaultCostAssignerComponent
 import org.isochrone.db.FromOptionDatabaseComponent
 import org.isochrone.areas.pseudoconvex.AreaShrinkerComponent

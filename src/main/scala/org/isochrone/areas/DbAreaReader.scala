@@ -1,7 +1,6 @@
-package org.isochrone.areas.pseudoconvex
+package org.isochrone.areas
 
 import org.isochrone.util.db.MyPostgresDriver.simple._
-import slick.jdbc.StaticQuery.interpolation
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.util._

@@ -5,6 +5,7 @@ import org.isochrone.db.SessionProviderComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.osm.CostAssignerComponent
+import org.isochrone.areas.PosAreaComponent
 
 trait AllCostsForAreaComponent extends PosAreaComponent {
     self: GraphComponentBase =>

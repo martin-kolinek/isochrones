@@ -8,6 +8,7 @@ import spire.syntax.normedVectorSpace._
 import spire.std.double._
 import spire.std.seq._
 import org.poly2tri.Poly2Tri
+import org.isochrone.areas.PosAreaComponent
 
 trait TriangulatorComponent extends PosAreaComponent {
     self: GraphComponentBase =>

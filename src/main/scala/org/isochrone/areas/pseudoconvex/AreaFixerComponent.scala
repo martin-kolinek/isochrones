@@ -8,6 +8,9 @@ import org.isochrone.graphlib.GraphComponentBase
 import com.vividsolutions.jts.geom.Geometry
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.db.SessionProviderComponent
+import org.isochrone.areas.PosAreaComponent
+import org.isochrone.areas.AreaReaderComponent
+import org.isochrone.areas.DbAreaReaderComponent
 
 trait AreaFixerComponent extends PosAreaComponent with GraphComponentBase {
     self: TriangulatorComponent with EdgeCostResolverComponent with ConvexizerComponent with AreaReaderComponent with DatabaseProvider with RoadNetTableComponent with CostAssignerComponent =>

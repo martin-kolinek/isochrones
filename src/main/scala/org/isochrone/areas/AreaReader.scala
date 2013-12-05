@@ -1,6 +1,5 @@
-package org.isochrone.areas.pseudoconvex
+package org.isochrone.areas
 
-import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.graphlib.GraphComponentBase
 
 trait AreaReaderComponent extends PosAreaComponent {

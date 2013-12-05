@@ -1,8 +1,6 @@
-package org.isochrone.areas.pseudoconvex
+package org.isochrone.areas
 
 import org.isochrone.graphlib.GraphComponentBase
-import spire.algebra.NormedVectorSpace
-import spire.algebra.MetricSpace
 import spire.syntax.normedVectorSpace._
 import spire.std.seq._
 import spire.std.double._

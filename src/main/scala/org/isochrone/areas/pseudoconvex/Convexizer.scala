@@ -6,6 +6,7 @@ import org.isochrone.graphlib.GraphType
 import org.isochrone.dijkstra.DijkstraProvider
 import scala.annotation.tailrec
 import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.areas.PosAreaComponent
 
 trait ConvexizerComponent extends PosAreaComponent {
     self: GraphComponentBase =>
