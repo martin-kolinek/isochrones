@@ -18,6 +18,8 @@ class DbAllCostsForAreaTest extends FunSuite with TestDatabase {
             val roadNetTables = new DefaultRoadNetTablesWithPrefix("ar_")
         }
         val costs = comp.allCostsForArea(comp.Area(1, Nil, Map()))
-        assert(costs.size == 12)
+        info(costs.toString)
+        assert(costs.size == 6)
+        
     }
 }
