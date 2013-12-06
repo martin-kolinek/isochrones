@@ -13,7 +13,7 @@ import org.isochrone.areas.PosAreaComponent
 trait TriangulatorComponent extends PosAreaComponent {
     self: GraphComponentBase =>
     trait Triangulator {
-        def triangulate(ar: Area): Traversable[(NodeType, NodeType)]
+        def triangulate(ar: PosArea): Traversable[(NodeType, NodeType)]
     }
 
     val triangulator: Triangulator
@@ -26,19 +26,19 @@ trait Poly2TriTriangulatorComponent extends TriangulatorComponent {
     type NodeType
 
     trait Poly2TriTriangulator extends Triangulator {
-        def areaToPolygon(ar: Area) = {
+        def areaToPolygon(ar: PosArea) = {
             val pts = ar.points.map(x => new PolygonPoint(x.pos.x, x.pos.y))
             new Polygon(pts)
         }
 
-        class AreaPosMap(ar: Area) {
+        class AreaPosMap(ar: PosArea) {
             private val mp = ar.points.map(x => (x.pos.x, x.pos.y) -> x.nd).toMap
             def getNode(x: Double, y: Double) = {
                 mp((x, y))
             }
         }
 
-        def triangulate(ar: Area): Traversable[(NodeType, NodeType)] = {
+        def triangulate(ar: PosArea): Traversable[(NodeType, NodeType)] = {
             val poly = areaToPolygon(ar)
             val posMap = new AreaPosMap(ar)
             Poly2Tri.triangulate(poly)

@@ -7,7 +7,7 @@ class TriangulatorTest extends FunSuite {
     test("Poly2TriTriangulator triangulates") {
         new Poly2TriTriangulatorComponent with GraphComponentBase {
             type NodeType = Int
-            val ar = Area(0, List(PointWithPosition(1, List(0.1, 2.3)),
+            val ar = PosArea(0, List(PointWithPosition(1, List(0.1, 2.3)),
                 PointWithPosition(2, List(1.89, 2.1)),
                 PointWithPosition(3, List(1.9, 0.01)),
                 PointWithPosition(4, List(0.03, 0.03))), Map())

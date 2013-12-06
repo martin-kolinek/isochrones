@@ -9,14 +9,14 @@ import org.isochrone.areas.PosAreaComponent
 
 trait AllCostsForAreaComponent extends PosAreaComponent {
     self: GraphComponentBase =>
-    def allCostsForArea(ar: Area): Traversable[EdgeWithCost]
+    def allCostsForArea(ar: PosArea): Traversable[EdgeWithCost]
 }
 
 trait DbAllCostsForAreaComponent extends AllCostsForAreaComponent with GraphComponentBase {
     self: RoadNetTableComponent with SessionProviderComponent with CostAssignerComponent =>
     type NodeType = Long
 
-    def allCostsForArea(ar: Area) = {
+    def allCostsForArea(ar: PosArea) = {
         val q = for {
             ar1 <- roadNetTables.roadAreas
             ar2 <- roadNetTables.roadAreas if ar1.id === ar2.id && ar1.nodeId < ar2.nodeId

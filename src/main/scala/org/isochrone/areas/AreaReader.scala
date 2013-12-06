@@ -6,7 +6,7 @@ trait AreaReaderComponent extends PosAreaComponent {
     self: GraphComponentBase =>
 
     trait AreaReader {
-        def areas: TraversableOnce[Area]
+        def areas: TraversableOnce[PosArea]
     }
 
     val reader: AreaReader

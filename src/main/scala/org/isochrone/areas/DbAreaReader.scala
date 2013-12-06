@@ -12,7 +12,7 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
     type NodeType = Long
 
     trait DbAreaReader extends AreaReader {
-        def areas: TraversableOnce[Area] = {
+        def areas: TraversableOnce[PosArea] = {
             val q = for {
                 n <- roadNetTables.roadNodes
                 a <- roadNetTables.roadAreas if a.nodeId === n.id
@@ -45,7 +45,7 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
                 val csts = (costs :+ finCost).flatMap {
                     case (_, n1, n2, c1, c2) => List((n1, n2) -> c1, (n2, n1) -> c2)
                 }.toMap
-                Area(l.head._1, pts, csts)
+                PosArea(l.head._1, pts, csts)
             }
         }
     }

@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.PrecisionModel
 import com.vividsolutions.jts.geom.Coordinate
 import com.typesafe.scalalogging.slf4j.Logging
 
-trait PosAreaComponent {
+trait PosAreaComponent extends AreaComponent {
     self: GraphComponentBase =>
 
     type Position = List[Double]
@@ -43,7 +43,7 @@ trait PosAreaComponent {
 
     case class EdgeWithCost(nds: Set[NodeType], cost: Double)
 
-    case class Area(id:Long, points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) extends Logging {
+    case class PosArea(id: Long, points: List[PointWithPosition], costs: Map[(NodeType, NodeType), Double]) extends Logging {
         def cost(nd1: NodeType, nd2: NodeType) = costs((nd1, nd2))
 
         def shrink(rat: Double) = {
@@ -55,7 +55,7 @@ trait PosAreaComponent {
                 val mid = (lv middleVect rv) :* rat
                 PointWithPosition(c.nd, c.pos + mid)
             }
-            Area(id, it.toList, costs)
+            PosArea(id, it.toList, costs)
         }
 
         lazy val edgeSet = {
@@ -92,9 +92,11 @@ trait PosAreaComponent {
                 val pos = (pt.pos - bounds.center) :/ bounds.longer
                 PointWithPosition(pt.nd, pos)
             }
-            Area(id, points.map(normPoint), costs)
+            PosArea(id, points.map(normPoint), costs)
         }
 
         override def toString = s"${points.map(_.nd)}, ${toLineString.toString}"
+
+        def area = Area(points.map(_.nd))
     }
 }

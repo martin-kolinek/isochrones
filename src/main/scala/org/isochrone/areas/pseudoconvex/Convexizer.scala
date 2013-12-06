@@ -12,7 +12,7 @@ trait ConvexizerComponent extends PosAreaComponent {
     self: GraphComponentBase =>
 
     trait Convexizer {
-        def convexize(ar: Area, diagonals: Traversable[EdgeWithCost]): Traversable[EdgeWithCost]
+        def convexize(ar: PosArea, diagonals: Traversable[EdgeWithCost]): Traversable[EdgeWithCost]
     }
 
     val convexizer: Convexizer
@@ -40,7 +40,7 @@ trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent {
     }
 
     object AreaWithDiagonalsGraph {
-        def apply(ar: Area, diagonals: Traversable[EdgeWithCost]) = {
+        def apply(ar: PosArea, diagonals: Traversable[EdgeWithCost]) = {
             val fromAr = (ar.points :+ ar.points.head).sliding(2).flatMap {
                 case Seq(a, b) => {
                     Seq((a.nd, b.nd, ar.cost(a.nd, b.nd)), (b.nd, a.nd, ar.cost(b.nd, a.nd)))
@@ -85,7 +85,7 @@ trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent {
             }
         }
 
-        def convexize(ar: Area, diagonals: Traversable[EdgeWithCost]) = {
+        def convexize(ar: PosArea, diagonals: Traversable[EdgeWithCost]) = {
             val grp = AreaWithDiagonalsGraph(ar, diagonals)
             conv(grp, allCostsForArea(ar).toList, diagonals.toList, Nil)
         }
