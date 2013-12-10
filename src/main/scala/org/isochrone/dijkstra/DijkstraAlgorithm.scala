@@ -74,6 +74,7 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
                 filter(_._1 == end).
                 headOption.map(_._2).
                 getOrElse(Double.MaxValue)
+        def compute(start: NodeType) = DijkstraAlgorithm.compute(Traversable(start -> 0.0))
     }
 
     val isoComputer = DijkstraAlgorithm
