@@ -6,14 +6,14 @@ import org.isochrone.graphlib.GraphComponentBaseWithDefault
 
 trait IsochroneComputerComponentTypes {
     self: GraphComponentBase =>
-    case class IsochroneEdge(start: NodeType, end: NodeType, part: Double)
+    case class IsochroneNode(nd:NodeType, remaining: Double)
 }
 
 trait IsochroneComputerComponent extends IsochroneComputerComponentTypes {
     self: GraphComponentBase =>
 
     trait IsochroneComputer {
-        def isochrone(start: Traversable[(NodeType, Double)], max: Double): Traversable[IsochroneEdge]
+        def isochrone(start: Traversable[(NodeType, Double)], max: Double): Traversable[IsochroneNode]
     }
 }
 
@@ -24,7 +24,7 @@ trait SomeIsochroneComputerComponent extends IsochroneComputerComponent {
 
 trait IsochronesComputationComponent extends IsochroneComputerComponentTypes {
     self: GraphComponentBase =>
-    def isochrone: Traversable[IsochroneEdge]
+    def isochrone: Traversable[IsochroneNode]
 }
 
 trait DefaultIsochronesComputationComponent extends IsochronesComputationComponent with IsochroneParamsParsingComponent {

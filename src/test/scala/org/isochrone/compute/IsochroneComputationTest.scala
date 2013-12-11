@@ -19,11 +19,11 @@ class IsochroneComputationTest extends FunSuite {
                 def isochrone(start: Traversable[(Int, Double)], max: Double) = {
                     assert(max == 10.0)
                     assert(start == Seq(0 -> 0.0))
-                    List(IsochroneEdge(1, 2, 0.5))
+                    List(IsochroneNode(1, 0.5))
                 }
             }
         }
 
-        assert(comp.isochrone == List(comp.IsochroneEdge(1, 2, 0.5)))
+        assert(comp.isochrone == List(comp.IsochroneNode(1, 0.5)))
     }
 }

@@ -8,7 +8,6 @@ import org.isochrone.Main
 import org.isochrone.output.GeometryOutputComponent
 import org.isochrone.dijkstra.DijkstraAlgorithmComponent
 import org.isochrone.compute.IsochronesComputationComponent
-import org.isochrone.compute.PointIsochroneOutputComponent
 import org.isochrone.db.FromOptionDatabaseComponent
 import org.isochrone.db.DatabaseOptionParsingComponent
 import org.isochrone.dbgraph.DatabaseGraphComponent

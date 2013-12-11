@@ -48,19 +48,7 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
         def nodesWithin(start: Traversable[(NodeType, Double)], max: Double) = compute(start).takeWhile(_._2 <= max)
 
         def isochrone(start: Traversable[(NodeType, Double)], max: Double) = {
-            val nodes = nodesWithin(start, max).toSeq
-            val inIsoSet = nodes.map(_._1).toSet
-            nodes.flatMap {
-                case (nd, cost) => {
-                    val remaining = max - cost
-                    for {
-                        (neigh, ncost) <- graph.neighbours(nd)
-                        if !inIsoSet.contains(neigh)
-                        quotient = remaining / ncost
-                        if quotient <= 1
-                    } yield IsochroneEdge(nd, neigh, quotient)
-                }
-            }
+            nodesWithin(start, max).map(IsochroneNode.tupled)
         }
     }
 

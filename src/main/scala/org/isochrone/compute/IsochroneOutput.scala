@@ -9,18 +9,3 @@ import com.vividsolutions.jts.geom.Coordinate
 trait IsochroneOutputComponent {
     def isochroneGeometry: Traversable[Geometry]
 }
-
-trait PointIsochroneOutputComponent extends IsochroneOutputComponent {
-    self: NodePositionComponent with IsochronesComputationComponent =>
-
-    val geomFact = new GeometryFactory(new PrecisionModel(), 4326)
-
-    lazy val isochroneGeometry = for {
-        IsochroneEdge(a, b, part) <- isochrone
-        (x1, y1) = nodePos.nodePosition(a)
-        (x2, y2) = nodePos.nodePosition(b)
-        x = x1 + (x2 - x1) * part
-        y = y1 + (y2 - y1) * part
-    } yield geomFact.createPoint(new Coordinate(x, y))
-
-}

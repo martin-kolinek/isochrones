@@ -45,15 +45,7 @@ trait MultiLevelDijkstraComponent extends IsochroneComputerComponent with SomeIs
 
         def isochrone(start: Traversable[(NodeType, Double)], limit: Double) = {
             val res = iso(start, levels.toList, None, limit)
-            val nodeSet = res.continueFrom.map(_._1).toSet
-            for {
-                (nd, cost) <- res.continueFrom
-                remaining = limit - cost
-                (neigh, ncost) <- levels.head.neighbours(nd)
-                if !nodeSet.contains(neigh) && levels.head.nodeRegion(neigh).filter(res.isRegionDone).isEmpty
-                quotient = remaining / ncost
-                if quotient <= 1
-            } yield IsochroneEdge(nd, neigh, quotient)
+            res.continueFrom.map(IsochroneNode.tupled)
         }
     }
 
