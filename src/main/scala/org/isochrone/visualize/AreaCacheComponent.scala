@@ -6,13 +6,22 @@ import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.RoadNetTableComponent
 
-trait AreaCacheComponent extends GraphComponentBase {
-    self: SessionProviderComponent with RoadNetTableComponent =>
+trait AreaCacheComponent {
+    self: GraphComponentBase =>
 
-    type NodeType = Long
     case class NodeArea(areaId: Long, costToCover: Double)
 
-    class AreaCache(maxSize: Int) {
+    trait AreaCache {
+        def getNodeAreas(nd: NodeType): List[NodeArea]
+    }
+
+    val areaCache: AreaCache
+}
+
+trait DbAreaCacheComponent extends AreaCacheComponent with GraphComponentBase {
+    self: SessionProviderComponent with RoadNetTableComponent =>
+    type NodeType = Long
+    class DbAreaCache(maxSize: Int) extends AreaCache {
 
         private var maxRetrievedCount = 0
         private val cache = new LRUCache[NodeType, List[NodeArea]]((k, v, m) => m.size > math.max(maxSize, maxRetrievedCount))
@@ -46,6 +55,4 @@ trait AreaCacheComponent extends GraphComponentBase {
             cache(nd)
         }
     }
-
-    val areaCache: AreaCache
 }

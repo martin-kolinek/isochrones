@@ -12,9 +12,17 @@ import org.isochrone.graphlib.GraphComponent
 import org.isochrone.output.GeometryOutputComponent
 import org.isochrone.graphlib.GraphComponentBaseWithDefault
 import org.isochrone.visualize.VisualizationIsochroneOutputComponent
+import org.isochrone.visualize.AreaCacheComponent
+import org.isochrone.visualize.AreaGeometryCacheComponent
+import org.isochrone.db.RoadNetTableComponent
+import org.isochrone.db.SessionProviderComponent
 
-trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent {
-    self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault =>
+trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with AreaCacheComponent with AreaGeometryCacheComponent {
+    self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault with RoadNetTableComponent with SessionProviderComponent =>
+
+    val areaCache = ???
+    val areaGeomCache = ???
+
     val execute = () => writeOutput()
 }
 

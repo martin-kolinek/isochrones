@@ -35,6 +35,7 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
         		with DijkstraAlgorithmComponent 
         		with OptionParserComponent
         		with GraphComponentBaseWithDefault {
+            override type NodeType = Long
             def readNodeType = implicitly[Read[NodeType]]
             def noNode = 0l
         }) + ("multidijkstra" --> new ActionComponent
@@ -42,11 +43,13 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
                 with OptionsBase
                 with MultiLevelDijkstraComponent
                 with ConfigMultiLevelRoadNetTableComponent
+                with ConfigRoadNetTableComponent
                 with ConfigMultiLevelDatabaseGraph
                 with SingleSessionProvider
                 with FromOptionDatabaseComponent
                 with GraphComponentBaseWithDefault
                 with OptionParserComponent {
+            override type NodeType = Long
             def readNodeType = implicitly[Read[NodeType]]
             def noNode = 0l
         })
