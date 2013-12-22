@@ -6,7 +6,7 @@ import org.isochrone.graphlib.GraphComponentBaseWithDefault
 
 trait IsochroneComputerComponentTypes {
     self: GraphComponentBase =>
-    case class IsochroneNode(nd:NodeType, remaining: Double)
+    case class IsochroneNode(nd: NodeType, remaining: Double)
 }
 
 trait IsochroneComputerComponent extends IsochroneComputerComponentTypes {

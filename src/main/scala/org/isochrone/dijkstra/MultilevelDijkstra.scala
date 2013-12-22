@@ -45,7 +45,9 @@ trait MultiLevelDijkstraComponent extends IsochroneComputerComponent with SomeIs
 
         def isochrone(start: Traversable[(NodeType, Double)], limit: Double) = {
             val res = iso(start, levels.toList, None, limit)
-            res.continueFrom.map(IsochroneNode.tupled)
+            res.continueFrom.map {
+                case (id, fromStart) => IsochroneNode(id, limit - fromStart)
+            }
         }
     }
 

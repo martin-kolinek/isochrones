@@ -48,7 +48,9 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
         def nodesWithin(start: Traversable[(NodeType, Double)], max: Double) = compute(start).takeWhile(_._2 <= max)
 
         def isochrone(start: Traversable[(NodeType, Double)], max: Double) = {
-            nodesWithin(start, max).map(IsochroneNode.tupled)
+            nodesWithin(start, max).map {
+                case (id, fromStart) => IsochroneNode(id, max - fromStart)
+            }
         }
     }
 

@@ -14,7 +14,7 @@ class DijkstraIsochroneTest extends FunSuite {
             val edges = (1 to 10).map((0, _, 0.5)) ++ (1 to 10).map(x => (x, x + 10, 0.5))
             val graph = SimpleGraph(edges: _*)
             val iso = DijkstraHelpers.isochrone(0, 0.6).toList
-            assert(iso.map(_.remaining).forall(q => math.abs(q - 0.1) < 0.01))
+            assert(iso.filter(_.nd != 0).map(_.remaining).forall(q => math.abs(q - 0.1) < 0.01))
         }
     }
 
@@ -48,7 +48,7 @@ class DijkstraIsochroneTest extends FunSuite {
             val lowlevel = SimpleGraph(lowerlevel, lowerlevelregs)
             val upper = SimpleGraph(upperlevel: _*)
             val levels = Seq(lowlevel, upper)
-            val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 3.1)
+            val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 3.1).toList
             val ndset = iso.map(_.nd).toSet
             assert(ndset.contains(5))
             assert(!ndset.contains(6))
@@ -71,13 +71,14 @@ class DijkstraIsochroneTest extends FunSuite {
             init = false
             val upper = SimpleGraph(upperlevel: _*)
             val levels = Seq(lowlevel, upper)
-            val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 6.5)
+            val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 6.5).toList
             val ndset = iso.map(_.nd).toSet
             assert(ndset.contains(8))
             assert(ndset.contains(9))
             assert(!ndset.contains(10))
             assert(!ndset.contains(11))
-            assert(iso.map(x => x.remaining).forall(x => math.abs(x - 0.5) <= 0.001))
+            info(iso.toString)
+            assert(iso.filter(x => x.nd == 8 || x.nd == 9).map(x => x.remaining).forall(x => math.abs(x - 0.5) <= 0.001))
         }
     }
 }
