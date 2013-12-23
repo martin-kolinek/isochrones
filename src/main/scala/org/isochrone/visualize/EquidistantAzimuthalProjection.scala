@@ -8,7 +8,6 @@ class EquidistantAzimuthalProjection(cx: Double, cy: Double) {
         val y = yy / 6371008.77141506
         import math._
         val c = sqrt(x * x + y * y)
-        println(c)
         if (c == 0)
             (cx, cy)
         else {
