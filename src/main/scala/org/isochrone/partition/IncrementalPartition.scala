@@ -16,6 +16,9 @@ trait IncrementalPartitionComponent {
         def partition() {
             database.withTransaction { implicit s: Session =>
                 roadNetTables.roadNodes.map(_.region).update(0)
+            }
+            database.withTransaction { implicit s: Session =>
+
                 for ((bbox, i) <- regularPartition.regions.zipWithIndex) {
                     logger.info(s"Partitioning region $bbox ($i/${regularPartition.regionCount})")
                     val bboxNodes = roadNetTables.roadNodes.filter(_.geom @&& bbox.dbBBox).map(_.id).to[Set]
