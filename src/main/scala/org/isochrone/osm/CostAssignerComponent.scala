@@ -12,6 +12,10 @@ trait SpeedCostAssignerComponent extends CostAssignerComponent {
     def roadSpeed: Double //km/h
     def noRoadSpeed: Double //km/h
     private def cst(c1: Column[Geometry], c2: Column[Geometry], spd: Double) = (c1.distanceSphere(c2).asColumnOf[Double] / 1000.0) / spd
+    def metersToRoadCost(meters: Double) = (meters / 1000) / roadSpeed
+    def metersToNoRoadCost(meters: Double) = (meters / 1000) / noRoadSpeed
+    def roadCostToMeters(cst: Double) = (cst * roadSpeed) * 1000
+    def noRoadCostToMeters(cst: Double) = (cst * noRoadSpeed) * 1000
     def getRoadCost(c1: Column[Geometry], c2: Column[Geometry]) = cst(c1, c2, roadSpeed)
     def getNoRoadCost(c1: Column[Geometry], c2: Column[Geometry]) = cst(c1, c2, noRoadSpeed)
 }

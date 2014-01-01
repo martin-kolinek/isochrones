@@ -16,9 +16,11 @@ import org.isochrone.visualize.AreaCacheComponent
 import org.isochrone.visualize.AreaGeometryCacheComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.SessionProviderComponent
+import org.isochrone.osm.DefaultCostAssignerComponent
+import org.isochrone.visualize.ConfigCirclePointsCountComponent
 
-trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with AreaCacheComponent with AreaGeometryCacheComponent {
-    self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault with RoadNetTableComponent with SessionProviderComponent =>
+trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with AreaCacheComponent with AreaGeometryCacheComponent with DefaultCostAssignerComponent with ConfigCirclePointsCountComponent {
+    self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault with RoadNetTableComponent with SessionProviderComponent with GraphComponent =>
 
     val areaCache = ???
     val areaGeomCache = ???
