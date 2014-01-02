@@ -15,7 +15,8 @@ trait PtsComponent extends PosAreaComponent with GraphComponentBase {
         PointWithPosition(3, List(0, 0)),
         PointWithPosition(4, List(1, 1)),
         PointWithPosition(5, List(0.5, 1)),
-        PointWithPosition(6, List(1.5, 1)))
+        PointWithPosition(6, List(1.5, 1)),
+        PointWithPosition(7, List(1, 1.5)))
 
 }
 

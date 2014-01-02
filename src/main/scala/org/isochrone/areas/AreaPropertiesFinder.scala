@@ -22,6 +22,8 @@ trait AreaPropertiesFinderComponent extends AreaCoverCostComponent with AreaGeom
                         roadNetTables.roadAreas.filter(_.nodeId === nd).filter(_.id === ar.id).map(_.costToCover).update(cst)
                     }
                     val geom = AreaGeometryFinder.areaGeometry(ar)
+                    if (!geom.isValid)
+                        println(geom)
                     assert(geom.isValid())
                     roadNetTables.areaGeoms.insert(ar.id -> geom)
                 }
