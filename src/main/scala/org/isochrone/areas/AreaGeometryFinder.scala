@@ -9,13 +9,14 @@ import com.vividsolutions.jts.geom.Geometry
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import scala.annotation.tailrec
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait AreaGeometryFinderComponent extends PosAreaComponent {
     self: GraphComponentBase =>
 
     import ListPositionImplicit._
 
-    object AreaGeometryFinder {
+    object AreaGeometryFinder extends Logging {
         def extractAreas(ar: PosArea) = {
             val pts = ar.points.map(_.nd)
 
@@ -82,7 +83,7 @@ trait AreaGeometryFinderComponent extends PosAreaComponent {
             val polys = areas.map(x => geomFact.createPolygon(x.toLinearRing))
             val bad = polys.find(!_.isValid)
             if (bad.isDefined) {
-                println(bad.get)
+                logger.error(s"Invalid geometry : ${bad.get}")
                 assert(false)
             }
             val shell = polys.find { poly =>
