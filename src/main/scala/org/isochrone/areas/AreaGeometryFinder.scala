@@ -8,6 +8,7 @@ import org.isochrone.util._
 import com.vividsolutions.jts.geom.Geometry
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
+import scala.annotation.tailrec
 
 trait AreaGeometryFinderComponent extends PosAreaComponent {
     self: GraphComponentBase =>
@@ -15,7 +16,7 @@ trait AreaGeometryFinderComponent extends PosAreaComponent {
     import ListPositionImplicit._
 
     object AreaGeometryFinder {
-        def filterInnerNodes(ar: PosArea) = {
+        def extractAreas(ar: PosArea) = {
             val pts = ar.points.map(_.nd)
 
             val edges = (ar.points.last +: ar.points).sliding(2).toList
@@ -23,7 +24,7 @@ trait AreaGeometryFinderComponent extends PosAreaComponent {
 
             val filtered = edges.filterNot(revEdges.contains)
             val consecutive = filtered.split(_.tail.head != _.head)
-            joinPatches(consecutive).map(x => PosArea(ar.id, x, ar.costs))
+            joinPatches(consecutive).flatMap(removeSelfIntersections).map(x => PosArea(ar.id, x, ar.costs))
         }
 
         def joinPatches(patches: List[List[List[PointWithPosition]]]): Iterable[List[PointWithPosition]] = {
@@ -41,11 +42,49 @@ trait AreaGeometryFinderComponent extends PosAreaComponent {
             lasts.map(_._2.toList)
         }
 
+        @tailrec
+        def removeSelfIntersectionsRec(poly: List[NodeType], current: List[NodeType], result: List[List[NodeType]], indexes: Map[NodeType, Int]): List[List[NodeType]] = {
+            poly match {
+                case Nil => {
+                    assert(current.size == 1)
+                    result
+                }
+                case head :: tail => {
+                    indexes.get(head) match {
+                        case None => {
+                            val newCur = head :: current
+                            val newIndexes = indexes + (head -> current.size)
+                            removeSelfIntersectionsRec(tail, newCur, result, newIndexes)
+                        }
+                        case Some(index) => {
+                            val lastOccur = current.size - index
+                            val cycle = current.take(lastOccur)
+                            val rest = current.drop(lastOccur)
+                            val newCur = head :: rest
+                            val newIndexes = indexes + (head -> rest.size)
+                            removeSelfIntersectionsRec(tail, newCur, cycle :: result, newIndexes)
+                        }
+                    }
+                }
+            }
+        }
+
+        def removeSelfIntersections(lst: List[PointWithPosition]): List[List[PointWithPosition]] = {
+            val posmap = lst.map(x => x.nd -> x).toMap
+            val nds = lst.map(_.nd).reverse
+            removeSelfIntersectionsRec(nds :+ nds.head, Nil, Nil, Map()).map(_.map(posmap))
+        }
+
         val geomFact = new GeometryFactory(new PrecisionModel(), 4326)
 
         def areaGeometry(ar: PosArea): Geometry = {
-            val areas = filterInnerNodes(ar)
+            val areas = extractAreas(ar)
             val polys = areas.map(x => geomFact.createPolygon(x.toLinearRing))
+            val bad = polys.find(!_.isValid)
+            if (bad.isDefined) {
+                println(bad.get)
+                assert(false)
+            }
             val shell = polys.find { poly =>
                 polys.filterNot(_ eq poly).forall(inner => poly.contains(inner))
             }

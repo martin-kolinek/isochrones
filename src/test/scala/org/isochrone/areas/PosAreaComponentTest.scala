@@ -16,8 +16,9 @@ trait PtsComponent extends PosAreaComponent with GraphComponentBase {
         PointWithPosition(4, List(1, 1)),
         PointWithPosition(5, List(0.5, 1)),
         PointWithPosition(6, List(1.5, 1)),
-        PointWithPosition(7, List(1, 1.5)))
-
+        PointWithPosition(7, List(1, 1.5)),
+        PointWithPosition(8, List(1.75, 1.5)),
+        PointWithPosition(9, List(1.25, 1.5)))
 }
 
 class PosAreaComponentTest extends FunSuite {
