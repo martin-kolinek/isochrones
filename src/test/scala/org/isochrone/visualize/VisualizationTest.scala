@@ -21,7 +21,6 @@ import com.vividsolutions.jts.io.WKTReader
 
 class VisualizationTest extends FunSuite {
     test("equidistant azimuthal projection works") {
-        //info(VisualizationUtil.circle(17, 48, 0.1, 4).toString)
         val proj = new EquidistantAzimuthalProjection(48, 17)
         info(proj.unproject(0, 0).toString)
         assert(proj.unproject(0, 0) == (48, 17))
@@ -34,6 +33,21 @@ class VisualizationTest extends FunSuite {
         assert(math.abs(shouldy - y) < 0.000000001)
         assert(math.abs(px - 1) < 0.000000001)
         assert(math.abs(py - 1) < 0.000000001)
+    }
+
+    test("approximate equidistant azimuthal projection works") {
+        val proj = new ApproxEquidistAzimuthProj(48, 17)
+        info(proj.unproject(0, 0).toString)
+        assert(proj.unproject(0, 0) == (48, 17))
+        val (x, y) = proj.unproject(1, 1)
+        val (px, py) = proj.project(x, y)
+        info((x, y).toString)
+        info((px, py).toString)
+        val (shouldx, shouldy) = (48.000009404119396, 17.000008993203462)
+        assert(math.abs(shouldx - x) < 0.000001)
+        assert(math.abs(shouldy - y) < 0.000001)
+        assert(math.abs(px - 1) < 0.000001)
+        assert(math.abs(py - 1) < 0.000001)
     }
 
     test("VisualizationUtil creates valid geometry") {
@@ -58,7 +72,7 @@ class VisualizationTest extends FunSuite {
             def circlePointCount = 10
             type NodeType = Int
             val areaCache: AreaCache = new AreaCache {
-                def getNodeAreas(nd: NodeType) = List(NodeArea(1, 10))
+                def getNodesAreas(nds: Seq[NodeType]) = x => List(NodeArea(1, 10))
             }
             val geomFact = new GeometryFactory(new PrecisionModel, 4326)
             val areaGeomCache: AreaGeometryCache = new AreaGeometryCache {
@@ -80,7 +94,7 @@ class VisualizationTest extends FunSuite {
             def roadSpeed: Double = 200
         }
         val outgeom = comp.isochroneGeometry.toList
-        val wkt = """MULTIPOLYGON (((48.01998612205766 17, 48 17, 48 17.005131819557114, 48.001743667295884 17.005131819557114, 48.01999999958337 17.000003903903934, 48.01998612205766 17)), ((48.1 17.015395414141526, 48.1 17, 48.040020824044724 17, 48.03999999979169 17.000005855856042, 48.09476871149209 17.015395414141526, 48.1 17.015395414141526))))"""
+        val wkt = """MULTIPOLYGON (((48.02 17, 48 17, 48 17.005134696220185, 48.00174167085455 17.005134696220185, 48.02 17)), ((48.1 17.01540408866056, 48.1 17, 48.04 17, 48.094774987436345 17.01540408866056, 48.1 17.01540408866056)))"""
         val reader = new WKTReader
         val lst = List(reader.read(wkt))
         info(outgeom.toString)

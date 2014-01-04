@@ -11,11 +11,9 @@ class AreaCacheTest extends FunSuite with TestDatabase {
     test("AreaCache works") {
         val comp = new DbAreaCacheComponent with RoadNetTableComponent with SingleSessionProvider with TestDatabaseComponent {
             val roadNetTables = new DefaultRoadNetTablesWithPrefix("ar_cach_")
-            val areaCache = new DbAreaCache(4)
         }
 
-        assert(comp.areaCache.getNodeAreas(2).map(_.areaId).toSet == Set(1, 2))
-        assert(comp.areaCache.rememberedNodes == 5)
-        assert(comp.areaCache.getNodeAreas(2).map(_.costToCover).toSet == Set(10.0))
+        assert(comp.areaCache.getNodesAreas(List(2))(2).map(_.areaId).toSet == Set(1, 2))
+        assert(comp.areaCache.getNodesAreas(List(2))(2).map(_.costToCover).toSet == Set(10.0))
     }
 }

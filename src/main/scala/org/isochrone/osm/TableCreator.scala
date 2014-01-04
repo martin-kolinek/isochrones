@@ -39,7 +39,7 @@ trait TableCreatorComponent extends RoadNetPrimaryKeyCreator {
                     Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNodes.tableName}_region_id" ON "${roadNetTables.roadNodes.tableName}"(region, id)""").execute()
                     Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadNet.tableName}" ON "${roadNetTables.roadNet.tableName}" using GIST (geom)""").execute()
                     Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadAreas.tableName}" ON "${roadNetTables.roadAreas.tableName}" (id, sequence_no)""").execute()
-                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadAreas.tableName}_nodes" ON "${roadNetTables.roadAreas.tableName}" (node_id)""").execute()
+                    Q.updateNA(s"""CREATE INDEX "ix_${roadNetTables.roadAreas.tableName}_nodes" ON "${roadNetTables.roadAreas.tableName}" (node_id, id)""").execute()
             }
         }
         def drop() {

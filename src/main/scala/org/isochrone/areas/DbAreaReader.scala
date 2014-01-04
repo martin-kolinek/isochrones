@@ -5,13 +5,14 @@ import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.util._
 import org.isochrone.db.SessionProviderComponent
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait DbAreaReaderComponent extends AreaReaderComponent {
     self: RoadNetTableComponent with GraphComponentBase with SessionProviderComponent =>
 
     type NodeType = Long
 
-    trait DbAreaReader extends AreaReader {
+    trait DbAreaReader extends AreaReader with Logging {
         def areas: TraversableOnce[PosArea] = {
             val q = for {
                 n <- roadNetTables.roadNodes
@@ -30,6 +31,10 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
                 rn <- roadNetTables.roadNet if rn.start === a1.nodeId && rn.end === a2.nodeId
                 rn2 <- roadNetTables.roadNet if rn2.end === a1.nodeId && rn2.start === a2.nodeId
             } yield (a1.id, a1.nodeId, a2.nodeId, rn.cost, rn2.cost)
+
+            logger.debug(q.selectStatement)
+            logger.debug(costQ.selectStatement)
+            logger.debug(finalCostQ.selectStatement)
 
             val iter = q.sortBy { case (n, a) => (a.id, a.sequenceNo) }.map {
                 case (n, a) => (a.id, n.id, n.geom)

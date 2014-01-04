@@ -18,43 +18,52 @@ import spire.std.seq._
 import spire.std.double._
 import org.isochrone.util._
 import org.isochrone.ArgumentParser
+import com.typesafe.scalalogging.slf4j.Logging
 
-trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent {
+trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent with Logging {
     self: IsochronesComputationComponent with AreaCacheComponent with AreaGeometryCacheComponent with NodePositionComponent with SpeedCostAssignerComponent with GraphComponent with CirclePointsCountComponent =>
 
     private val geomFact = new GeometryFactory(new PrecisionModel, 4326)
 
     def isochroneGeometry = {
         val isoList = isochrone.toList
+        logger.info(s"Got isochrone (size = ${isoList.size}), computing geometry")
+        val ndArs = areaCache.getNodesAreas(isoList.map(_.nd))
         val covered = (for {
             nd <- isoList
-            arnd <- areaCache.getNodeAreas(nd.nd) if nd.remaining >= arnd.costToCover
+            arnd <- ndArs(nd.nd) if nd.remaining >= arnd.costToCover
         } yield arnd.areaId).toSet
-
+        logger.info(s"Found covered (size = ${covered.size})")
         val areaNodes = (for {
             nd <- isoList
-            arnd <- areaCache.getNodeAreas(nd.nd) if !covered.contains(arnd.areaId)
+            arnd <- ndArs(nd.nd) if !covered.contains(arnd.areaId)
         } yield {
             (nd, arnd)
         }).groupBy(_._2.areaId).map {
             case (arid, lst) => arid -> lst.map(_._1)
         }
-        areaNodes.map((getAreaGeom _).tupled)
+        areaNodes.map((getAreaGeom _).tupled).flatten
     }
 
-    def getAreaGeom(arid: Long, nodes: List[IsochroneNode]): Geometry = {
-        val nodeGeoms = nodes.map(getNodeGeom(nodes.map(_.nd).toSet))
-        areaGeomCache.getAreaGeom(arid).intersection(nodeGeoms.reduce(_ union _))
+    def getAreaGeom(arid: Long, nodes: List[IsochroneNode]): Option[Geometry] = {
+        val nodeGeoms = nodes.flatMap(getNodeGeom(nodes.map(_.nd).toSet))
+        if (nodeGeoms.isEmpty)
+            None
+        else
+            Some(areaGeomCache.getAreaGeom(arid).intersection(nodeGeoms.reduce(_ union _)))
     }
 
-    def getNodeGeom(arnds: Set[NodeType])(nd: IsochroneNode): Geometry = {
+    def getNodeGeom(arnds: Set[NodeType])(nd: IsochroneNode): Option[Geometry] = {
         val geoms = graph.neighbours(nd.nd).filter(x => arnds.contains(x._1)).map(x => edgeGeom(nd, x._1, x._2))
-        geoms.reduce(_ union _)
+        if (geoms.isEmpty)
+            None
+        else
+            Some(geoms.reduce(_ union _))
     }
 
     def edgeGeom(nd: IsochroneNode, nd2: NodeType, cst: Double) = {
         val List(cx, cy) = vector.tupled(nodePos.nodePosition(nd.nd))
-        val proj = new EquidistantAzimuthalProjection(cx, cy)
+        val proj = new ApproxEquidistAzimuthProj(cx, cy)
         val List(x, y) = vector.tupled(nodePos.nodePosition(nd2))
         val circ = VisualizationUtil.circle(cx, cy, noRoadCostToMeters(nd.remaining), circlePointCount)
         if (nd.remaining <= cst) {
@@ -77,7 +86,7 @@ trait CirclePointsCountComponent {
 trait ConfigCirclePointsCountComponent extends CirclePointsCountComponent with VisualizationConfigComponent {
     self: ArgumentParser =>
 
-    def circlePointCount = circlePointsLens.get(parsedConfig)
+    lazy val circlePointCount = circlePointsLens.get(parsedConfig)
 }
 
 trait VisualizationConfigComponent extends OptionParserComponent {
@@ -93,7 +102,7 @@ object VisualizationUtil {
     private val geomFact = new GeometryFactory(new PrecisionModel, 4326)
 
     def circle(cx: Double, cy: Double, radius: Double, numPoints: Int) = {
-        val proj = new EquidistantAzimuthalProjection(cx, cy)
+        val proj = new ApproxEquidistAzimuthProj(cx, cy)
         val angFrac = 2 * math.Pi / numPoints
         val coords = for (ang <- (0 until numPoints).map(_ * angFrac)) yield {
             val (x, y) = proj.unproject(math.cos(ang) * radius, math.sin(ang) * radius)

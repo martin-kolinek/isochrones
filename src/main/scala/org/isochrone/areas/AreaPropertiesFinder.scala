@@ -18,12 +18,16 @@ trait AreaPropertiesFinderComponent extends AreaCoverCostComponent with AreaGeom
                 Query(roadNetTables.areaGeoms).delete
                 for (ar <- reader.areas) {
                     logger.info(s"Processing area ${ar.id}")
-                    for ((nd, cst) <- AreaCoverCostDeterminer.getCostsForArea(ar)) {
+                    val costs = AreaCoverCostDeterminer.getCostsForArea(ar)
+                    logger.info("Determined cover costs")
+                    for ((nd, cst) <- costs) {
                         roadNetTables.roadAreas.filter(_.nodeId === nd).filter(_.id === ar.id).map(_.costToCover).update(cst)
                     }
+                    logger.info("Saved cover costs")
                     val geom = AreaGeometryFinder.areaGeometry(ar)
                     assert(geom.isValid())
                     roadNetTables.areaGeoms.insert(ar.id -> geom)
+                    logger.info("Found geometry")
                 }
             }
         }
