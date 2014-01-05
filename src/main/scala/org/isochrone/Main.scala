@@ -20,6 +20,7 @@ import org.isochrone.executors.ConnectorExecutor
 import org.isochrone.executors.AreaExecutor
 import org.isochrone.executors.AreaFixerExecutor
 import org.isochrone.executors.AllAreaCoverCostsExecutor
+import org.isochrone.executors.WalkingEdgesAdderExecutor
 
 object Main extends App with Logging
         with DijkstraIsochroneComputer
@@ -30,8 +31,9 @@ object Main extends App with Logging
         with IntersectionRemoverExecutor
         with ConnectorExecutor
         with AreaExecutor
-        with AreaFixerExecutor 
-        with AllAreaCoverCostsExecutor {
+        with AreaFixerExecutor
+        with AllAreaCoverCostsExecutor
+        with WalkingEdgesAdderExecutor {
 
     trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>
