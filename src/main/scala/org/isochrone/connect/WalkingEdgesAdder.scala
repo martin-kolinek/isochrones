@@ -61,6 +61,7 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
                             val edgQ = for {
                                 n1 <- roadNetTables.roadNodes if n1.id === startid
                                 n2 <- roadNetTables.roadNodes if n2.id === id
+                                if !Query(roadNetTables.roadNet).filter(e => e.start === startid && e.end === id).exists
                             } yield (n1.id, n2.id, getNoRoadCost(n1.geom, n2.geom), true, n1.geom.shortestLine(n2.geom).asColumnOf[Geometry])
                             roadNetTables.roadNet.insert(edgQ)
                         }
