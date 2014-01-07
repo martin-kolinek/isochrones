@@ -21,8 +21,7 @@ class WalkingEdgesAdderTest extends FunSuite with TestDatabase {
     test("SimpleWalkingEdgesAdder works") {
         val comp = new SimpleWalkingEdgesAdderComponent with WalkRoadNetTableComponent with DijkstraAlgorithmComponent with SingleSessionProvider with TestDatabaseComponent with SpeedCostAssignerComponent with MaxCostQuotientComponent with DefaultDatabaseGraphComponent {
             override type NodeType = Long
-            def maxCostQuotient = 1
-            def maxDistanceQuotient = 1
+            def maxDistance = 30000
             def noRoadSpeed = 1.0 / 1000.0
             def roadSpeed = 2.0 / 1000.0
         }
@@ -32,7 +31,7 @@ class WalkingEdgesAdderTest extends FunSuite with TestDatabase {
             val rn = comp.roadNetTables.roadNet
             val lst = Query(rn).list
             info(lst.toString)
-            assert(lst.size == 3)
+            assert(lst.size == 6)
             val newEdge = lst.find(x => x._1 == 1 && x._2 == 3)
             assert(newEdge.isDefined)
             assert(math.abs(newEdge.get._3 - 11119) < 1)

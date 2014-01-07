@@ -26,33 +26,30 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
     type NodeType = Long
     def addWalkingEdges() {
         database.withTransaction { implicit s: Session =>
-            val q = sql"""
-            select n.id, a2.max_cost, st_x(n.geom), st_y(n.geom) 
-            from #${roadNetTables.roadNodes.tableName} n
-                 inner join (select a.node_id, max(a.cost_to_cover) as max_cost from #${roadNetTables.roadAreas.tableName} a group by a.node_id) a2 on n.id = a2.node_id
-            order by n.id
-            """.as[(Long, Double, Double, Double)]
+            val q = Query(roadNetTables.roadNodes).map(x => (x.id, x.geom)).sortBy(_._1)
             q.elements.zipWithIndex.foreach {
-                case ((startid, cst, lon, lat), idx) => {
-                    val proj = new ApproxEquidistAzimuthProj(lon, lat)
+                case ((startid, geom), idx) => {
+                    val point = geom.getInteriorPoint
+                    val proj = new ApproxEquidistAzimuthProj(point.getX, point.getY)
                     logger.info(s"Processing node $startid (index = $idx)")
-                    val dist = maxDistanceQuotient * noRoadCostToMeters(cst)
+                    val dist = maxDistance
                     val box = {
                         val (left, low) = proj.unproject(-dist, -dist)
                         val (right, up) = proj.unproject(dist, dist)
                         makeBox(makePoint(left, low), makePoint(right, up))
                     }
-                    logger.debug(s"Looking for nodes within $dist meters and $cst hours")
+                    logger.debug(s"Looking for nodes within $dist meters")
                     val ndsQuery = for {
                         n <- roadNetTables.roadNodes if n.id === startid
                         n2 <- roadNetTables.roadNodes if n2.geom @&& box
                     } yield n2.id -> getNoRoadCost(n.geom, n2.geom)
-                    val dijkstraNodes = DijkstraHelpers.nodesWithin(startid, cst * maxCostQuotient).toMap
-                    logger.debug(s"Dijkstra search returned ${dijkstraNodes.size} nodes")
                     val nds = ndsQuery.list
+                    val nodeSet = nds.view.map(_._1).toSet
+                    val dijkstraNodes = DijkstraHelpers.compute(startid).filter(x => nodeSet.contains(x._1)).take(nds.size).toMap
+                    logger.debug(s"Dijkstra search returned ${dijkstraNodes.size} nodes")
                     logger.debug(s"Database query returned ${nds.size} nodes")
                     val ndsFilt = nds.filter {
-                        case (id, cost) => cost - dijkstraNodes.get(id).getOrElse(Double.PositiveInfinity) < -1E-10
+                        case (id, cost) => cost - dijkstraNodes.get(id).getOrElse(Double.PositiveInfinity) < -1E-10 //round off errors
                     }
                     logger.info(s"Adding ${ndsFilt.size} edges")
                     ndsFilt.foreach {
@@ -75,22 +72,18 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
 }
 
 trait MaxCostQuotientComponent {
-    def maxDistanceQuotient: Double
-    def maxCostQuotient: Double
+    def maxDistance: Double
 }
 
 trait ConfigMaxCostQuotientComponent extends OptionParserComponent with MaxCostQuotientComponent {
     self: ArgumentParser =>
 
-    val maxDistanceQuotientLens = registerConfig(1.5)
-    val maxCostQuotientLens = registerConfig(1.5)
+    val maxDistanceLens = registerConfig(500.0)
 
-    lazy val maxDistanceQuotient = maxDistanceQuotientLens.get(parsedConfig)
-    lazy val maxCostQuotient = maxCostQuotientLens.get(parsedConfig)
+    lazy val maxDistance = maxDistanceLens.get(parsedConfig)
 
     abstract override def parserOptions(pars: OptionParser[OptionConfig]) {
         super.parserOptions(pars)
-        pars.opt[Double]("max-distance-quotient").action((x, c) => maxDistanceQuotientLens.set(c)(x))
-        pars.opt[Double]("max-cost-quotient").action((x, c) => maxCostQuotientLens.set(c)(x))
+        pars.opt[Double]("max-distance").action((x, c) => maxDistanceLens.set(c)(x))
     }
 }
