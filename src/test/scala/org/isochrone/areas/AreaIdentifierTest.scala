@@ -7,6 +7,8 @@ import org.isochrone.graphlib.NodePositionComponent
 import org.isochrone.graphlib.GraphWithRegionsComponent
 import com.typesafe.scalalogging.slf4j.Logging
 import org.scalatest.Assertions
+import org.isochrone.simplegraph.SimpleGraphWithRegionsComponent
+import org.isochrone.simplegraph.SimpleGraphWithRegionsComponent
 
 class AreaIdentifierTest extends FunSuite with Logging {
 
@@ -60,9 +62,9 @@ class AreaIdentifierTest extends FunSuite with Logging {
     }
 
     test("Area identifier works") {
-        new SimpleGraphComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
+        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
             type NodeType = Int
-            val graph = SimpleGraph(edges, regions, positions)
+            val graph = SimpleGraphWithRegions(edges, regions, positions)
             val nodePos = graph
             val expectedAreas = Set(
                 Area(List(1, 2, 6, 5)),
@@ -82,10 +84,10 @@ class AreaIdentifierTest extends FunSuite with Logging {
     }
 
     test("Areas are computed lazily for different regions") {
-        new SimpleGraphComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
+        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
             type NodeType = Int
             var init = true
-            val graph = new SimpleGraph(edges, regions, positions) {
+            val graph = new SimpleGraphWithRegions(edges, regions, positions) {
                 override def singleRegion(rg: RegionType) = if (rg == regions.head || init)
                     super.singleRegion(rg)
                 else Assertions.fail
@@ -98,9 +100,9 @@ class AreaIdentifierTest extends FunSuite with Logging {
     }
 
     test("Area identifier works when starting from a line") {
-        new SimpleGraphComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
+        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
             type NodeType = Int
-            val graph = new SimpleGraph(edges, regions, positions) {
+            val graph = new SimpleGraphWithRegions(edges, regions, positions) {
                 override def neighbours(node: NodeType) =
                     if (node == 10)
                         super.neighbours(node).filter(_._1 == 9) ++ super.neighbours(node).filterNot(_._1 == 9)

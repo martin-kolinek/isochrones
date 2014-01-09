@@ -39,7 +39,7 @@ class SimpleGraphTest extends FunSuite {
     }
 
     test("SimpleGraph works with regions") {
-        new SimpleGraphComponent with DefaultDijkstraProvider {
+        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider {
             type NodeType = Int
             val dir = Seq(
                 0 -> 1,
@@ -51,7 +51,7 @@ class SimpleGraphTest extends FunSuite {
                 5 -> 6,
                 6 -> 4)
             val undir = dir ++ dir.map(_.swap)
-            val graph = SimpleGraph(undir.map(x => (x._1, x._2, 1.0)),
+            val graph = SimpleGraphWithRegions(undir.map(x => (x._1, x._2, 1.0)),
                 Map(0 -> 0, 1 -> 0, 2 -> 0, 3 -> 0, 4 -> 1, 5 -> 1, 6 -> 1))
             assert(graph.nodeRegion(0).map(_.num) == Some(0))
             assert(graph.nodeRegion(5).map(_.num) == Some(1))
@@ -63,9 +63,9 @@ class SimpleGraphTest extends FunSuite {
     }
 
     test("SimpleGraph simpleRegion works") {
-        new SimpleGraphComponent with DefaultDijkstraProvider {
+        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider {
             type NodeType = Int
-            val graph = SimpleGraph(Seq((0, 1, 1.0), (1, 2, 1.0), (2, 0, 1.0)), Map(0 -> 1, 1 -> 1, 2 -> 2))
+            val graph = SimpleGraphWithRegions(Seq((0, 1, 1.0), (1, 2, 1.0), (2, 0, 1.0)), Map(0 -> 1, 1 -> 1, 2 -> 2))
             val sing = graph.singleRegion(graph.nodeRegion(0).get)
             assert(sing.nodes.toSet == Set(0, 1))
             assert(sing.neighbours(1).size == 0)

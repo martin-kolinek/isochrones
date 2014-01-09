@@ -13,17 +13,19 @@ import org.isochrone.osm.SpeedCostAssignerComponent
 import org.isochrone.dbgraph.DefaultDatabaseGraphComponent
 import org.isochrone.db.DefaultRoadNetTablesWithPrefix
 import org.isochrone.util.db.MyPostgresDriver.simple._
+import org.isochrone.db.RegularPartitionComponent
 
 class WalkingEdgesAdderTest extends FunSuite with TestDatabase {
     trait WalkRoadNetTableComponent extends RoadNetTableComponent {
         val roadNetTables = new DefaultRoadNetTablesWithPrefix("walk_")
     }
     test("SimpleWalkingEdgesAdder works") {
-        val comp = new SimpleWalkingEdgesAdderComponent with WalkRoadNetTableComponent with DijkstraAlgorithmComponent with SingleSessionProvider with TestDatabaseComponent with SpeedCostAssignerComponent with MaxCostQuotientComponent with DefaultDatabaseGraphComponent {
+        val comp = new SimpleWalkingEdgesAdderComponent with WalkRoadNetTableComponent with SingleSessionProvider with TestDatabaseComponent with SpeedCostAssignerComponent with MaxCostQuotientComponent with RegularPartitionComponent with DefaultDijkstraProvider {
             override type NodeType = Long
             def maxDistance = 30000
             def noRoadSpeed = 1.0 / 1000.0
             def roadSpeed = 2.0 / 1000.0
+            val regularPartition = new RegularPartition(10)
         }
 
         comp.addWalkingEdges()
