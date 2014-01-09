@@ -38,8 +38,9 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
     def processRegion(bbox: regularPartition.BoundingBox, idx: Int) = {
         database.withTransaction { implicit s: Session =>
             logger.info(s"Processing region $bbox ($idx/${regularPartition.regionCount}")
+            val gr = new DatabaseGraph(roadNetTables, 1000, s)
             val q = Query(roadNetTables.roadNodes).filter(_.geom @&& bbox.dbBBox).map(x => (x.id, x.geom)).sortBy(_._1)
-            val newgraph = (SimpleGraph() /: q.elements.zipWithIndex)(processNode(s))
+            val newgraph = (SimpleGraph() /: q.elements.zipWithIndex)(processNode(gr, s))
             newgraph.extractEdges.foreach {
                 case (start, end, cost) => {
                     val edgQ = for {
@@ -52,10 +53,10 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
         }
     }
 
-    def processNode(s: Session)(sg: SimpleGraph, nd: ((NodeType, Geometry), Int)): SimpleGraph = {
+    def processNode(dbGraph: DatabaseGraph, s: Session)(sg: SimpleGraph, nd: ((NodeType, Geometry), Int)): SimpleGraph = {
         val ((startid, geom), idx) = nd
         logger.info(s"Processing node $startid (index = $idx)")
-        val union = new UnionGraph(new DatabaseGraph(roadNetTables, 1000, s), sg)
+        val union = new UnionGraph(dbGraph, sg)
         val box = {
             val dist = maxDistance
             val point = geom.getInteriorPoint
