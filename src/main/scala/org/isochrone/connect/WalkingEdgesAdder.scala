@@ -45,8 +45,8 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
                     } yield n2.id -> getNoRoadCost(n.geom, n2.geom)
                     val nds = ndsQuery.list
                     val nodeSet = nds.view.map(_._1).toSet
-                    val dijkstraNodes = DijkstraHelpers.compute(startid).filter(x => nodeSet.contains(x._1)).take(nds.size).toMap
-                    logger.debug(s"Dijkstra search returned ${dijkstraNodes.size} nodes")
+                    val dijkstraNodes = DijkstraHelpers.compute(startid).lazyFilter(x => nodeSet.contains(x._1)).take(nds.size).toMap
+                    logger.debug(s"Dijkstra search returned ${dijkstraNodes.size} nodes ($dijkstraNodes)")
                     logger.debug(s"Database query returned ${nds.size} nodes")
                     val ndsFilt = nds.filter {
                         case (id, cost) => cost - dijkstraNodes.get(id).getOrElse(Double.PositiveInfinity) < -1E-10 //round off errors
@@ -78,7 +78,7 @@ trait MaxCostQuotientComponent {
 trait ConfigMaxCostQuotientComponent extends OptionParserComponent with MaxCostQuotientComponent {
     self: ArgumentParser =>
 
-    val maxDistanceLens = registerConfig(500.0)
+    lazy val maxDistanceLens = registerConfig(50.0)
 
     lazy val maxDistance = maxDistanceLens.get(parsedConfig)
 

@@ -40,6 +40,7 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
         }
 
         def compute(start: Traversable[(NodeType, Double)]) = new Traversable[(NodeType, Double)] {
+            self =>
             def foreach[U](func: ((NodeType, Double)) => U) {
                 alg(start, (x: NodeType, y: Double) => func(x -> y))
             }
