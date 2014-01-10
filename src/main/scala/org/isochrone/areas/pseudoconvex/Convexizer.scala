@@ -24,32 +24,23 @@ trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent with Area
 
     object HertelMehlhortModConvexizer extends Convexizer with Logging {
         @tailrec
-        private def conv(ar: AreaWithDiagonalsGraph, allCosts: List[EdgeWithCost], diags: List[EdgeWithCost], needed: List[EdgeWithCost]): List[EdgeWithCost] = diags match {
+        private def conv(ar: AreaWithDiagonalsGraph, diags: List[EdgeWithCost], needed: List[EdgeWithCost]): List[EdgeWithCost] = diags match {
             case Nil => needed
             case candidate :: rest => {
                 logger.debug(s"processing edge $candidate, remaining ${rest.size}")
                 val Seq(a, b) = candidate.nds.toSeq
                 val noedg = ar.withoutEdge(a, b)
                 val comp = dijkstraForGraph(noedg)
-                val notRequired = allCosts.flatMap { e =>
-                    val Seq(a, b) = e.nds.toSeq
-                    Seq((a, b, e.cost), (b, a, e.cost))
-                }.forall {
-                    case (a, b, cost) => {
-                        val noedgCost = comp.DijkstraHelpers.distance(a, b)
-                        noedgCost <= cost
-                    }
-                }
-                if (notRequired)
-                    conv(noedg, allCosts, rest, needed)
+                if (comp.DijkstraHelpers.nodesWithin(a, candidate.cost).map(_._1).exists(b == _))
+                    conv(noedg, rest, needed)
                 else
-                    conv(ar, allCosts, rest, candidate :: needed)
+                    conv(ar, rest, candidate :: needed)
             }
         }
 
         def convexize(ar: PosArea, diagonals: Traversable[EdgeWithCost]) = {
             val grp = AreaWithDiagonalsGraph(ar, diagonals)
-            conv(grp, allCostsForArea(ar).toList, diagonals.toList, Nil)
+            conv(grp, diagonals.toList, Nil)
         }
     }
 
