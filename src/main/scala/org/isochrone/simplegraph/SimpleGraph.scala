@@ -26,10 +26,23 @@ trait SimpleGraphComponent extends GraphComponentBase {
             new SimpleGraph(newNeigh, nodePositions)
         }
 
+        def withoutEdge(start: NodeType, end: NodeType) = {
+            val lns = mapLens[NodeType, List[(NodeType, Double)]](start)
+            val newNeigh = lns.modify(neigh) {
+                case None => None
+                case Some(l) => Some(l.filterNot(_._1 == end))
+            }
+            new SimpleGraph(newNeigh, nodePositions)
+        }
+
         def extractEdges = neigh.flatMap {
             case (start, n) => n.map {
                 case (end, cost) => (start, end, cost)
             }
+        }
+
+        def contains(start: NodeType, end: NodeType) = {
+            neighbours(start).exists(_._1 == end)
         }
     }
 

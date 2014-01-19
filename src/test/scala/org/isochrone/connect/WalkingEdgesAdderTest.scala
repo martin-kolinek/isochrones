@@ -34,7 +34,7 @@ class WalkingEdgesAdderTest extends FunSuite with TestDatabase {
             val lst = Query(rn).list
             info(lst.toString)
             assert(lst.size == 6)
-            val newEdge = lst.find(x => x._1 == 1 && x._2 == 3)
+            val newEdge = lst.find(x => x._1 == 1 && x._2 == 3 || x._1 == 1 && x._2 == 5)
             assert(newEdge.isDefined)
             assert(math.abs(newEdge.get._3 - 11119) < 1)
             assert(newEdge.get._4)
