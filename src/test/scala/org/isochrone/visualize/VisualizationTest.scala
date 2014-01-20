@@ -68,7 +68,7 @@ class VisualizationTest extends FunSuite {
     }
 
     test("visualizer creates a geometry") {
-        val comp = new IsochronesComputationComponent with AreaCacheComponent with AreaGeometryCacheComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DefaultDijkstraProvider with CirclePointsCountComponent {
+        val comp = new IsochronesComputationComponent with AreaCacheComponent with AreaGeometryCacheComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DefaultDijkstraProvider with CirclePointsCountComponent {
             def circlePointCount = 10
             type NodeType = Int
             val areaCache: AreaCache = new AreaCache {
