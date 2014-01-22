@@ -12,18 +12,14 @@ import org.isochrone.graphlib.GraphComponent
 import org.isochrone.output.GeometryOutputComponent
 import org.isochrone.graphlib.GraphComponentBaseWithDefault
 import org.isochrone.visualize.VisualizationIsochroneOutputComponent
-import org.isochrone.visualize.AreaCacheComponent
-import org.isochrone.visualize.AreaGeometryCacheComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.SessionProviderComponent
 import org.isochrone.osm.DefaultCostAssignerComponent
 import org.isochrone.visualize.ConfigCirclePointsCountComponent
-import org.isochrone.visualize.DbAreaCacheComponent
-import org.isochrone.visualize.DbAreaGeometryCacheComponent
-import org.isochrone.visualize.ConfigDbAreaGeometryCacheComponent
 import org.isochrone.visualize.SomePreciseAreaVisualizer
+import org.isochrone.visualize.DbAreaInfoComponent
 
-trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with ConfigCirclePointsCountComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with DbAreaCacheComponent with ConfigDbAreaGeometryCacheComponent with DefaultCostAssignerComponent {
+trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with ConfigCirclePointsCountComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with DbAreaInfoComponent with DefaultCostAssignerComponent {
     self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault with RoadNetTableComponent with SessionProviderComponent with GraphComponent =>
 
     val execute = () => writeOutput()

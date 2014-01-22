@@ -20,6 +20,7 @@ import org.isochrone.util._
 import com.vividsolutions.jts.io.WKTReader
 
 class VisualizationTest extends FunSuite {
+
     test("equidistant azimuthal projection works") {
         val proj = new EquidistantAzimuthalProjection(48, 17)
         info(proj.unproject(0, 0).toString)
@@ -68,16 +69,27 @@ class VisualizationTest extends FunSuite {
     }
 
     test("visualizer creates a geometry") {
-        val comp = new IsochronesComputationComponent with AreaCacheComponent with AreaGeometryCacheComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DefaultDijkstraProvider with CirclePointsCountComponent {
+        val comp = new IsochronesComputationComponent with AreaInfoComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DefaultDijkstraProvider with CirclePointsCountComponent {
             def circlePointCount = 10
             type NodeType = Int
-            val areaCache: AreaCache = new AreaCache {
-                def getNodesAreas(nds: Seq[NodeType]) = x => List(NodeArea(1, 10))
-            }
-            val geomFact = new GeometryFactory(new PrecisionModel, 4326)
-            val areaGeomCache: AreaGeometryCache = new AreaGeometryCache {
-                def getAreaGeom(ar: Long) = geomFact.createPolygon((Seq(1, 2, 3, 4, 1)).map(nodePos.nodePosition).
-                    map(x => new Coordinate(x._1, x._2)).toArray)
+            private val geomFact = new GeometryFactory(new PrecisionModel, 4326)
+            val areaInfoRetriever = new AreaInfoRetriever {
+                def getNodesAreas(nds: Traversable[NodeType]) = x => List(NodeArea(1, 10))
+                def getAreaGeometries(ars: Traversable[Long]) = x => {
+                    geomFact.createPolygon((Seq(1, 2, 3, 4, 1)).map(nodePos.nodePosition).
+                        map(x => new Coordinate(x._1, x._2)).toArray)
+                }
+
+                def getAreas(ars: Traversable[Long]) = x => {
+                    val points = List(1, 2, 3, 4).map { id =>
+                        PointWithPosition(id, vector.tupled(nodePos.nodePosition(id)))
+                    }
+                    val costs = (for {
+                        a <- 1 to 4
+                        b <- 1 to 4
+                    } yield (a, b) -> 1.0).toMap
+                    PosArea(x, points, costs)
+                }
             }
             val graph = SimpleGraph.undirCost(0.05)(1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1)
             def isochrone: Traversable[IsochroneNode] = Seq(IsochroneNode(1, 0.01), IsochroneNode(2, 0.03))

@@ -14,16 +14,16 @@ import com.vividsolutions.jts.geom.GeometryFactory
 import com.vividsolutions.jts.geom.Coordinate
 
 trait PreciseAreaVisualizerComponent extends AreaVisualizerComponentTypes {
-    self: GraphComponent with NodePositionComponent with AreaGeometryCacheComponent with SpeedCostAssignerComponent with CirclePointsCountComponent =>
+    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent =>
     private val geomFact = new GeometryFactory(new PrecisionModel, 4326)
 
     trait PreciseAreaVisualizer extends AreaVisualizer {
-        def areaGeom(arid: Long, nodes: List[IsochroneNode]): Option[Geometry] = {
+        def areaGeom(area: PosArea, areaGeom: Geometry, nodes: List[IsochroneNode]): Option[Geometry] = {
             val nodeGeoms = nodes.flatMap(getNodeGeom(nodes.map(_.nd).toSet))
             if (nodeGeoms.isEmpty)
                 None
             else
-                Some(areaGeomCache.getAreaGeom(arid).intersection(nodeGeoms.reduce(_ union _)))
+                Some(areaGeom.intersection(nodeGeoms.reduce(_ union _)))
         }
 
         def getNodeGeom(arnds: Set[NodeType])(nd: IsochroneNode): Option[Geometry] = {
@@ -54,6 +54,6 @@ trait PreciseAreaVisualizerComponent extends AreaVisualizerComponentTypes {
 }
 
 trait SomePreciseAreaVisualizer extends AreaVisualizerComponent with PreciseAreaVisualizerComponent {
-    self: GraphComponent with NodePositionComponent with AreaGeometryCacheComponent with SpeedCostAssignerComponent with CirclePointsCountComponent =>
+    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent =>
     val areaVisualizer = new PreciseAreaVisualizer {}
 }
