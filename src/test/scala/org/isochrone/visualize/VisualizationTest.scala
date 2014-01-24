@@ -37,6 +37,8 @@ class VisualizationTest extends FunSuite {
     }
 
     test("approximate equidistant azimuthal projection works") {
+        val comp = new ApproxEquidistAzimuthProjComponent {}
+        import comp._
         val proj = new ApproxEquidistAzimuthProj(48, 17)
         info(proj.unproject(0, 0).toString)
         assert(proj.unproject(0, 0) == (48, 17))
@@ -52,10 +54,16 @@ class VisualizationTest extends FunSuite {
     }
 
     test("VisualizationUtil creates valid geometry") {
-        val geom = VisualizationUtil.circle(48, 17, 100, 4)
-        assert(geom.isValid)
-        val geom2 = VisualizationUtil.circle(48, 17, 100, 100)
-        assert(geom2.isValid)
+        new CircleDrawingComponent with CirclePointsCountComponent with AzimuthalProjectionComponent with TranslatingProjectionComponent {
+            def circlePointCount = 4
+            val geom = CircleDrawing.circle(48, 17, 100)
+            assert(geom.isValid)
+        }
+        new CircleDrawingComponent with CirclePointsCountComponent with AzimuthalProjectionComponent with TranslatingProjectionComponent {
+            def circlePointCount = 100
+            val geom2 = CircleDrawing.circle(48, 17, 100)
+            assert(geom2.isValid)
+        }
     }
 
     test("circle intersection works") {
@@ -68,8 +76,31 @@ class VisualizationTest extends FunSuite {
         })
     }
 
+    test("arc works") {
+        ???
+    }
+
+    test("circle intersection first one in left -> right is top (that is has higher y)") {
+        val c1 = vector(0.0, 0.0)
+        val c2 = vector(1.0, 0.0)
+        val ints = VisualizationUtil.circleIntersection(c1, c2, 3, 3)
+        assert(ints.head.y > 0)
+        assert(ints.tail.head.y < 0)
+        val ints2 = VisualizationUtil.circleIntersection(c2, c1, 3, 3)
+        assert(ints2.head.y < 0)
+        assert(ints2.tail.head.y > 0)
+
+        val c3 = vector(0.0, 1.0)
+        val ints3 = VisualizationUtil.circleIntersection(c1, c3, 3, 3)
+        assert(ints3.head.x < 0)
+        assert(ints3.tail.head.x > 0)
+        val ints4 = VisualizationUtil.circleIntersection(c3, c1, 3, 3)
+        assert(ints4.head.x > 0)
+        assert(ints4.tail.head.x < 0)
+    }
+
     test("visualizer creates a geometry") {
-        val comp = new IsochronesComputationComponent with AreaInfoComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DefaultDijkstraProvider with CirclePointsCountComponent {
+        val comp = new IsochronesComputationComponent with AreaInfoComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DefaultDijkstraProvider with CirclePointsCountComponent with ApproxEquidistAzimuthProjComponent {
             def circlePointCount = 10
             type NodeType = Int
             private val geomFact = new GeometryFactory(new PrecisionModel, 4326)

@@ -18,8 +18,9 @@ import org.isochrone.osm.DefaultCostAssignerComponent
 import org.isochrone.visualize.ConfigCirclePointsCountComponent
 import org.isochrone.visualize.SomePreciseAreaVisualizer
 import org.isochrone.visualize.DbAreaInfoComponent
+import org.isochrone.visualize.ApproxEquidistAzimuthProjComponent
 
-trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with ConfigCirclePointsCountComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with DbAreaInfoComponent with DefaultCostAssignerComponent {
+trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with ConfigCirclePointsCountComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with DbAreaInfoComponent with DefaultCostAssignerComponent with ApproxEquidistAzimuthProjComponent {
     self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault with RoadNetTableComponent with SessionProviderComponent with GraphComponent =>
 
     val execute = () => writeOutput()

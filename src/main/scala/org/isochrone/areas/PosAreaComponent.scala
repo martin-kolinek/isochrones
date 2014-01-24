@@ -1,6 +1,7 @@
 package org.isochrone.areas
 
 import org.isochrone.graphlib.GraphComponentBase
+import org.isochrone.util._
 import spire.syntax.normedVectorSpace._
 import spire.std.seq._
 import spire.std.double._
@@ -17,12 +18,12 @@ trait PosAreaComponent extends AreaComponent {
 
     object ListPositionImplicit {
         implicit class PositionOps(lst: Position) {
-            def x = lst.head
-            def y = lst.tail.head
+
+            def angle = math.atan2(lst.y, lst.x)
 
             def middleVect(other: Position) = {
-                val thisAng = math.atan2(y, x)
-                val otherAng = math.atan2(other.y, other.x)
+                val thisAng = angle
+                val otherAng = other.angle
                 val normOtherAng =
                     if (otherAng <= thisAng) otherAng + 2 * math.Pi
                     else otherAng

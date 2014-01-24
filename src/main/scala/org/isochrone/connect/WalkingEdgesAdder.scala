@@ -16,7 +16,6 @@ import org.isochrone.OptionParserComponent
 import org.isochrone.ArgumentParser
 import org.isochrone.graphlib.GraphType
 import scopt.OptionParser
-import org.isochrone.visualize.ApproxEquidistAzimuthProj
 import slick.jdbc.StaticQuery.interpolation
 import org.isochrone.db.RegularPartitionComponent
 import org.isochrone.simplegraph.SimpleGraphComponent
@@ -27,12 +26,13 @@ import org.isochrone.db.SessionProviderComponent
 import org.isochrone.dbgraph.DatabaseGraph
 import scala.collection.mutable.HashSet
 import scala.annotation.tailrec
+import org.isochrone.visualize.ApproxEquidistAzimuthProjComponent
 
 trait WalkingEdgesAdderComponent {
     def addWalkingEdges()
 }
 
-trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with GraphComponentBase with Logging with SimpleGraphComponent with WalkingEdgeFilter {
+trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with GraphComponentBase with Logging with SimpleGraphComponent with WalkingEdgeFilter with ApproxEquidistAzimuthProjComponent {
     self: DatabaseProvider with RoadNetTableComponent with SpeedCostAssignerComponent with MaxCostQuotientComponent with RegularPartitionComponent with DijkstraProvider =>
     override type NodeType = Long
     def addWalkingEdges() {

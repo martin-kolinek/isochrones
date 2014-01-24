@@ -2,6 +2,7 @@ package org.isochrone.areas
 
 import scala.annotation.tailrec
 import org.isochrone.graphlib.GraphType
+import org.isochrone.util._
 import org.isochrone.graphlib.NodePositionComponent
 import org.isochrone.graphlib.GraphComponent
 import com.typesafe.scalalogging.slf4j.Logging
@@ -12,11 +13,6 @@ trait SingleReagionAreaIdentifierComponent extends AreaComponent {
     object SingleRegionAreaFinder extends Logging {
 
         type DoneEdgesSet = Set[(NodeType, NodeType)]
-
-        def normalizeAngle(angle: Double) = {
-            val ret = angle % (2 * math.Pi)
-            if (ret < 0) ret + 2 * math.Pi else ret
-        }
 
         @tailrec
         def completeArea(part: List[NodeType], firstNode: NodeType, done: DoneEdgesSet): (Area, DoneEdgesSet) = {
@@ -54,7 +50,7 @@ trait SingleReagionAreaIdentifierComponent extends AreaComponent {
         def startingEdgesAreas(edges: List[(NodeType, NodeType)], done: DoneEdgesSet, current: List[Area]): (List[Area], DoneEdgesSet) = {
             edges match {
                 case Nil => current -> done
-                case (edge @ (start, end)) :: tail => {
+                case (edge@(start, end)) :: tail => {
                     if (done.contains(edge))
                         startingEdgesAreas(tail, done, current)
                     else {
@@ -81,7 +77,7 @@ trait SingleReagionAreaIdentifierComponent extends AreaComponent {
                 }
             }
         }
-        
+
         def findAreas() = areasForNodes(graph.nodes.toList, Set(), Nil)
 
     }

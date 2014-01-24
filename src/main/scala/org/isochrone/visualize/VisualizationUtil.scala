@@ -7,20 +7,9 @@ import org.isochrone.util._
 import spire.syntax.normedVectorSpace._
 import spire.std.seq._
 import spire.std.double._
+import com.vividsolutions.jts.geom.LineString
 
 object VisualizationUtil {
-    private val geomFact = new GeometryFactory(new PrecisionModel, 4326)
-
-    def circle(cx: Double, cy: Double, radius: Double, numPoints: Int) = {
-        val proj = new ApproxEquidistAzimuthProj(cx, cy)
-        val angFrac = 2 * math.Pi / numPoints
-        val coords = for (ang <- (0 until numPoints).map(_ * angFrac)) yield {
-            val (x, y) = proj.unproject(math.cos(ang) * radius, math.sin(ang) * radius)
-            new Coordinate(x, y)
-        }
-        geomFact.createPolygon((coords :+ coords.head).toArray)
-    }
-
     //r1 - radius of left circle
     //r2 - radius of right circle
     //d - distance between circles
@@ -35,7 +24,7 @@ object VisualizationUtil {
             val a = (1 / d) * math.sqrt(first * second * third * fourth)
             a / 2
         }
-        Seq(vector(x, y), vector(x, -y))
+        Seq(vector(x, -y), vector(x, y))
     }
 
     def circleIntersection(c1: List[Double], c2: List[Double], r1: Double, r2: Double): Seq[List[Double]] = {

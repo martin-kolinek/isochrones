@@ -1,6 +1,7 @@
 package org.isochrone.areas.pseudoconvex
 
 import org.isochrone.graphlib.GraphComponentBase
+import org.isochrone.util._
 import org.poly2tri.geometry.polygon.PolygonPoint
 import org.poly2tri.geometry.polygon.Polygon
 import scala.collection.JavaConversions._

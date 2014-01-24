@@ -4,6 +4,7 @@ import org.isochrone.dbgraph.DatabaseGraphComponent
 import scala.annotation.tailrec
 import org.isochrone.graphlib.GraphWithRegionsComponent
 import org.isochrone.graphlib.NodePositionComponent
+import org.isochrone.util._
 import org.isochrone.graphlib.GraphWithRegionsType
 import org.isochrone.graphlib.NodePosition
 import org.isochrone.graphlib.GraphWithRegionsType
@@ -30,11 +31,6 @@ trait AreaIdentifierComponent extends AreaComponent {
             def regionDone(nd: NodeType) = graph.nodeRegion(nd).map(doneRegions.contains).getOrElse(true)
 
             def withCurrentRegion(r: RegionType) = new DoneEdgesSet(doneEdges, doneRegions, Some(r))
-        }
-
-        def normalizeAngle(angle: Double) = {
-            val ret = angle % (2 * math.Pi)
-            if (ret < 0) ret + 2 * math.Pi else ret
         }
 
         @tailrec
@@ -79,7 +75,7 @@ trait AreaIdentifierComponent extends AreaComponent {
         def startingEdgesAreas(edges: List[(NodeType, NodeType)], done: DoneEdgesSet, current: List[Area]): (List[Area], DoneEdgesSet) = {
             edges match {
                 case Nil => current -> done
-                case (edge @ (start, end)) :: tail => {
+                case (edge@(start, end)) :: tail => {
                     if (done.contains(edge))
                         startingEdgesAreas(tail, done, current)
                     else {
