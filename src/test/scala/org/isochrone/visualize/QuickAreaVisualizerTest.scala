@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.GeometryFactory
 import org.isochrone.areas.AreaGeometryFinderComponent
 import org.isochrone.compute.IsochroneComputerComponentTypes
 import org.scalatest.matchers.MustMatchers
+import com.vividsolutions.jts.io.WKTReader
 
 class QuickAreaVisualizerTest extends FunSuite with MustMatchers {
 
@@ -81,32 +82,94 @@ class QuickAreaVisualizerTest extends FunSuite with MustMatchers {
     }
 
     test("connectAroundEdge works with intersection") {
-        val got@List(b) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.5, 0), true))(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0, 1), false))
+        val got@List(b) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0),
+            Some(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.5, 0), true)),
+            Some(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0, 1), false)))
         assert(b.pt.x > 0.5 && b.pt.x < 0.7)
         assert(b.pt.y > 0)
     }
 
     test("connectAroundEdge works with one overtaking other") {
-        val got = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.0, 1.0), false))(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0.1, 0.9), false))
+        val got = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0),
+            Some(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.0, 1.0), false)),
+            Some(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0.1, 0.9), false)))
         got must equal(Nil)
     }
 
     test("connectAroundEdge works with not touching") {
-        val got@List(b, c) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.7, 0), true))(areaVis.ResultPoint(vector(0.3, 0), true), areaVis.ResultPoint(vector(0, 1), false))
+        val got@List(b, c) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0),
+            Some(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.7, 0), true)),
+            Some(areaVis.ResultPoint(vector(0.3, 0), true), areaVis.ResultPoint(vector(0, 1), false)))
         assert((b.pt, c.pt) === (vector(0.7, 0), vector(0.3, 0)))
         assert(got.forall(_.onEdge))
     }
 
+    test("connectAroundEdge works with only touching") {
+        val got = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0),
+            Some(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.5, 0), true)),
+            Some(areaVis.ResultPoint(vector(0.5, 0), true), areaVis.ResultPoint(vector(0, 1), false)))
+        info(got.size.toString)
+        assert((got.size == 1) === !got.head.onEdge)
+    }
+
     test("connectAroundNode works with acute angles") {
-        val got@(List(a)) = areaVis.connectAroundNode(vector(0, 0))(vector(4, 1), vector(0, 1))(vector(1, 0), vector(1, 4))
-        assert((a - vector(1.0, 1.0)).norm < 0.0001)
+        import areaVis.ResultPoint
+        val got@(List(a)) = areaVis.connectAroundNode(vector(0, 0))(ResultPoint(vector(4, 1), false), ResultPoint(vector(0, 1), false))(ResultPoint(vector(1, 0), false), ResultPoint(vector(1, 4), false))
+        assert((a.pt - vector(1.0, 1.0)).norm < 0.0001)
+        assert(a.onEdge === false)
+    }
+
+    test("connectAroundEdge works with only first edge") {
+        val got = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0),
+            Some(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.5, 0), true)),
+            None)
+
+        got must equal(List(areaVis.ResultPoint(vector(0.5, 0), true)))
+    }
+
+    test("connectAroundEdge works with only second edge") {
+        val got = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0),
+            None,
+            Some(areaVis.ResultPoint(vector(0.3, 0), true), areaVis.ResultPoint(vector(0, 1), false)))
+
+        got must equal(List(areaVis.ResultPoint(vector(0.3, 0), true)))
     }
 
     test("connectAroundNode works with obtuse angles") {
-        val got = areaVis.connectAroundNode(vector(0, 0))(vector(4, 1), vector(0, 1))(vector(-1, 0), vector(-1, -4))
+        import areaVis.interiorPoint
+        val got = areaVis.connectAroundNode(vector(0, 0))(interiorPoint(vector(4, 1)), interiorPoint(vector(0, 1)))(interiorPoint(vector(-1, 0)), interiorPoint(vector(-1, -4)))
         info(got.toString)
-        assert((got.head - vector(0.0, 1)).norm < 0.0001)
-        assert((got.last - vector(-1.0, 0)).norm < 0.0001)
-        assert(got.forall(x => math.abs((x - vector(0.0, 0)).norm - 1.0) < 0.0001))
+        assert((got.head.pt - vector(0.0, 1)).norm < 0.0001)
+        assert((got.last.pt - vector(-1.0, 0)).norm < 0.0001)
+        assert(got.forall(x => math.abs((x.pt - vector(0.0, 0)).norm - 1.0) < 0.0001))
+        assert(got.forall(!_.onEdge))
+    }
+
+    test("connectAroundEdge with overlapping lines") {
+        val got = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0),
+            Some(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.0, 1.0), false)),
+            Some(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.0, 1.0), false)))
+        got must equal(Nil)
+    }
+
+    test("resultPoints work") {
+        info(areaVis.resultPoints.toString)
+        assert(areaVis.resultPoints.size === 9)
+    }
+
+    test("createLine does create tangent lines") {
+        val l1 = (areaVis.extractBack _).tupled(areaVis.createLine(pointMap(1), pointMap(2)).get)
+        val l2 = (areaVis.extractForward _).tupled(areaVis.createLine(pointMap(2), pointMap(1)).get)
+        val jl1 = areaVis.createJtsLine(l1._1.pt, l1._2.pt)
+        val jl2 = areaVis.createJtsLine(l2._1.pt, l2._2.pt)
+        assert(!(jl1 intersects jl2))
+    }
+
+    test("QuickAreaVisualizer works") {
+        val wkt = """MULTILINESTRING ((10 5, 9.543373756578255 0.456626243421745, 1.3701177229975996 1.3675007826026064, 0 15), (20 5, 19.543373756578255 0.4566262434217448, 15 0, 10.456626243421745 0.456626243421745, 10 5))"""
+
+        assert(areaVis.result.isDefined)
+        assert(areaVis.result.get.isValid)
+        assert(areaVis.result.get.toString == wkt)
     }
 }
