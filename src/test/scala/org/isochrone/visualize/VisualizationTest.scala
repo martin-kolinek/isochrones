@@ -18,8 +18,9 @@ import spire.std.double._
 import spire.std.seq._
 import org.isochrone.util._
 import com.vividsolutions.jts.io.WKTReader
+import org.scalatest.matchers.MustMatchers
 
-class VisualizationTest extends FunSuite {
+class VisualizationTest extends FunSuite with MustMatchers {
 
     test("equidistant azimuthal projection works") {
         val proj = new EquidistantAzimuthalProjection(48, 17)
@@ -77,7 +78,21 @@ class VisualizationTest extends FunSuite {
     }
 
     test("arc works") {
-        ???
+        new CircleDrawingComponent with CirclePointsCountComponent with TranslatingProjectionComponent {
+            def circlePointCount = 100
+            val arc = CircleDrawing.arc(5, 4, 8, math.Pi / 8, (6 * math.Pi) / 4.0 + math.Pi / 8)
+            assert(arc.size === 76)
+            arc.foreach(x => (x - vector(5.0, 4)).norm must be(8.0 plusOrMinus 0.00001))
+        }
+    }
+
+    test("arc circle works") {
+        new CircleDrawingComponent with CirclePointsCountComponent with TranslatingProjectionComponent {
+            def circlePointCount = 100
+            val arc = CircleDrawing.arc(5, 4, 8, 0, 2 * math.Pi)
+            assert(arc.size === 101)
+            arc.foreach(x => (x - vector(5.0, 4)).norm must be(8.0 plusOrMinus 0.00001))
+        }
     }
 
     test("circle intersection first one in left -> right is top (that is has higher y)") {

@@ -88,24 +88,18 @@ trait QuickAreaVisualizerComponent extends AreaVisualizerComponentTypes with Cir
             geomFact.createLineString(Array(new Coordinate(p1.x, p1.y), new Coordinate(p2.x, p2.y)))
         }
 
-        def connectAroundEdge(edgeStart: Position, edgeEnd: Position)(firstStart: ResultPoint, firstEnd: ResultPoint)(secondStart: ResultPoint, secondEnd: ResultPoint): List[Position] = {
+        def connectAroundEdge(edgeStart: Position, edgeEnd: Position)(firstStart: ResultPoint, firstEnd: ResultPoint)(secondStart: ResultPoint, secondEnd: ResultPoint): List[ResultPoint] = {
             val first = createLine(firstStart.pt, firstEnd.pt)
             val second = createLine(secondStart.pt, secondEnd.pt)
             val intersection = first.intersection(second)
             intersection match {
-                case ls: LineString if !ls.isEmpty => List(firstStart.pt, firstEnd.pt)
-                case point: Point if !point.isEmpty => List(firstStart.pt, vector(point.getX, point.getY), secondEnd.pt)
+                case ls: LineString if !ls.isEmpty => Nil
+                case point: Point if !point.isEmpty => List(interiorPoint(vector(point.getX, point.getY)))
                 case other => {
-                    assert(other.isEmpty)
-                    val edge = createLine(edgeStart, edgeEnd)
-                    if (firstEnd.onEdge && secondStart.onEdge) {
-                        List(firstStart.pt, firstEnd.pt, secondStart.pt, secondEnd.pt)
-                    } else {
-                        if (first.distance(edge) > second.distance(edge))
-                            List(firstStart.pt, firstEnd.pt)
-                        else
-                            List(secondStart.pt, secondEnd.pt)
-                    }
+                    if (firstEnd.onEdge && secondStart.onEdge)
+                        List(firstEnd, secondStart)
+                    else
+                        Nil
                 }
             }
         }

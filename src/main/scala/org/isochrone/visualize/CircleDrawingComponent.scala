@@ -35,7 +35,11 @@ trait CircleDrawingComponent {
                 val normMax = if (maxAng < minAng) maxAng + 2 * math.Pi else maxAng
                 val points = for (ang <- (0 until circlePointCount).map(_ * angFrac + minAng) if ang < normMax)
                     yield pointForAngle(ang)
-                (points :+ pointForAngle(maxAng))
+                val lastPoint = if (normalizeAngle(minAng) == normalizeAngle(maxAng))
+                    points.head
+                else
+                    pointForAngle(maxAng)
+                (points :+ lastPoint)
             }
         }
 

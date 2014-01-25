@@ -81,23 +81,20 @@ class QuickAreaVisualizerTest extends FunSuite with MustMatchers {
     }
 
     test("connectAroundEdge works with intersection") {
-        val got@List(a, b, c) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.5, 0), true))(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0, 1), false))
-        assert(b.x > 0.5 && b.x < 0.7)
-        assert(b.y > 0)
-        assert((a - vector(1.0, 1)).norm < 0.0001)
-        assert((c - vector(0.0, 1)).norm < 0.0001)
+        val got@List(b) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.5, 0), true))(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0, 1), false))
+        assert(b.pt.x > 0.5 && b.pt.x < 0.7)
+        assert(b.pt.y > 0)
     }
 
     test("connectAroundEdge works with one overtaking other") {
-        val got@List(a, b) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.0, 1.0), false))(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0.1, 0.9), false))
-        info(got.toString)
-        assert((a - vector(1.0, 1)).norm < 0.0001)
-        assert((b - vector(0.0, 1)).norm < 0.0001)
+        val got = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.0, 1.0), false))(areaVis.ResultPoint(vector(0.7, 0), true), areaVis.ResultPoint(vector(0.1, 0.9), false))
+        got must equal(Nil)
     }
 
     test("connectAroundEdge works with not touching") {
-        val got@List(a, b, c, d) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.7, 0), true))(areaVis.ResultPoint(vector(0.3, 0), true), areaVis.ResultPoint(vector(0, 1), false))
-        assert((a, b, c, d) == (vector(1, 1), vector(0.7, 0), vector(0.3, 0), vector(0, 1)))
+        val got@List(b, c) = areaVis.connectAroundEdge(vector(0, 0), vector(1, 0))(areaVis.ResultPoint(vector(1, 1), false), areaVis.ResultPoint(vector(0.7, 0), true))(areaVis.ResultPoint(vector(0.3, 0), true), areaVis.ResultPoint(vector(0, 1), false))
+        assert((b.pt, c.pt) === (vector(0.7, 0), vector(0.3, 0)))
+        assert(got.forall(_.onEdge))
     }
 
     test("connectAroundNode works with acute angles") {
