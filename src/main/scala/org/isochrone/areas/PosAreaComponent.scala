@@ -96,7 +96,7 @@ trait PosAreaComponent extends AreaComponent {
             PosArea(id, points.map(normPoint), costs)
         }
 
-        override def toString = s"${points.map(_.nd)}, ${toLineString.toString}"
+        override def toString = s"PosArea(${id}, ${points.map(_.nd)}, ${toLineString.toString})"
 
         def area = Area(points.map(_.nd))
     }

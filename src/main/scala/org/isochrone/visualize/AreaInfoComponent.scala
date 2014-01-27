@@ -62,7 +62,6 @@ trait DbAreaInfoComponent extends AreaInfoComponent with GraphComponentBase {
             val sorted = q.sortBy(x => (x._1, x._2))
             case class Row(areaId: Long, seqNo: Int, nodeId: Long, geom: Geometry, end: Long, cost: Double)
             val fromDb = sorted.list.view.map(Row.tupled)
-
             def extractPoints(rows: Seq[Row]): List[PointWithPosition] = {
                 val map = rows.groupBy(_.nodeId).map {
                     case (id, rows) => {
@@ -70,7 +69,7 @@ trait DbAreaInfoComponent extends AreaInfoComponent with GraphComponentBase {
                         id -> PointWithPosition(id, vector(point.getX, point.getY))
                     }
                 }
-                rows.map(_.nodeId).toList.distinct.map(map)
+                rows.map(_.nodeId).split(_ != _).map(_.head).toList.map(map)
             }
 
             def extractCosts(rows: Seq[Row]): Map[(Long, Long), Double] = {

@@ -11,9 +11,11 @@ import com.vividsolutions.jts.geom.PrecisionModel
 import com.vividsolutions.jts.geom.Coordinate
 import com.vividsolutions.jts.geom.LineString
 import com.vividsolutions.jts.geom.Point
+import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.osm.SpeedCostAssignerComponent
 
 trait QuickAreaVisualizerComponent extends AreaVisualizerComponentTypes with CircleDrawingComponent {
-    self: GraphComponentBase with CirclePointsCountComponent with AzimuthalProjectionComponent =>
+    self: GraphComponentBase with CirclePointsCountComponent with AzimuthalProjectionComponent with SpeedCostAssignerComponent =>
 
     val geomFact = new GeometryFactory(new PrecisionModel, 4326)
 
@@ -31,28 +33,39 @@ trait QuickAreaVisualizerComponent extends AreaVisualizerComponentTypes with Cir
         def createLine(start: PointWithPosition, end: PointWithPosition) = {
             val cost = area.cost(start.nd, end.nd)
 
-            def tangentPoints(pt: Position, remaining: Double, other: Position) = {
-                val center = (pt + other) :/ 2.0
-                val proj = projectionForPoint(pt.x, pt.y)
-                val projectedCenter = vector.tupled(proj.project(center.x, center.y))
-                val centerRad = projectedCenter.norm
-                VisualizationUtil.circleIntersection(vector(0, 0), projectedCenter, remaining, centerRad).
+            def tangentPoints(proj: AzimuthalProjection, pt: Position, remaining: Double, other: Position) = {
+                val projectedOther = vector.tupled(proj.project(other.x, other.y))
+                val projectedCenter = projectedOther :/ 2.0
+                val startRad = noRoadCostToMeters(remaining)
+                val centerRad = math.max((startRad / 2.0) + 0.1, projectedCenter.norm)
+                val ret = VisualizationUtil.circleIntersection(vector(0, 0), projectedCenter, startRad, centerRad).
                     map(x => vector.tupled(proj.unproject(x.x, x.y))).
                     map(interiorPoint)
+                assert(ret.forall(_.pt.forall(!_.isNaN)))
+                ret
+            }
+
+            def findExtendedEdgeEnd(proj: AzimuthalProjection, s: Position, e: Position, rem: Double) = {
+                val projEnd = vector.tupled(proj.project(e.x, e.y))
+                val adjusted = projEnd :* (rem / cost)
+                vector.tupled(proj.unproject(adjusted.x, adjusted.y))
             }
 
             val startProj = projectionForPoint(start.pos.x, start.pos.y)
+            val endProj = projectionForPoint(end.pos.x, end.pos.y)
 
             (nodeMap.get(start.nd), nodeMap.get(start.nd).map(_ - cost).filter(_ > 0)) match {
                 case (None, _) => None
                 case (Some(remaining), None) => {
-                    val endPoint = ResultPoint(start.pos + ((end.pos - start.pos) :* (remaining / cost)), true)
-                    val startPoints = tangentPoints(start.pos, remaining, endPoint.pt)
+                    val endPoint = ResultPoint(findExtendedEdgeEnd(startProj, start.pos, end.pos, remaining), true)
+                    val startPoints = tangentPoints(startProj, start.pos, remaining, endPoint.pt)
                     Some(startPoints, Seq(endPoint, endPoint))
                 }
                 case (Some(startRem), Some(endRem)) => {
-                    val startPoints = tangentPoints(start.pos, startRem, end.pos)
-                    val endPoints = tangentPoints(end.pos, endRem, start.pos).reverse
+                    val extension = findExtendedEdgeEnd(startProj, start.pos, end.pos, startRem)
+                    val startPoints = tangentPoints(startProj, start.pos, startRem, extension)
+                    val endPoints = tangentPoints(endProj, end.pos, endRem, extension)
+
                     Some(startPoints, endPoints)
                 }
             }
@@ -73,6 +86,8 @@ trait QuickAreaVisualizerComponent extends AreaVisualizerComponentTypes with Cir
             } else {
                 val first = createJtsLine(firstStart.pt, firstEnd.pt)
                 val second = createJtsLine(secondStart.pt, secondEnd.pt)
+                println(first)
+                println(second)
                 val intersection = first.intersection(second)
                 intersection match {
                     case pt: Point if !pt.isEmpty => {
@@ -154,14 +169,26 @@ trait QuickAreaVisualizerComponent extends AreaVisualizerComponentTypes with Cir
                 connected.map(lsFromLst)
         }
 
-        val result: Option[Geometry] = if (linestrings.size == 1)
-            Some(linestrings.head)
-        else
-            Some(geomFact.createMultiLineString(linestrings.toArray))
+        val result: Option[Geometry] = {
+            if (linestrings.size == 1)
+                Some(linestrings.head)
+            else
+                Some(geomFact.createMultiLineString(linestrings.toArray))
+        }
     }
 
-    trait QuickAreaVisualizer extends AreaVisualizer {
+    trait QuickAreaVisualizer extends AreaVisualizer with Logging {
         import ListPositionImplicit._
 
+        def areaGeom(area: PosArea, areaGeom: Geometry, nodes: List[IsochroneNode]) = {
+            logger.debug(area.toString)
+            new AreaVisGeom(area, areaGeom, nodes).result
+        }
     }
+}
+
+trait SomeQuickAreaVisualizerComponent extends QuickAreaVisualizerComponent with AreaVisualizerComponent {
+    self: GraphComponentBase with CirclePointsCountComponent with AzimuthalProjectionComponent with SpeedCostAssignerComponent =>
+
+    val areaVisualizer = new QuickAreaVisualizer {}
 }

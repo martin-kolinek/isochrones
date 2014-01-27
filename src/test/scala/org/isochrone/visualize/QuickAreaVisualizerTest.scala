@@ -13,11 +13,15 @@ import org.isochrone.areas.AreaGeometryFinderComponent
 import org.isochrone.compute.IsochroneComputerComponentTypes
 import org.scalatest.matchers.MustMatchers
 import com.vividsolutions.jts.io.WKTReader
+import org.isochrone.osm.SpeedCostAssignerComponent
 
 class QuickAreaVisualizerTest extends FunSuite with MustMatchers {
 
-    object AreaComponent extends PosAreaComponent with GraphComponentBase with AreaGeometryFinderComponent with IsochroneComputerComponentTypes with QuickAreaVisualizerComponent with CirclePointsCountComponent with TranslatingProjectionComponent {
+    object AreaComponent extends PosAreaComponent with GraphComponentBase with AreaGeometryFinderComponent with IsochroneComputerComponentTypes with QuickAreaVisualizerComponent with CirclePointsCountComponent with TranslatingProjectionComponent with SpeedCostAssignerComponent {
         def circlePointCount = 20
+
+        def noRoadSpeed = 1.0 / 1000.0
+        def roadSpeed = 10.0 / 1000.0
 
         type NodeType = Int
 
@@ -162,13 +166,15 @@ class QuickAreaVisualizerTest extends FunSuite with MustMatchers {
         val l2 = (areaVis.extractForward _).tupled(areaVis.createLine(pointMap(2), pointMap(1)).get)
         val jl1 = areaVis.createJtsLine(l1._1.pt, l1._2.pt)
         val jl2 = areaVis.createJtsLine(l2._1.pt, l2._2.pt)
+        info(jl1.toString)
+        info(jl2.toString)
         assert(!(jl1 intersects jl2))
     }
 
     test("QuickAreaVisualizer works") {
-        val wkt = """MULTILINESTRING ((10 5, 9.543373756578255 0.456626243421745, 1.3701177229975996 1.3675007826026064, 0 15), (20 5, 19.543373756578255 0.4566262434217448, 15 0, 10.456626243421745 0.456626243421745, 10 5))"""
-
+        val wkt = """MULTILINESTRING ((10 5, 9.543373756578255 0.456626243421745, 1.3698787302652349 1.3698787302652349, 0 15), (20 5, 19.543373756578255 0.4566262434217448, 15 0, 10.456626243421745 0.456626243421745, 10 5))"""
         assert(areaVis.result.isDefined)
+        info(areaVis.result.get.toString)
         assert(areaVis.result.get.isValid)
         assert(areaVis.result.get.toString == wkt)
     }

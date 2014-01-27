@@ -38,4 +38,13 @@ class AreaInfoTest extends FunSuite with TestDatabase with MustMatchers {
         assert(area.points.map(_.pos).exists(x => (x - vector(1.0, 2.0)).norm < 0.001))
         area.cost(3, 4) must be(5.0 plusOrMinus 0.0001)
     }
+
+    test("pos areas work with repeated nodes") {
+        val comp = new DbAreaInfoComponent with RoadNetTableComponent with SingleSessionProvider with TestDatabaseComponent {
+            val roadNetTables = new DefaultRoadNetTablesWithPrefix("ar2_")
+        }
+        val area = comp.areaInfoRetriever.getAreas(Seq(1))(1)
+        assert(area.area === comp.Area(List(1, 2, 5, 2, 3, 4)))
+        area.cost(2, 5) must be(1.0 plusOrMinus 0.0001)
+    }
 }
