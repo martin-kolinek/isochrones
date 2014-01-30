@@ -97,7 +97,7 @@ class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Sess
     def retrieveRegion(region: Int) {
         Timing.timeLogged(logger, x => s"retrieveRegion($region) took $x") {
             val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
-            val q = for ((n, e) <- startJoin.sortBy(_._1.id) if n.region === region) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
+            val q = for ((n, e) <- startJoin.sortBy(x => (x._1.id, x._2.end)) if n.region === region) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
             logger.debug(s"Region select: ${q.selectStatement}")
             val list = q.list()(session)
             regionMap(region) = list.map(_._1)
