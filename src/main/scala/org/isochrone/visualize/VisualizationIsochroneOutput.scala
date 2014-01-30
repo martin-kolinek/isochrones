@@ -53,12 +53,6 @@ trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent wit
             areaVisualizer.areaGeom(posAreas(id), geoms(id), nodes)
         }).flatten
     }
-
-    def areaGeometries(ars: Traversable[Long]): Map[Long, Geometry] = {
-        ???
-    }
-
-    def areas(ids: Seq[Long]): Map[Long, PosArea] = ???
 }
 
 
