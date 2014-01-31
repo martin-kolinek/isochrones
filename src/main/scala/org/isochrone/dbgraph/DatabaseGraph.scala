@@ -20,95 +20,45 @@ import org.isochrone.db.MultiLevelRoadNetTableComponent
 import org.isochrone.db.RoadNetTables
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.util.Timing
+import com.vividsolutions.jts.geom.Geometry
 
-class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends GraphWithRegionsType[Long, Int] with NodePosition[Long] with Logging {
-    private val regionMap = new LRUCache[Int, Traversable[Long]]((k, v, m) => {
-        val ret = m.size > maxRegions
-        if (ret) {
-            logger.debug(s"Removing region $k")
-            removeRegion(v)
+trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] with NodePosition[Long] {
+    self: DatabaseGraphBase =>
+
+    final type BasicQueryType = Query[WrappedBasicQueryResult, BasicQueryResult]
+
+    final type WrappedBasicQueryResult = (Column[Long], Column[Option[Long]], Column[Option[Double]], Column[Geometry])
+
+    final type BasicQueryResult = (Long, Option[Long], Option[Double], Geometry)
+
+    protected case class BasicNodeProps(neighs: Traversable[(Long, Double)], pos: (Double, Double))
+
+    final def basicQuery(region: Int): BasicQueryType = {
+        val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
+        for ((n, e) <- startJoin.sortBy(x => (x._1.id, x._2.end)) if n.region === region) yield (n.id, e.end.?, e.cost.?, n.geom)
+    }
+
+    final def basicNodePropsFromQueryResult(qrs: List[BasicQueryResult]): Traversable[(Long, BasicNodeProps)] = {
+        for ((n, lst) <- qrs.groupBy(_._1).view) yield {
+            val neighs = lst.collect { case (st, Some(en), Some(c), _) => (en, c) }
+            val pos = (lst.head._4.getInteriorPoint.getX, lst.head._4.getInteriorPoint.getY)
+            n -> BasicNodeProps(neighs, pos)
         }
-        ret
-    })
-
-    def regions = regionDiameters.map(_._1)
-
-    private val neigh = new HashMap[Long, Traversable[(Long, Double)]]
-
-    private val nodePos = new HashMap[Long, (Double, Double)]
-
-    private val nodesToRegions = new HashMap[Long, Int]
-
-    private var retrievalscntr = 0
-    def retrievals = retrievalscntr
-
-    def removeRegion(nodes: Traversable[Long]) = for (n <- nodes) {
-        nodesToRegions -= n
-        neigh -= n
-        nodePos -= n
-    }
-
-    def regionNodes(rg: Int) = {
-        ensureRegion(rg)
-        regionMap(rg)
-    }
-
-    def ensureRegion(rg: Int) {
-        if (!regionMap.contains(rg))
-            retrieveRegion(rg)
     }
 
     def nodePosition(nd: Long) = {
         ensureRegion(nd)
-        nodePos(nd)
-    }
-
-    def nodeRegion(node: Long) = {
-        ensureRegion(node)
-        nodesToRegions.get(node)
-    }
-
-    def nodesInMemory = neigh.size
-
-    def ensureRegion(node: Long) {
-        if (!nodesToRegions.isDefinedAt(node))
-            retrieveNode(node)
-    }
-
-    def ensureInMemory(node: Long) {
-        if (!neigh.isDefinedAt(node)) {
-            retrieveNode(node)
-        }
+        extractBasicNodeProps(nodesProps(nd)).pos
     }
 
     def neighbours(node: Long) = {
         ensureInMemory(node)
         if (nodesToRegions.contains(node))
             regionMap.updateUsage(nodesToRegions(node))
-        neigh.getOrElse(node, Seq())
+        nodesProps.get(node).map(extractBasicNodeProps).map(_.neighs).getOrElse(Seq())
     }
 
-    def retrieveNode(node: Long) {
-        retrievalscntr += 1
-        val q = roadNetTables.roadNodes.filter(_.id === node).map(_.region)
-        q.list()(session).map(x => retrieveRegion(x))
-    }
-
-    def retrieveRegion(region: Int) {
-        Timing.timeLogged(logger, x => s"retrieveRegion($region) took $x") {
-            val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
-            val q = for ((n, e) <- startJoin.sortBy(x => (x._1.id, x._2.end)) if n.region === region) yield n.id ~ e.end.? ~ e.cost.? ~ n.geom
-            logger.debug(s"Region select: ${q.selectStatement}")
-            val list = q.list()(session)
-            regionMap(region) = list.map(_._1)
-            nodePos ++= list.map(x => (x._1, (x._4.getInteriorPoint.getX, x._4.getInteriorPoint.getY)))
-            val map = list.groupBy(_._1)
-            for ((k, v) <- map) {
-                neigh(k) = v.collect { case (st, Some(en), Some(c), _) => (en, c) }
-                nodesToRegions(k) = region
-            }
-        }
-    }
+    def extractBasicNodeProps(np: NodeProperties): BasicNodeProps
 
     override def singleRegion(rg: Int) = {
         val supGraph = super.singleRegion(rg)
@@ -122,7 +72,7 @@ class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Sess
         }
     }
 
-    def nodes = roadNetTables.roadNodes.map(_.id).list()(session)
+    def regions = regionDiameters.map(_._1)
 
     lazy val regionDiameters = {
         val q = for {
@@ -137,6 +87,23 @@ class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Sess
     } yield d).getOrElse(Double.PositiveInfinity)
 
     def regionDiameter(rg: Int) = regionDiameters(rg)
+
+    def nodes = roadNetTables.roadNodes.map(_.id).list()(session)
+}
+
+class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality {
+
+    def extractBasicNodeProps(np: NodeProperties) = np
+
+    type NodeProperties = BasicNodeProps
+
+    type QueryType = BasicQueryType
+
+    type QueryResult = BasicQueryResult
+
+    def nodePropsFromQueryResult(qrs: List[QueryResult]): Traversable[(Long, NodeProperties)] = basicNodePropsFromQueryResult(qrs)
+
+    def query(region: Int): QueryType = basicQuery(region)
 }
 
 trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
