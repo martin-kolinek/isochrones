@@ -79,8 +79,6 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
 
         new DefaultRoadNetTableComponent with DefaultDatabaseGraphComponent with SingleSessionProvider with TestDatabaseComponent {
             assert(graph.neighbours(5).size == 0)
-            val neigh = graph.neighbours(10)
-            assert(neigh.size == 0)
         }
     }
 
@@ -101,8 +99,6 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
             assert(graph.neighbours(5).size == 0)
             assert(graph.neighbours(5).size == 0)
             assert(graph.neighbours(5).size == 0)
-            val neigh = graph.neighbours(10)
-            assert(neigh.size == 0)
             assert(graph.retrievals > 0)
             assert(graph.retrievals <= 2)
         }

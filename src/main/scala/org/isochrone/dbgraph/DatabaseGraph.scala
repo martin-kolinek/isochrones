@@ -47,15 +47,11 @@ trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] wi
     }
 
     def nodePosition(nd: Long) = {
-        ensureRegion(nd)
-        extractBasicNodeProps(nodesProps(nd)).pos
+        extractBasicNodeProps(propsForNode(nd)).pos
     }
 
     def neighbours(node: Long) = {
-        ensureInMemory(node)
-        if (nodesToRegions.contains(node))
-            regionMap.updateUsage(nodesToRegions(node))
-        nodesProps.get(node).map(extractBasicNodeProps).map(_.neighs).getOrElse(Seq())
+        extractBasicNodeProps(propsForNode(node)).neighs
     }
 
     def extractBasicNodeProps(np: NodeProperties): BasicNodeProps

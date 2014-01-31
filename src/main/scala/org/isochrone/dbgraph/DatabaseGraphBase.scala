@@ -18,49 +18,51 @@ abstract class DatabaseGraphBase(protected val roadNetTables: RoadNetTables, max
         ret
     })
 
-    protected final val nodesProps = new HashMap[Long, NodeProperties]
+    private val nodesProps = new HashMap[Long, NodeProperties]
 
-    protected final val nodesToRegions = new HashMap[Long, Int]
+    private val nodesToRegions = new HashMap[Long, Int]
 
     type NodeProperties
 
     private var retrievalscntr = 0
     final def retrievals = retrievalscntr
 
-    final def removeRegion(nodes: Traversable[Long]) = for (n <- nodes) {
+    private def removeRegion(nodes: Traversable[Long]) = for (n <- nodes) {
         nodesToRegions -= n
         nodesProps -= n
     }
 
-    final def regionNodes(rg: Int) = {
+    final def propsForNode(nd: Long) = {
+        ensureInMemory(nd)
+        if (nodesToRegions.contains(nd))
+            regionMap.updateUsage(nodesToRegions(nd))
+        nodesProps(nd)
+    }
+
+    private def regionNodes(rg: Int) = {
         ensureRegion(rg)
         regionMap(rg)
     }
 
-    final def ensureRegion(rg: Int) {
+    protected final def ensureRegion(rg: Int) {
         if (!regionMap.contains(rg))
             retrieveRegion(rg)
     }
 
-    final def nodeRegion(node: Long) = {
-        ensureRegion(node)
+    def nodeRegion(node: Long) = {
+        ensureInMemory(node)
         nodesToRegions.get(node)
     }
 
     final def nodesInMemory = nodesProps.size
 
-    final def ensureRegion(node: Long) {
-        if (!nodesToRegions.isDefinedAt(node))
-            retrieveNode(node)
-    }
-
-    final def ensureInMemory(node: Long) {
+    private def ensureInMemory(node: Long) {
         if (!nodesProps.isDefinedAt(node)) {
             retrieveNode(node)
         }
     }
 
-    final def retrieveNode(node: Long) {
+    private def retrieveNode(node: Long) {
         retrievalscntr += 1
         val q = roadNetTables.roadNodes.filter(_.id === node).map(_.region)
         q.list()(session).map(x => retrieveRegion(x))
@@ -74,7 +76,7 @@ abstract class DatabaseGraphBase(protected val roadNetTables: RoadNetTables, max
 
     def query(region: Int): QueryType
 
-    final def retrieveRegion(region: Int) {
+    private def retrieveRegion(region: Int) {
         Timing.timeLogged(logger, x => s"retrieveRegion($region) took $x") {
             logger.debug(s"Region select: ${query(region).selectStatement}")
             val list = query(region).list()(session)
