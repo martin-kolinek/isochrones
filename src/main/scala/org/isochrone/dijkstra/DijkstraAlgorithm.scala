@@ -15,17 +15,17 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
 
     object DijkstraAlgorithm extends IsochroneComputer {
 
-        private def alg(start: Traversable[(NodeType, Double)], res: (NodeType, Double) => Unit) {
+        def alg(start: Traversable[(NodeType, Double)], closedFunc: (NodeType, Double, Option[(NodeType, Double)]) => Unit, opened: (NodeType, NodeType) => Unit, cancel: () => Boolean) {
             val closed = new HashSet[NodeType]
             val costMap = new HashMap[NodeType, Double]
+            val previous = new HashMap[NodeType, (NodeType, Double)]
             val open = IndexedPriorityQueue(start.toSeq: _*)
             costMap ++= start
-
-            while (!open.empty) {
+            while (!open.empty && !cancel()) {
                 val (current, curCost) = open.minimum
                 open -= current
                 closed += current
-                res(current, curCost)
+                closedFunc(current, curCost, previous.get(current))
                 for ((neighbour, cost) <- graph.neighbours(current) if !closed.contains(neighbour)) {
                     val newCost = curCost + cost
                     val better = costMap.get(neighbour).map(newCost < _)
@@ -33,7 +33,9 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
                         open -= neighbour
                     }
                     if (better.getOrElse(true)) {
+                        opened(neighbour, current)
                         open += neighbour -> newCost
+                        previous(neighbour) = current -> cost
                     }
                 }
             }
@@ -42,7 +44,7 @@ trait DijkstraAlgorithmComponent extends IsochroneComputerComponent with SomeIso
         def compute(start: Traversable[(NodeType, Double)]) = new Traversable[(NodeType, Double)] {
             self =>
             def foreach[U](func: ((NodeType, Double)) => U) {
-                alg(start, (x: NodeType, y: Double) => func(x -> y))
+                alg(start, (node, cost, prev) => func(node -> cost), (x, y) => {}, () => false)
             }
         }
 

@@ -3,20 +3,21 @@ package org.isochrone.areas
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.graphlib.GraphType
 import shapeless.Lens
+import org.isochrone.graphlib.MapGraphType
 
 trait AreaGraphComponent extends PosAreaComponent {
     self: GraphComponentBase =>
 
-    class AreaWithDiagonalsGraph(mp: Map[NodeType, Seq[(NodeType, Double)]]) extends GraphType[NodeType] {
+    class AreaWithDiagonalsGraph(mp: Map[NodeType, Map[NodeType, Double]]) extends MapGraphType[NodeType] {
         def withoutEdge(n1: NodeType, n2: NodeType) = {
             rem(n1, n2).rem(n2, n1)
         }
 
         private def rem(n1: NodeType, n2: NodeType) = {
-            val lns = Lens.mapLens[NodeType, Seq[(NodeType, Double)]](n1)
+            val lns = Lens.mapLens[NodeType, Map[NodeType, Double]](n1)
             new AreaWithDiagonalsGraph(lns.modify(mp)(opt => for {
-                lst <- opt
-            } yield lst.filterNot(_._1 == n2)))
+                mp <- opt
+            } yield mp - n2))
         }
 
         def nodes = mp.keys
@@ -38,8 +39,8 @@ trait AreaGraphComponent extends PosAreaComponent {
                 Seq((a, b, edg.cost), (b, a, edg.cost))
             }
 
-            val mp = (fromAr ++ fromDiag).toSeq.groupBy(_._1).map {
-                case (k, lst) => k -> lst.map(x => (x._2, x._3))
+            val mp = (fromAr ++ fromDiag).toSeq.view.groupBy(_._1).map {
+                case (k, lst) => k -> lst.view.map(x => (x._2, x._3)).toMap
             }
 
             new AreaWithDiagonalsGraph(mp)

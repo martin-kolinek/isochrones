@@ -13,6 +13,12 @@ trait GraphWithRegionsType[Node, Region] extends GraphType[Node] {
     def filterRegions(func: Region => Boolean) = new GraphType[Node] {
         def neighbours(nd: Node) = self.neighbours(nd).filter(x => self.nodeRegion(x._1).filter(func).isDefined)
         def nodes = self.nodes.filter(x => self.nodeRegion(x).filter(func).isDefined)
+        def edgeCost(start: Node, end: Node) = {
+            if (self.nodeRegion(start).filter(func).isDefined && self.nodeRegion(end).filter(func).isDefined)
+                self.edgeCost(start, end)
+            else
+                None
+        }
     }
 
     def regions: Traversable[Region]

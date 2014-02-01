@@ -5,8 +5,9 @@ import org.isochrone.db.RoadNetTables
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.graphlib.GraphWithRegionsComponentBase
 import org.isochrone.db.SessionProviderComponent
+import org.isochrone.hh.NeighbourhoodSizes
 
-class HHDatabaseGraph(hhTables: HHTables, roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality {
+class HHDatabaseGraph(hhTables: HHTables, roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality with NeighbourhoodSizes[Long] {
     case class HHNodeProps(np: BasicNodeProps, dh: Double)
 
     type QueryResult = (BasicQueryResult, Double)

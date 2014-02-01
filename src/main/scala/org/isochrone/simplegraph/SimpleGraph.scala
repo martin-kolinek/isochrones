@@ -5,32 +5,32 @@ import shapeless.Lens._
 import org.isochrone.dijkstra.DijkstraProvider
 
 trait SimpleGraphComponent extends GraphComponentBase {
-    class SimpleGraph private (neigh: Map[NodeType, List[(NodeType, Double)]], nodePositions: Map[NodeType, (Double, Double)]) extends GraphType[NodeType] with NodePosition[NodeType] {
+    class SimpleGraph private (neigh: Map[NodeType, Map[NodeType, Double]], nodePositions: Map[NodeType, (Double, Double)]) extends MapGraphType[NodeType] with NodePosition[NodeType] {
         def this(edges: Seq[(NodeType, NodeType, Double)], nodePositions: Map[NodeType, (Double, Double)]) =
-            this(edges.groupBy(_._1).map { case (k, v) => (k, v.map(x => (x._2, x._3)).toList) }, nodePositions)
+            this(edges.groupBy(_._1).map { case (k, v) => (k, v.map(x => (x._2, x._3)).toMap) }, nodePositions)
 
         def nodes: Traversable[NodeType] = (neigh.keys ++ neigh.values.flatMap(identity).map(_._1)).toSet
 
-        def neighbours(node: NodeType) = neigh.getOrElse(node, Nil)
+        def neighbours(node: NodeType) = neigh.getOrElse(node, Map())
 
         def nodePosition(nd: NodeType) = nodePositions(nd)
 
         override def toString = s"SimpleGraph($neigh)"
 
         def withEdge(start: NodeType, end: NodeType, cost: Double) = {
-            val lns = mapLens[NodeType, List[(NodeType, Double)]](start)
+            val lns = mapLens[NodeType, Map[NodeType, Double]](start)
             val newNeigh = lns.modify(neigh) {
-                case None => Some(List(end -> cost))
-                case Some(l) => Some((end -> cost) :: l)
+                case None => Some(Map(end -> cost))
+                case Some(l) => Some(l + (end -> cost))
             }
             new SimpleGraph(newNeigh, nodePositions)
         }
 
         def withoutEdge(start: NodeType, end: NodeType) = {
-            val lns = mapLens[NodeType, List[(NodeType, Double)]](start)
+            val lns = mapLens[NodeType, Map[NodeType, Double]](start)
             val newNeigh = lns.modify(neigh) {
                 case None => None
-                case Some(l) => Some(l.filterNot(_._1 == end))
+                case Some(l) => Some(l - end)
             }
             new SimpleGraph(newNeigh, nodePositions)
         }

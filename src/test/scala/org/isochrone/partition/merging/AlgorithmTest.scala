@@ -131,7 +131,7 @@ class AlgorithmTest extends FunSuite {
                 def checkCells(part: Partition) {
                     for (cell <- part.cells) {
                         val should = cell.nodes.flatMap(
-                            x => graph.neighbours(x).filter(y => !cell.nodes.contains(y._1)).map(y => x -> y._1)).toSet
+                            x => graph.neighbours(x).toList.filter(y => !cell.nodes.contains(y._1)).map(y => x -> y._1)).toSet
                         assert(should == cell.leaving)
                     }
                 }

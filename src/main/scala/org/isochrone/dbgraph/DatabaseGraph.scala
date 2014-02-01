@@ -21,8 +21,9 @@ import org.isochrone.db.RoadNetTables
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.util.Timing
 import com.vividsolutions.jts.geom.Geometry
+import org.isochrone.graphlib.MapGraphType
 
-trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] with NodePosition[Long] {
+trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] with MapGraphType[Long] with NodePosition[Long] {
     self: DatabaseGraphBase =>
 
     final type BasicQueryType = Query[WrappedBasicQueryResult, BasicQueryResult]
@@ -31,7 +32,7 @@ trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] wi
 
     final type BasicQueryResult = (Long, Option[Long], Option[Double], Geometry)
 
-    protected case class BasicNodeProps(neighs: Traversable[(Long, Double)], pos: (Double, Double))
+    protected case class BasicNodeProps(neighs: Map[Long, Double], pos: (Double, Double))
 
     final def basicQuery(region: Int): BasicQueryType = {
         val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
@@ -40,7 +41,7 @@ trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] wi
 
     final def basicNodePropsFromQueryResult(qrs: List[BasicQueryResult]): Traversable[(Long, BasicNodeProps)] = {
         for ((n, lst) <- qrs.groupBy(_._1).view) yield {
-            val neighs = lst.collect { case (st, Some(en), Some(c), _) => (en, c) }
+            val neighs = lst.collect { case (st, Some(en), Some(c), _) => (en, c) }.toMap
             val pos = (lst.head._4.getInteriorPoint.getX, lst.head._4.getInteriorPoint.getY)
             n -> BasicNodeProps(neighs, pos)
         }
@@ -65,6 +66,8 @@ trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] wi
             }
 
             def neighbours(nd: Long) = supGraph.neighbours(nd)
+
+            def edgeCost(start: Long, end: Long) = supGraph.edgeCost(start, end)
         }
     }
 
