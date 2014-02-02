@@ -33,7 +33,8 @@ trait SecondPhaseComponent {
             }
 
             val leaves = tree.parentMap.keys.filterNot(tree.childMap.contains).toSeq
-
+            val slacks = leaves.map(x => x -> neighbourhoods.neighbourhoodSize(x)).toMap.withDefaultValue(Double.PositiveInfinity)
+            processQueue(Queue(leaves: _*), Nil, slacks)
         }
     }
 }

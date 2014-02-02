@@ -17,6 +17,8 @@ trait FirstPhaseComponent {
             val startDh = neighbourhoods.neighbourhoodSize(start)
             val activeNodes = new HashSet[NodeType]
             activeNodes += start
+            val activeUnsettled = new HashSet[NodeType]
+            activeUnsettled += start
 
             val s1Rest = new HashMap[NodeType, Double]
 
@@ -26,14 +28,17 @@ trait FirstPhaseComponent {
 
             val withinStartNeighbourhood = new HashSet[NodeType]
 
-            def cancel() = activeNodes.isEmpty
+            def cancel() = activeUnsettled.isEmpty
 
             def opened(node: NodeType, parent: NodeType) {
-                if (activeNodes.contains(parent))
+                if (activeNodes.contains(parent)) {
                     activeNodes += node
+                    activeUnsettled += node
+                }
             }
 
             def closed(current: NodeType, costFromStart: Double, previous: Option[(NodeType, Double)]) = {
+                activeUnsettled -= current
                 if (costFromStart < startDh)
                     withinStartNeighbourhood += current
                 previous match {
