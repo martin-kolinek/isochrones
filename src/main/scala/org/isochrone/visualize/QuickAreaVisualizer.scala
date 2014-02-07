@@ -86,8 +86,6 @@ trait QuickAreaVisualizerComponent extends AreaVisualizerComponentTypes with Cir
             } else {
                 val first = createJtsLine(firstStart.pt, firstEnd.pt)
                 val second = createJtsLine(secondStart.pt, secondEnd.pt)
-                println(first)
-                println(second)
                 val intersection = first.intersection(second)
                 intersection match {
                     case pt: Point if !pt.isEmpty => {

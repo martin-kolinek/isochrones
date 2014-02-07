@@ -63,8 +63,6 @@ class DijkstraIsochroneTest extends FunSuite {
             var init = true
             val lowlevel = new SimpleGraphWithRegions(lowerlevel, lowerlevelregs, lowerlevelregs.map(_._1 -> (0.0, 0.0)).toMap) {
                 override def neighbours(node: Int) = {
-                    if (node == 5 && !init)
-                        println(s"Asked for neighbours of $node")
                     super.neighbours(node)
                 }
             }
