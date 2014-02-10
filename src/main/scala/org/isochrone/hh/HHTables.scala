@@ -3,6 +3,7 @@ package org.isochrone.hh
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.RoadNetTableParsingComponent
 import org.isochrone.ArgumentParser
+import org.isochrone.db.EdgeTable
 
 class NodeNeighbourhoods(name: String) extends Table[(Long, Double)](name) {
     def nodeId = column[Long]("node_id")
@@ -12,6 +13,7 @@ class NodeNeighbourhoods(name: String) extends Table[(Long, Double)](name) {
 
 trait HHTables {
     val neighbourhoods: NodeNeighbourhoods
+    val shortcutEdges: EdgeTable
 }
 
 trait HHTableComponent {
@@ -20,6 +22,7 @@ trait HHTableComponent {
 
 class DefaultHHTablesWithPrefix(prefix: String) extends HHTables {
     val neighbourhoods = new NodeNeighbourhoods(prefix + "hh_node_neighbourhoods")
+    val shortcutEdges = new EdgeTable(prefix + "hh_shortcuts")
 }
 
 trait ConfigHHTableComponent extends HHTableComponent with RoadNetTableParsingComponent {

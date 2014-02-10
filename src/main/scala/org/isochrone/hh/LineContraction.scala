@@ -10,6 +10,7 @@ import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.graphlib.GraphComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.EdgeTable
+import scala.collection.mutable.HashSet
 
 trait LineContractionComponentBase {
     self: GraphComponent =>
@@ -32,7 +33,9 @@ trait LineContractionComponentBase {
             findEndOfLineInt(nd, prev, Nil)
         }
 
-        case class Line(start: NodeType, inner: List[NodeType], end: NodeType)
+        case class Line(start: NodeType, inner: List[NodeType], end: NodeType) {
+            lazy val nodeSet = Set(start, end)
+        }
 
         def getNodeLine(nd: NodeType) = {
             val neigh = graph.neighbours(nd).head._1
@@ -67,16 +70,27 @@ trait LineContractionComponentBase {
 }
 
 trait LineContractionComponent extends GraphComponentBase with LineContractionComponentBase {
-    self: RegularPartitionComponent with GraphComponent with RoadNetTableComponent =>
+    self: GraphComponent with RoadNetTableComponent =>
 
     type NodeType = Long
 
     class LineContraction(output: EdgeTable) extends LineContractionBase {
-        def contractLines(bbox: regularPartition.BoundingBox) = {
+        def contractLines(bbox: Column[Geometry])(implicit s: Session) = {
             val nodesToProcessQuery = for {
-                n <- roadNetTables.roadNodes if n.geom @&& bbox.dbBBox
+                n <- roadNetTables.roadNodes if n.geom @&& bbox
                 if Query(roadNetTables.roadNet).filter(e => e.start === n.id).length === 2
             } yield n.id
+
+            val processed = new HashSet[NodeType]
+
+            nodesToProcessQuery.foreach { nd =>
+                if (!processed.contains(nd)) {
+                    val line = getNodeLine(nd)
+                    processed ++= line.inner
+                    insertShortcuts(line, s)
+                    deleteInner(line, s)
+                }
+            }
         }
 
         def insertShortcuts(ln: Line, session: Session) = {
