@@ -5,16 +5,9 @@ import org.isochrone.compute.IsochroneComputerComponent
 import org.isochrone.compute.SomeIsochroneComputerComponent
 
 trait MultiLevelDijkstraComponent extends IsochroneComputerComponent with SomeIsochroneComputerComponent {
-    self: MultiLevelGraphComponent =>
+    self: MultiLevelGraphComponent with DijkstraAlgorithmProviderComponent =>
 
     object MultilevelDijkstra extends IsochroneComputer {
-        private def dijkstraComp(g: GraphType[NodeType]) = {
-            new DijkstraAlgorithmComponent with GraphComponent {
-                type NodeType = self.NodeType
-                val graph = g
-            }
-        }
-
         private case class FromUpperLevel(isRegionDone: RegionType => Boolean, continueFrom: Traversable[(NodeType, Double)])
 
         private def iso(start: Traversable[(NodeType, Double)], rest: List[GraphWithRegionsType[NodeType, RegionType]], lowerLevel: Option[GraphWithRegionsType[NodeType, RegionType]], limit: Double): FromUpperLevel = {
@@ -27,11 +20,11 @@ trait MultiLevelDijkstraComponent extends IsochroneComputerComponent with SomeIs
                 val singleResult = for {
                     (reg, regStart) <- grouped
                     single = curLevel.singleRegion(reg)
-                    res <- dijkstraComp(single).DijkstraAlgorithm.nodesWithin(regStart, limit)
+                    res <- dijkstraForGraph(single).nodesWithin(regStart, limit)
                 } yield res
                 val fromUpperLevel = iso(singleResult, rest.tail, Some(curLevel), limit)
-                val dijkstraOnUndone = dijkstraComp(curLevel.filterRegions(x => !fromUpperLevel.isRegionDone(x)))
-                val borderNodes = dijkstraOnUndone.DijkstraAlgorithm.nodesWithin(fromUpperLevel.continueFrom, limit).toList
+                val dijkstraOnUndone = dijkstraForGraph(curLevel.filterRegions(x => !fromUpperLevel.isRegionDone(x)))
+                val borderNodes = dijkstraOnUndone.nodesWithin(fromUpperLevel.continueFrom, limit).toList
                 val doneRegions = (for {
                     (nd, cst) <- borderNodes
                     rem = limit - cst

@@ -1,7 +1,6 @@
 package org.isochrone.hh
 
 import org.isochrone.db.HigherLevelRoadNetTableComponent
-import org.isochrone.dbgraph.DatabaseGraphComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.graphlib.GraphComponent
 import org.isochrone.dijkstra.DijkstraAlgorithmComponent
@@ -14,22 +13,23 @@ import org.isochrone.db.RegularPartitionComponent
 import org.isochrone.ArgumentParser
 import org.isochrone.dbgraph.NodeCacheSizeParserComponent
 import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.graphlib.GraphComponentBase
 
-trait HHStepComponent extends NodeCacheSizeParserComponent {
-    self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HHTableComponent with RoadNetTableComponent with NeighbourhoodSizeComponent with DatabaseProvider with ArgumentParser =>
+trait HHStepComponent extends NodeCacheSizeParserComponent with GraphComponentBase {
+    self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HHTableComponent with RoadNetTableComponent with NeighbourhoodSizeComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent =>
+
+    type NodeType = Long
 
     object HHStep extends Logging {
         def createHigherLevel() {
             database.withTransaction { implicit ses: Session =>
-                val firstStep = new FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeComponent with GraphComponent with DijkstraAlgorithmComponent {
-                    type NodeType = Long
-                    val graph = new HHDatabaseGraph(hhTables, roadNetTables, 200, ses)
-                    val neighbourhoods = graph
-                }
+                val hhgraph = new HHDatabaseGraph(hhTables, roadNetTables, 200, ses)
+                val fs = firstPhase(hhgraph, hhgraph)
+                val ss = secondPhase(hhgraph, hhgraph)
                 higherRoadNetTables.roadNodes.insert(Query(roadNetTables.roadNodes))
                 Query(roadNetTables.roadNodes).map(_.id).foreach { rn =>
-                    val tree = firstStep.FirstPhase.nodeTree(rn)
-                    firstStep.SecondPhase.extractHighwayEdges(tree).foreach {
+                    val tree = fs.nodeTree(rn)
+                    ss.extractHighwayEdges(tree).foreach {
                         case (s, e) => {
                             higherRoadNetTables.roadNet.insert(Query(roadNetTables.roadNet).filter(x => x.start === s && x.end === e))
                         }

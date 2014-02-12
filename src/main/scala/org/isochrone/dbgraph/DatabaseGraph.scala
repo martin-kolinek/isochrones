@@ -105,16 +105,6 @@ class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Sess
     def query(region: Int): QueryType = basicQuery(region)
 }
 
-trait DatabaseGraphComponent extends GraphWithRegionsComponentBase {
-    self: SessionProviderComponent =>
-
-    class SessionDatabaseGraph(rnt: RoadNetTables, cacheSize: Int) extends DatabaseGraph(rnt, cacheSize, session)
-
-    type NodeType = Long
-
-    type RegionType = Int
-}
-
 trait NodeCacheSizeParserComponent extends OptionParserComponent {
     lazy val nodeCacheSizeLens = registerConfig(500)
 
@@ -124,23 +114,27 @@ trait NodeCacheSizeParserComponent extends OptionParserComponent {
     }
 }
 
-trait ConfigDatabaseGraphComponent extends GraphWithRegionsComponent with DatabaseGraphComponent with NodeCacheSizeParserComponent with NodePositionComponent {
+trait ConfigDatabaseGraphComponent extends GraphWithRegionsComponent with NodeCacheSizeParserComponent with NodePositionComponent {
     self: RoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
-
-    val graph = new SessionDatabaseGraph(roadNetTables, nodeCacheSizeLens.get(parsedConfig))
+    type NodeType = Long
+    type RegionType = Int
+    val graph = new DatabaseGraph(roadNetTables, nodeCacheSizeLens.get(parsedConfig), session)
     val nodePos = graph
 }
 
-trait DefaultDatabaseGraphComponent extends GraphWithRegionsComponent with DatabaseGraphComponent with NodePositionComponent {
+trait DefaultDatabaseGraphComponent extends GraphWithRegionsComponent with NodePositionComponent {
     self: RoadNetTableComponent with SessionProviderComponent =>
-    val graph = new SessionDatabaseGraph(roadNetTables, 500)
+    type NodeType = Long
+    type RegionType = Int
+    val graph = new DatabaseGraph(roadNetTables, 500, session)
     val nodePos = graph
 }
 
-trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphComponent with NodePositionComponent with DatabaseGraphComponent with NodeCacheSizeParserComponent {
+trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphComponent with NodePositionComponent with NodeCacheSizeParserComponent {
     self: MultiLevelRoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
-
-    val levels = roadNetTableLevels.map(x => new SessionDatabaseGraph(x, nodeCacheSizeLens.get(parsedConfig)))
+    type NodeType = Long
+    type RegionType = Int
+    val levels = roadNetTableLevels.map(x => new DatabaseGraph(x, nodeCacheSizeLens.get(parsedConfig), session))
 
     val graph = levels.head
     val nodePos = graph

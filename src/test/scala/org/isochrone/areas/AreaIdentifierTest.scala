@@ -2,7 +2,7 @@ package org.isochrone.areas
 
 import org.scalatest.FunSuite
 import org.isochrone.simplegraph.SimpleGraphComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.graphlib.NodePositionComponent
 import org.isochrone.graphlib.GraphWithRegionsComponent
 import com.typesafe.scalalogging.slf4j.Logging
@@ -62,7 +62,7 @@ class AreaIdentifierTest extends FunSuite with Logging {
     }
 
     test("Area identifier works") {
-        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
+        new SimpleGraphWithRegionsComponent with DijkstraAlgorithmProviderComponent with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
             type NodeType = Int
             val graph = SimpleGraphWithRegions(edges, regions, positions)
             val nodePos = graph
@@ -84,7 +84,7 @@ class AreaIdentifierTest extends FunSuite with Logging {
     }
 
     test("Areas are computed lazily for different regions") {
-        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
+        new SimpleGraphWithRegionsComponent with DijkstraAlgorithmProviderComponent with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
             type NodeType = Int
             var init = true
             val graph = new SimpleGraphWithRegions(edges, regions, positions) {
@@ -100,7 +100,7 @@ class AreaIdentifierTest extends FunSuite with Logging {
     }
 
     test("Area identifier works when starting from a line") {
-        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
+        new SimpleGraphWithRegionsComponent with DijkstraAlgorithmProviderComponent with NodePositionComponent with GraphWithRegionsComponent with AreaIdentifierComponent {
             type NodeType = Int
             val graph = new SimpleGraphWithRegions(edges, regions, positions) {
                 override def neighbours(node: NodeType) =

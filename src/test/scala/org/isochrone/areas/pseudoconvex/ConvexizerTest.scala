@@ -2,11 +2,11 @@ package org.isochrone.areas.pseudoconvex
 
 import org.scalatest.FunSuite
 import org.isochrone.graphlib.GraphComponentBase
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 class ConvexizerTest extends FunSuite {
     test("convexizer works") {
-        new HertelMehlhortModConvexizerComponent with GraphComponentBase with DefaultDijkstraProvider with AllCostsForAreaComponent {
+        new HertelMehlhortModConvexizerComponent with GraphComponentBase with DijkstraAlgorithmProviderComponent with AllCostsForAreaComponent {
             def allCostsForArea(ar: PosArea) = (for {
                 a <- 1 to 6
                 b <- 1 to 6 if a != b && Set(a, b) != Set(3, 6)

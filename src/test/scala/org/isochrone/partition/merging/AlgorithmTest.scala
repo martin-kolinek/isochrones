@@ -3,16 +3,13 @@ package org.isochrone.partition.merging
 import org.scalatest.FunSuite
 import org.isochrone.graphlib._
 import org.isochrone.simplegraph.SimpleGraphComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
 import org.isochrone.simplegraph.SimpleGraphComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
 import org.isochrone.util.RandomGraphComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 class AlgorithmTest extends FunSuite {
     test("merging algorithm works with controlled functions") {
-        new SimpleGraphComponent with GraphComponent with MergingPartitionerComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider {
+        new SimpleGraphComponent with GraphComponent with MergingPartitionerComponent with MergingAlgorithmPropertiesComponent with DijkstraAlgorithmProviderComponent {
             type NodeType = Int
             val mergeAlgProps = new MergingAlgorithmProperties {
                 def mergePriorityFunc(c1: Cell, c2: Cell) = {
@@ -42,7 +39,7 @@ class AlgorithmTest extends FunSuite {
     }
 
     test("Merging algorithm works with empty graph") {
-        new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with DefaultDijkstraProvider with DefaultMergingAlgPropertiesComponent {
+        new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with DijkstraAlgorithmProviderComponent with DefaultMergingAlgPropertiesComponent {
             type NodeType = Int
             val graph = SimpleGraph()
             assert(MergingPartitioner.partition() == Set())
@@ -50,7 +47,7 @@ class AlgorithmTest extends FunSuite {
     }
 
     test("Merging algorithm with bridge") {
-        new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with MergingAlgorithmPropertiesComponent with DefaultDijkstraProvider with FunctionLibraryComponent {
+        new SimpleGraphComponent with MergingPartitionerComponent with GraphComponent with MergingAlgorithmPropertiesComponent with DijkstraAlgorithmProviderComponent with FunctionLibraryComponent {
             type NodeType = Int
             val mergeAlgProps = new MergingAlgorithmProperties {
                 def mergePriorityFunc(c1: Cell, c2: Cell) = FunctionLibrary.mergePriority(c1, c2)
@@ -69,7 +66,7 @@ class AlgorithmTest extends FunSuite {
 
     test("Sanity checks for step function on random graphs") {
         for (i <- 1 to 3; funcn <- 0 to 1) {
-            new RandomGraphComponent with DefaultDijkstraProvider with PartitionComponent with GraphComponent with CellComponent with MergingAlgorithmPropertiesComponent with FunctionLibraryComponent {
+            new RandomGraphComponent with DijkstraAlgorithmProviderComponent with PartitionComponent with GraphComponent with CellComponent with MergingAlgorithmPropertiesComponent with FunctionLibraryComponent {
                 def checkCellNeighbours(part: Partition) {
                     val nodesToCells = part.cells.flatMap(x => x.nodes.map(y => x -> y)).map(_.swap).toMap
                     val cellNeighbours = part.cells.map(x => x -> x.nodes.flatMap(graph.neighbours _).map(_._1).map(nodesToCells).filter(y => y != x).toSet).filter(!_._2.isEmpty).toMap

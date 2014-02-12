@@ -1,11 +1,11 @@
 package org.isochrone.simplegraph
 
 import org.scalatest.FunSuite
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 class SimpleGraphTest extends FunSuite {
     test("SimpleGraph works") {
-        new SimpleGraphComponent with DefaultDijkstraProvider {
+        new SimpleGraphComponent with DijkstraAlgorithmProviderComponent {
             type NodeType = Int
             val graph = SimpleGraph(
                 (1, 2, 0.1),
@@ -23,7 +23,7 @@ class SimpleGraphTest extends FunSuite {
     }
 
     test("SimpleGraph returns empty list for nonexistent node") {
-        new SimpleGraphComponent with DefaultDijkstraProvider {
+        new SimpleGraphComponent with DijkstraAlgorithmProviderComponent {
             type NodeType = Int
             val graph = SimpleGraph(
                 (1, 2, 0.1),
@@ -39,7 +39,7 @@ class SimpleGraphTest extends FunSuite {
     }
 
     test("SimpleGraph works with regions") {
-        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider {
+        new SimpleGraphWithRegionsComponent with DijkstraAlgorithmProviderComponent {
             type NodeType = Int
             val dir = Seq(
                 0 -> 1,
@@ -63,7 +63,7 @@ class SimpleGraphTest extends FunSuite {
     }
 
     test("SimpleGraph simpleRegion works") {
-        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider {
+        new SimpleGraphWithRegionsComponent with DijkstraAlgorithmProviderComponent {
             type NodeType = Int
             val graph = SimpleGraphWithRegions(Seq((0, 1, 1.0), (1, 2, 1.0), (2, 0, 1.0)), Map(0 -> 1, 1 -> 1, 2 -> 2))
             val sing = graph.singleRegion(graph.nodeRegion(0).get)

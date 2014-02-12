@@ -3,7 +3,7 @@ package org.isochrone.areas
 import org.scalatest.FunSuite
 import org.isochrone.db.TestDatabase
 import org.isochrone.db.TestDatabaseComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.db.SingleSessionProvider
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.DefaultRoadNetTablesWithPrefix
@@ -12,7 +12,7 @@ import org.isochrone.graphlib.GraphComponentBase
 
 class AreaPropFinderTest extends FunSuite with TestDatabase {
     test("AreaPropertiesFinder works") {
-        val comp = new TestDatabaseComponent with AreaPropertiesFinderComponent with DefaultDijkstraProvider with DbAreaReaderComponent with SingleSessionProvider with RoadNetTableComponent with GraphComponentBase {
+        val comp = new TestDatabaseComponent with AreaPropertiesFinderComponent with DijkstraAlgorithmProviderComponent with DbAreaReaderComponent with SingleSessionProvider with RoadNetTableComponent with GraphComponentBase {
             override type NodeType = Long
             val roadNetTables = new DefaultRoadNetTablesWithPrefix("ar_")
             val reader = new DbAreaReader {}

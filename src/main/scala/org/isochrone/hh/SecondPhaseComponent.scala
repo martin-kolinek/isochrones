@@ -3,11 +3,15 @@ package org.isochrone.hh
 import scala.collection.immutable.Queue
 import scala.annotation.tailrec
 import org.isochrone.graphlib.GraphComponent
+import org.isochrone.graphlib.GraphComponentBase
+import org.isochrone.graphlib.GraphType
 
 trait SecondPhaseComponent {
-    self: GraphComponent with NeighbourhoodSizeComponent with FirstPhaseComponent =>
+    self: FirstPhaseComponent with GraphComponentBase =>
 
-    object SecondPhase {
+    def secondPhase(graph: GraphType[NodeType], neighSizes: NeighbourhoodSizes[NodeType]) = new SecondPhase(graph, neighSizes)
+
+    class SecondPhase(graph: GraphType[NodeType], neighSizes: NeighbourhoodSizes[NodeType]) {
         def extractHighwayEdges(tree: NodeTree) = {
             @tailrec
             def processQueue(q: Queue[NodeType], edges: List[(NodeType, NodeType)], slacks: Map[NodeType, Double]): List[(NodeType, NodeType)] = {
@@ -33,7 +37,7 @@ trait SecondPhaseComponent {
             }
 
             val leaves = tree.parentMap.keys.filterNot(tree.childMap.contains).toSeq
-            val slacks = leaves.map(x => x -> neighbourhoods.neighbourhoodSize(x)).toMap.withDefaultValue(Double.PositiveInfinity)
+            val slacks = leaves.map(x => x -> neighSizes.neighbourhoodSize(x)).toMap.withDefaultValue(Double.PositiveInfinity)
             processQueue(Queue(leaves: _*), Nil, slacks)
         }
     }

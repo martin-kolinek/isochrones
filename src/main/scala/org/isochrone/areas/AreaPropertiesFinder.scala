@@ -1,6 +1,6 @@
 package org.isochrone.areas
 
-import org.isochrone.dijkstra.DijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.DatabaseProvider
@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.util.db.MyPostgresDriver.simple._
 
 trait AreaPropertiesFinderComponent extends AreaCoverCostComponent with AreaGeometryFinderComponent {
-    self: AreaReaderComponent with DijkstraProvider with GraphComponentBase with RoadNetTableComponent with DatabaseProvider =>
+    self: AreaReaderComponent with DijkstraAlgorithmProviderComponent with GraphComponentBase with RoadNetTableComponent with DatabaseProvider =>
 
     type NodeType = Long
 

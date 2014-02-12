@@ -11,7 +11,6 @@ import org.isochrone.Main
 import org.isochrone.db.ConfigRegularPartitionComponent
 import org.isochrone.partition.ConfigIncrementalPartitionComponent
 import org.isochrone.dboutput.partition.HigherLevelGraphCreatorComponent
-import org.isochrone.dbgraph.DatabaseGraphComponent
 import org.isochrone.db.HigherConfigRoadNetTableComponent
 import org.isochrone.partition.DefaultRegionAnalyzerProvider
 import org.isochrone.db.SingleSessionProvider
@@ -42,6 +41,8 @@ trait HigherLevelCreator extends ActionExecutor {
 	        with DefaultRegionAnalyzerProvider
 	        with FromOptionDatabaseComponent
 	        with SingleSessionProvider {
+	    override type NodeType = Long
+	    override type RegionType = Int
 	    val execute = () => HigherLevelGraph.createHigherLevelGraph()
 	})
 }

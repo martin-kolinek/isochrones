@@ -3,7 +3,7 @@ package org.isochrone.areas.pseudoconvex
 import org.isochrone.graphlib.GraphComponentBase
 import shapeless.Lens
 import org.isochrone.graphlib.GraphType
-import org.isochrone.dijkstra.DijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import scala.annotation.tailrec
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.areas.PosAreaComponent
@@ -20,7 +20,7 @@ trait ConvexizerComponent extends PosAreaComponent {
 }
 
 trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent with AreaGraphComponent {
-    self: GraphComponentBase with DijkstraProvider with AllCostsForAreaComponent =>
+    self: GraphComponentBase with DijkstraAlgorithmProviderComponent with AllCostsForAreaComponent =>
 
     object HertelMehlhortModConvexizer extends Convexizer with Logging {
         @tailrec
@@ -31,7 +31,7 @@ trait HertelMehlhortModConvexizerComponent extends ConvexizerComponent with Area
                 val Seq(a, b) = candidate.nds.toSeq
                 val noedg = ar.withoutEdge(a, b)
                 val comp = dijkstraForGraph(noedg)
-                if (comp.DijkstraHelpers.nodesWithin(a, candidate.cost).map(_._1).exists(b == _))
+                if (comp.helper.nodesWithin(a, candidate.cost).map(_._1).exists(b == _))
                     conv(noedg, rest, needed)
                 else
                     conv(ar, rest, candidate :: needed)

@@ -6,13 +6,32 @@ import org.isochrone.db.HigherLevelRoadNetTableComponent
 import org.isochrone.dijkstra.DijkstraAlgorithmComponent
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
+import org.isochrone.graphlib.GraphType
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 trait FirstPhaseComponent {
-    self: NeighbourhoodSizeComponent with GraphComponent with DijkstraAlgorithmComponent =>
+    self: GraphComponentBase =>
 
     case class NodeTree(childMap: collection.immutable.Map[NodeType, Seq[NodeType]], parentMap: collection.immutable.Map[NodeType, NodeType], withinStartNeighbourhood: collection.immutable.Set[NodeType])
 
-    object FirstPhase {
+    def firstPhase(g: GraphType[NodeType], neigh: NeighbourhoodSizes[NodeType]): FirstPhase
+
+    trait FirstPhase {
+        def nodeTree(start: NodeType): NodeTree
+    }
+}
+
+trait FirstPhaseComponentImpl extends FirstPhaseComponent {
+    self: DijkstraAlgorithmProviderComponent with GraphComponentBase =>
+
+    def firstPhase(g: GraphType[NodeType], neigh: NeighbourhoodSizes[NodeType]) = new FirstPhaseImpl {
+        val graph = g
+        val neighbourhoods = neigh
+    }
+
+    trait FirstPhaseImpl extends FirstPhase {
+        val graph: GraphType[NodeType]
+        val neighbourhoods: NeighbourhoodSizes[NodeType]
         def nodeTree(start: NodeType): NodeTree = {
             val startDh = neighbourhoods.neighbourhoodSize(start)
             val activeNodes = new HashSet[NodeType]
@@ -66,7 +85,7 @@ trait FirstPhaseComponent {
                 }
             }
 
-            DijkstraAlgorithm.alg(Seq(start -> 0), closed, opened, cancel)
+            dijkstraForGraph(graph).alg(Seq(start -> 0), closed, opened, cancel)
 
             val childMap = predecessors.toSeq.view.map(_.swap).groupBy(_._1).map {
                 case (par, chlds) => par -> chlds.map(_._2).force

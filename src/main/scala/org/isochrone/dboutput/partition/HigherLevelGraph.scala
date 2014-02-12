@@ -10,12 +10,14 @@ import org.isochrone.db.RoadNetTables
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.HigherLevelRoadNetTableComponent
 import org.isochrone.partition.RegionAnalyzerProviderComponent
-import org.isochrone.dbgraph.DatabaseGraphComponent
 import com.typesafe.scalalogging.slf4j.Logging
 import com.vividsolutions.jts.geom.Geometry
 
-trait HigherLevelGraphCreatorComponent {
-    self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with DatabaseGraphComponent with GraphWithRegionsComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
+trait HigherLevelGraphCreatorComponent extends GraphWithRegionsComponentBase {
+    self: RoadNetTableComponent with HigherLevelRoadNetTableComponent with GraphWithRegionsComponent with DatabaseProvider with RegionAnalyzerProviderComponent =>
+
+    type NodeType = Long
+    type RegionType = Int
 
     object HigherLevelGraph extends Logging {
         def createHigherLevelGraph() {

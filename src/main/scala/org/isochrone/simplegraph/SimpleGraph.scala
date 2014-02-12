@@ -2,7 +2,7 @@ package org.isochrone.simplegraph
 
 import org.isochrone.graphlib._
 import shapeless.Lens._
-import org.isochrone.dijkstra.DijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 trait SimpleGraphComponent extends GraphComponentBase {
     class SimpleGraph private (neigh: Map[NodeType, Map[NodeType, Double]], nodePositions: Map[NodeType, (Double, Double)]) extends MapGraphType[NodeType] with NodePosition[NodeType] {
@@ -61,7 +61,7 @@ trait SimpleGraphComponent extends GraphComponentBase {
 }
 
 trait SimpleGraphWithRegionsComponent extends SimpleGraphComponent {
-    self: DijkstraProvider =>
+    self: DijkstraAlgorithmProviderComponent =>
 
     type RegionType = SimpleGraphRegion
 
@@ -85,7 +85,7 @@ trait SimpleGraphWithRegionsComponent extends SimpleGraphComponent {
                 node <- nodes.toSeq
                 region <- nodeRegions.get(node)
                 single = this.singleRegion(nodeRegionsProc(node))
-            } yield node -> dijkstraForGraph(single).DijkstraAlgorithm.compute(Seq(node -> 0.0)).map(_._2).max
+            } yield node -> dijkstraForGraph(single).compute(Seq(node -> 0.0)).map(_._2).max
             x.toMap
         }
 

@@ -2,10 +2,10 @@ package org.isochrone.util
 
 import scala.util.Random
 import org.isochrone.simplegraph.SimpleGraphComponent
-import org.isochrone.dijkstra.DijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 trait RandomGraphComponent extends SimpleGraphComponent {
-    self: DijkstraProvider =>
+    self: DijkstraAlgorithmProviderComponent =>
     type NodeType = Int
     object RandomGraph {
         val rand = new Random()

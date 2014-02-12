@@ -8,7 +8,7 @@ import org.isochrone.db.ConfigRoadNetTableComponent
 import org.isochrone.db.FromOptionDatabaseComponent
 import org.isochrone.OptionParserComponent
 import org.isochrone.areas.DbAreaReaderComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.db.SingleSessionProvider
 import org.isochrone.areas.AreaPropertiesFinderComponent
 import org.isochrone.graphlib.GraphComponentBase
@@ -24,7 +24,7 @@ trait AllAreaCoverCostsExecutor extends ActionExecutor {
 	    with FromOptionDatabaseComponent
 	    with OptionParserComponent 
 	    with DbAreaReaderComponent
-	    with DefaultDijkstraProvider
+	    with DijkstraAlgorithmProviderComponent
 	    with SingleSessionProvider
 	    with GraphComponentBase {
 	        override type NodeType = Long

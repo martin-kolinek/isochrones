@@ -10,7 +10,6 @@ import org.isochrone.dijkstra.DijkstraAlgorithmComponent
 import org.isochrone.compute.IsochronesComputationComponent
 import org.isochrone.db.FromOptionDatabaseComponent
 import org.isochrone.db.DatabaseOptionParsingComponent
-import org.isochrone.dbgraph.DatabaseGraphComponent
 import org.isochrone.db.DefaultRoadNetTableComponent
 import org.isochrone.db.SingleSessionProvider
 import scopt.Read
@@ -21,6 +20,7 @@ import org.isochrone.dbgraph.ConfigDatabaseGraphComponent
 import org.isochrone.dbgraph.ConfigMultiLevelDatabaseGraph
 import org.isochrone.db.ConfigMultiLevelRoadNetTableComponent
 import org.isochrone.ArgumentParser
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 trait DijkstraIsochroneComputer extends ActionExecutor {
     self: Main.type =>
@@ -41,6 +41,7 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
         }) + ("multidijkstra" --> new ActionComponent
                 with IsochroneExecutorCompoent
                 with OptionsBase
+                with DijkstraAlgorithmProviderComponent
                 with MultiLevelDijkstraComponent
                 with ConfigMultiLevelRoadNetTableComponent
                 with ConfigRoadNetTableComponent

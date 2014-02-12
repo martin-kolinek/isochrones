@@ -10,19 +10,19 @@ import org.isochrone.simplegraph.SimpleGraphWithRegionsComponent
 
 class DijkstraIsochroneTest extends FunSuite {
     test("dijkstra isochrone finds an isochrone in star") {
-        new SimpleGraphComponent with DefaultDijkstraProvider with DijkstraAlgorithmComponent with GraphComponent {
+        new GraphComponent with SimpleGraphComponent with DijkstraAlgorithmComponent {
             type NodeType = Int
-            val edges = (1 to 10).map((0, _, 0.5)) ++ (1 to 10).map(x => (x, x + 10, 0.5))
-            val graph = SimpleGraph(edges: _*)
-            val iso = DijkstraHelpers.isochrone(0, 0.6).toList
+            lazy val edges = (1 to 10).map((0, _, 0.5)) ++ (1 to 10).map(x => (x, x + 10, 0.5))
+            lazy val graph = SimpleGraph(edges: _*)
+            lazy val iso = DijkstraHelpers.isochrone(0, 0.6).toList
             assert(iso.filter(_.nd != 0).map(_.remaining).forall(q => math.abs(q - 0.1) < 0.01))
         }
     }
 
     test("dijkstra finds an isochrone on random graph") {
         for (i <- 1 to 3) {
-            new RandomGraphComponent with DefaultDijkstraProvider with DijkstraAlgorithmComponent with GraphComponent {
-                val graph = RandomGraph.randomGraph(100, 300)
+            new RandomGraphComponent with GraphComponent with DijkstraAlgorithmComponent {
+                lazy val graph = RandomGraph.randomGraph(100, 300)
                 DijkstraHelpers.isochrone(1, 20.0)
             }
         }
@@ -44,7 +44,7 @@ class DijkstraIsochroneTest extends FunSuite {
         (6, 7, 1.0))
 
     test("multilevel dijkstra works on a graph") {
-        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
+        new SimpleGraphWithRegionsComponent with DijkstraAlgorithmProviderComponent with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
             type NodeType = Int
             val lowlevel = SimpleGraphWithRegions(lowerlevel, lowerlevelregs)
             val upper = SimpleGraphWithRegions(upperlevel: _*)
@@ -58,18 +58,18 @@ class DijkstraIsochroneTest extends FunSuite {
     }
 
     test("multilevel dijkstra does not ask for unneeded edges") {
-        new SimpleGraphWithRegionsComponent with DefaultDijkstraProvider with MultiLevelDijkstraComponent with MultiLevelGraphComponent {
+        new MultiLevelGraphComponent with SimpleGraphWithRegionsComponent with DijkstraAlgorithmProviderComponent with MultiLevelDijkstraComponent {
             type NodeType = Int
             var init = true
-            val lowlevel = new SimpleGraphWithRegions(lowerlevel, lowerlevelregs, lowerlevelregs.map(_._1 -> (0.0, 0.0)).toMap) {
+            def lowlevel = new SimpleGraphWithRegions(lowerlevel, lowerlevelregs, lowerlevelregs.map(_._1 -> (0.0, 0.0)).toMap) {
                 override def neighbours(node: Int) = {
                     super.neighbours(node)
                 }
             }
             lowlevel.nodes.map(lowlevel.nodeRegion).map(_.map(_.diameter))
             init = false
-            val upper = SimpleGraphWithRegions(upperlevel: _*)
-            val levels = Seq(lowlevel, upper)
+            def upper = SimpleGraphWithRegions(upperlevel: _*)
+            lazy val levels = Seq(lowlevel, upper)
             val iso = MultilevelDijkstra.isochrone(Seq(1 -> 0.0), 6.5).toList
             val ndset = iso.map(_.nd).toSet
             assert(ndset.contains(8))

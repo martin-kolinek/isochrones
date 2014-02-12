@@ -13,7 +13,7 @@ import org.isochrone.areas.DbAreaReaderComponent
 import org.isochrone.osm.DefaultCostAssignerComponent
 import org.isochrone.db.FromOptionDatabaseComponent
 import org.isochrone.areas.pseudoconvex.AreaShrinkerComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.db.SingleSessionProvider
 import org.isochrone.OptionParserComponent
 import org.isochrone.areas.pseudoconvex.ConfigShrinkRatioComponent
@@ -38,7 +38,7 @@ trait AreaFixerExecutor extends ActionExecutor {
 		with DefaultCostAssignerComponent
 		with FromOptionDatabaseComponent
 		with AreaShrinkerComponent
-		with DefaultDijkstraProvider
+		with DijkstraAlgorithmProviderComponent
 		with SingleSessionProvider
 		with OptionParserComponent {
         override type NodeType = Long

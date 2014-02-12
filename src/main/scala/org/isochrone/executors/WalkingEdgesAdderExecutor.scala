@@ -13,7 +13,7 @@ import org.isochrone.osm.DefaultCostAssignerComponent
 import org.isochrone.connect.ConfigMaxCostQuotientComponent
 import org.isochrone.dbgraph.ConfigDatabaseGraphComponent
 import org.isochrone.db.ConfigRegularPartitionComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
 trait WalkingEdgesAdderExecutor extends ActionExecutor {
     self: Main.type =>
@@ -27,7 +27,7 @@ trait WalkingEdgesAdderExecutor extends ActionExecutor {
                 with ConfigRegularPartitionComponent
                 with SingleSessionProvider
                 with ConfigMaxCostQuotientComponent 
-                with DefaultDijkstraProvider {
+                with DijkstraAlgorithmProviderComponent {
         	override type NodeType = Long
         	val execute = () => addWalkingEdges()
         })

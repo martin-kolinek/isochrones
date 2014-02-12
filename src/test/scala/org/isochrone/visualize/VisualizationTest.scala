@@ -7,7 +7,7 @@ import org.isochrone.graphlib.NodePositionComponent
 import org.isochrone.graphlib.GraphComponent
 import org.isochrone.osm.SpeedCostAssignerComponent
 import org.isochrone.simplegraph.SimpleGraphComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.graphlib.NodePosition
 import com.vividsolutions.jts.geom.GeometryFactory
 import com.vividsolutions.jts.geom.PrecisionModel
@@ -115,7 +115,7 @@ class VisualizationTest extends FunSuite with MustMatchers {
     }
 
     test("visualizer creates a geometry") {
-        val comp = new IsochronesComputationComponent with AreaInfoComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DefaultDijkstraProvider with CirclePointsCountComponent with ApproxEquidistAzimuthProjComponent {
+        val comp = new IsochronesComputationComponent with AreaInfoComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DijkstraAlgorithmProviderComponent with CirclePointsCountComponent with ApproxEquidistAzimuthProjComponent {
             def circlePointCount = 10
             type NodeType = Int
             private val geomFact = new GeometryFactory(new PrecisionModel, 4326)

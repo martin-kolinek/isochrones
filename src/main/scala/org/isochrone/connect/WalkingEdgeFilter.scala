@@ -4,12 +4,12 @@ import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.simplegraph.SimpleGraphComponent
 import org.isochrone.dbgraph.DatabaseGraph
 import org.isochrone.graphlib.UnionGraph
-import org.isochrone.dijkstra.DijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import scala.annotation.tailrec
 import com.typesafe.scalalogging.slf4j.Logging
 
 trait WalkingEdgeFilter extends GraphComponentBase with Logging {
-    self: SimpleGraphComponent with DijkstraProvider =>
+    self: SimpleGraphComponent with DijkstraAlgorithmProviderComponent =>
 
     type NodeType = Long
 
@@ -21,7 +21,7 @@ trait WalkingEdgeFilter extends GraphComponentBase with Logging {
             val withoutEdge = sg.withoutEdge(start, end).withoutEdge(end, start)
             val union = new UnionGraph(dbg, withoutEdge)
             val dijk = dijkstraForGraph(union)
-            if (dijk.DijkstraHelpers.distance(start, end) <= cost && dijk.DijkstraHelpers.distance(end, start) <= cost)
+            if (dijk.helper.distance(start, end) <= cost && dijk.helper.distance(end, start) <= cost)
                 filterNodesInternal(rest, dbg, withoutEdge, filtered)
             else
                 filterNodesInternal(rest, dbg, sg, edg :: filtered)

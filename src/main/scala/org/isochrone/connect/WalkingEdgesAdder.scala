@@ -3,7 +3,7 @@ package org.isochrone.connect
 import org.isochrone.db.DatabaseProvider
 import scala.util.Random
 import org.isochrone.db.RoadNetTableComponent
-import org.isochrone.dijkstra.DijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.util._
 import org.isochrone.osm.SpeedCostAssignerComponent
@@ -20,7 +20,6 @@ import slick.jdbc.StaticQuery.interpolation
 import org.isochrone.db.RegularPartitionComponent
 import org.isochrone.simplegraph.SimpleGraphComponent
 import org.isochrone.graphlib.UnionGraph
-import org.isochrone.dbgraph.DatabaseGraphComponent
 import org.isochrone.db.SingleSessionProvider
 import org.isochrone.db.SessionProviderComponent
 import org.isochrone.dbgraph.DatabaseGraph
@@ -33,7 +32,7 @@ trait WalkingEdgesAdderComponent {
 }
 
 trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with GraphComponentBase with Logging with SimpleGraphComponent with WalkingEdgeFilter with ApproxEquidistAzimuthProjComponent {
-    self: DatabaseProvider with RoadNetTableComponent with SpeedCostAssignerComponent with MaxCostQuotientComponent with RegularPartitionComponent with DijkstraProvider =>
+    self: DatabaseProvider with RoadNetTableComponent with SpeedCostAssignerComponent with MaxCostQuotientComponent with RegularPartitionComponent with DijkstraAlgorithmProviderComponent =>
     override type NodeType = Long
     def addWalkingEdges() {
         regularPartition.regions.zipWithIndex.foreach((processRegion _).tupled)
@@ -82,7 +81,7 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
         val nodeSet = dbNodes.map(_._1).toSet
         val dijkstraNodes = {
             val dijk = dijkstraForGraph(union)
-            dijk.DijkstraHelpers.compute(startid).lazyFilter(x => nodeSet.contains(x._1)).take(dbNodes.size).toMap
+            dijk.helper.compute(startid).lazyFilter(x => nodeSet.contains(x._1)).take(dbNodes.size).toMap
         }
 
         val walkingIsFasterNodes = dbNodes.filter {
@@ -111,9 +110,9 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
         }
     }
 
-    private def findWalkingEdge(start: NodeType, sg: SimpleGraph, union: GraphType[NodeType], dijk: DijkstraAlgorithmComponent { type NodeType = self.NodeType }, dbNodes: Map[NodeType, Double]): (SimpleGraph, Map[NodeType, Double]) = {
+    private def findWalkingEdge(start: NodeType, sg: SimpleGraph, union: GraphType[NodeType], dijk: DijkstraAlgorithmClass, dbNodes: Map[NodeType, Double]): (SimpleGraph, Map[NodeType, Double]) = {
         var currentNodes = dbNodes
-        dijk.DijkstraHelpers.compute(start).foreach {
+        dijk.helper.compute(start).foreach {
             case (nd, cost) => {
                 if (currentNodes.contains(nd) && currentNodes(nd) - cost <= -1E-10) {
                     return (addEdge(sg, union, start, nd, currentNodes(nd)), currentNodes - nd)

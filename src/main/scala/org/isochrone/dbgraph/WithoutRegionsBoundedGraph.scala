@@ -7,10 +7,10 @@ import org.isochrone.graphlib.GraphType
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.simplegraph.SimpleGraphComponent
-import org.isochrone.dijkstra.DefaultDijkstraProvider
-import org.isochrone.dijkstra.DijkstraProvider
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
-trait WithoutRegionsBoundedGraphComponent extends GraphComponentBase with SimpleGraphComponent with DefaultDijkstraProvider {
+trait WithoutRegionsBoundedGraphComponent extends GraphComponentBase with SimpleGraphComponent with DijkstraAlgorithmProviderComponent {
     self: RegularPartitionComponent with DatabaseProvider with RoadNetTableComponent =>
 
     type NodeType = Long
