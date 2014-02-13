@@ -15,7 +15,9 @@ trait AreaCoverCostComponent extends AreaGraphComponent {
             val grp = AreaWithDiagonalsGraph(ar, Nil)
             val dijk = dijkstraForGraph(grp)
             for (PointWithPosition(nd, _) <- ar.points) yield {
-                nd -> dijk.helper.compute(nd).map(_._2).max
+                val costs = for ((other, ocost) <- dijk.helper.compute(nd))
+                    yield grp.neighbours(other).map(_._2).max + ocost
+                nd -> costs.max
             }
         }
     }
