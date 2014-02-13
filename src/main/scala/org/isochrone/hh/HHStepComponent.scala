@@ -82,7 +82,7 @@ trait HHStepComponent extends NodeCacheSizeParserComponent with GraphComponentBa
         }
 
         def makeStep() {
-            //findNeighbourhoodSizes()
+            findNeighbourhoodSizes()
             createHigherLevel()
             contractHigherLevel()
         }

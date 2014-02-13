@@ -37,7 +37,7 @@ trait ConfigNeighbourhoodCountComponent extends OptionParserComponent with Neigh
 
     abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
         super.parserOptions(pars)
-        pars.opt[Int]("neighbourhood-count").text("The size of highway hierarchies neighbourhoods (default = 20)")
+        pars.opt[Int]("neighbourhood-count").text("The size of highway hierarchies neighbourhoods (default = 20)").action((x, c) => neighCountLens.set(c)(x))
     }
 
     lazy val neighbourhoodCount = neighCountLens.get(parsedConfig)

@@ -9,7 +9,7 @@ trait AreaVisualizerComponentTypes extends IsochroneComputerComponentTypes with 
     self: GraphComponentBase =>
 
     trait AreaVisualizer {
-        def areaGeom(area: PosArea, areaGeom: Geometry, nodes: List[IsochroneNode]): Option[Geometry]
+        def areaGeom(area: PosArea, areaGeom: Geometry, nodes: List[IsochroneNode]): Traversable[Geometry]
     }
 }
 

@@ -12,18 +12,34 @@ import org.isochrone.osm.SpeedCostAssignerComponent
 import com.vividsolutions.jts.geom.PrecisionModel
 import com.vividsolutions.jts.geom.GeometryFactory
 import com.vividsolutions.jts.geom.Coordinate
+import com.vividsolutions.jts.geom.LineString
+import com.vividsolutions.jts.geom.LinearRing
+import org.isochrone.OptionParserComponent
+import org.isochrone.ArgumentParser
+import scopt.OptionParser
 
 trait PreciseAreaVisualizerComponent extends AreaVisualizerComponentTypes with CircleDrawingComponent {
-    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent =>
+    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent with OnlyLinesComponent =>
     private val geomFact = new GeometryFactory(new PrecisionModel, 4326)
 
     trait PreciseAreaVisualizer extends AreaVisualizer {
-        def areaGeom(area: PosArea, areaGeom: Geometry, nodes: List[IsochroneNode]): Option[Geometry] = {
+        def areaGeom(area: PosArea, areaGeom: Geometry, nodes: List[IsochroneNode]): Traversable[Geometry] = {
             val nodeGeoms = nodes.flatMap(getNodeGeom(nodes.map(_.nd).toSet))
             if (nodeGeoms.isEmpty)
                 None
-            else
-                Some(areaGeom.intersection(nodeGeoms.reduce(_ union _)))
+            else {
+                val geom = areaGeom.intersection(nodeGeoms.reduce(_ union _))
+                if (onlyLines) {
+                    val bound = geom.getBoundary
+                    (0 until bound.getNumGeometries).map(bound.getGeometryN).view.map {
+                        case lr: LinearRing => geomFact.createLineString(lr.getCoordinates())
+                        case ls: LineString => ls
+                        case _ => throw new Exception("Not a line returned by getBoundary")
+                    }.map(_.difference(areaGeom.getBoundary))
+                } else {
+                    Some(geom)
+                }
+            }
         }
 
         def getNodeGeom(arnds: Set[NodeType])(nd: IsochroneNode): Option[Geometry] = {
@@ -53,7 +69,23 @@ trait PreciseAreaVisualizerComponent extends AreaVisualizerComponentTypes with C
     }
 }
 
+trait OnlyLinesComponent {
+    def onlyLines: Boolean
+}
+
+trait ConfigOnlyLinesComponent extends OptionParserComponent with OnlyLinesComponent {
+    self: ArgumentParser =>
+
+    lazy val onlyLinesLens = registerConfig(false)
+    lazy val onlyLines = onlyLinesLens.get(parsedConfig)
+
+    abstract override def parserOptions(pars: OptionParser[OptionConfig]) {
+        super.parserOptions(pars)
+        pars.opt[Boolean]("only-lines").text("output only lines, not whole polygons (default = false)").action((x, c) => onlyLinesLens.set(c)(x))
+    }
+}
+
 trait SomePreciseAreaVisualizer extends AreaVisualizerComponent with PreciseAreaVisualizerComponent {
-    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent =>
+    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent with OnlyLinesComponent =>
     val areaVisualizer = new PreciseAreaVisualizer {}
 }
