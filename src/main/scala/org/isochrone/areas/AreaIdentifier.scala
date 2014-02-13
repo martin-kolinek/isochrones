@@ -1,6 +1,5 @@
 package org.isochrone.areas
 
-import org.isochrone.dbgraph.DatabaseGraphComponent
 import scala.annotation.tailrec
 import org.isochrone.graphlib.GraphWithRegionsComponent
 import org.isochrone.graphlib.NodePositionComponent
