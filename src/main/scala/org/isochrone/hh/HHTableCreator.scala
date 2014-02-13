@@ -6,12 +6,14 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 trait HHTableCreatorComponent {
     self: HHTableComponent with DatabaseProvider =>
     object HHTableCreator {
-        def createTables = database.withSession { implicit s: Session =>
-            hhTables.neighbourhoods.ddl.create
+        private def ddls = (hhTables.neighbourhoods.ddl ++ hhTables.shortcutEdges.ddl)
+
+        def createTables() = database.withSession { implicit s: Session =>
+            ddls.create
         }
 
-        def dropTables = database.withSession { implicit s: Session =>
-            hhTables.neighbourhoods.ddl.drop
+        def dropTables() = database.withSession { implicit s: Session =>
+            ddls.drop
         }
     }
 }
