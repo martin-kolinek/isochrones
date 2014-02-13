@@ -13,10 +13,10 @@ import org.isochrone.db.EdgeTable
 import scala.collection.mutable.HashSet
 
 trait LineContractionComponentBase {
-    self: GraphComponent =>
+    self: GraphComponentBase =>
 
     trait LineContractionBase {
-
+        val graph: GraphType[NodeType]
         def findEndOfLine(nd: NodeType, prev: NodeType) = {
             @tailrec
             def findEndOfLineInt(nd: NodeType, prev: NodeType, res: List[NodeType]): List[NodeType] = {
@@ -70,15 +70,17 @@ trait LineContractionComponentBase {
 }
 
 trait LineContractionComponent extends GraphComponentBase with LineContractionComponentBase {
-    self: GraphComponent with RoadNetTableComponent =>
 
     type NodeType = Long
 
-    class LineContraction(output: EdgeTable) extends LineContractionBase {
+    def lineContractor(g: GraphType[NodeType], rnet: RoadNetTables, output: EdgeTable) = new LineContraction(g, rnet, output)
+
+    class LineContraction(g: GraphType[NodeType], rnet: RoadNetTables, output: EdgeTable) extends LineContractionBase {
+        val graph = g
         def contractLines(bbox: Column[Geometry])(implicit s: Session) = {
             val nodesToProcessQuery = for {
-                n <- roadNetTables.roadNodes if n.geom @&& bbox
-                if Query(roadNetTables.roadNet).filter(e => e.start === n.id).length === 2
+                n <- rnet.roadNodes if n.geom @&& bbox
+                if Query(rnet.roadNet).filter(e => e.start === n.id).length === 2
             } yield n.id
 
             val processed = new HashSet[NodeType]
@@ -96,8 +98,8 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
         def insertShortcuts(ln: Line, session: Session) = {
             for ((s, e, c) <- getShortcuts(ln)) {
                 val q = for {
-                    n1 <- roadNetTables.roadNodes if n1.id === s
-                    n2 <- roadNetTables.roadNodes if n2.id === e
+                    n1 <- rnet.roadNodes if n1.id === s
+                    n2 <- rnet.roadNodes if n2.id === e
                 } yield (n1.id, n2.id, c, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
                 output.insert(q)(session)
             }
@@ -105,7 +107,7 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
 
         def deleteInner(ln: Line, s: Session) {
             def delEdge(a: NodeType, b: NodeType) {
-                roadNetTables.roadNet.filter(e => e.start === a && e.end === b).delete(s)
+                rnet.roadNet.filter(e => e.start === a && e.end === b).delete(s)
             }
 
             for (Seq(a, b) <- ln.inner.sliding(2)) {

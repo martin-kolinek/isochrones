@@ -28,7 +28,7 @@ trait SecondPhaseComponent {
                         slacks.updated(parent, parentSlack)
                     else
                         slacks
-                    val next = if (slacks(parent) == Double.PositiveInfinity && !tree.withinStartNeighbourhood.contains(parent))
+                    val next = if (slacks(parent) == Double.PositiveInfinity && !tree.withinStartNeighbourhood.contains(parent) && tree.parentMap.contains(parent))
                         dequeued.enqueue(parent)
                     else
                         dequeued

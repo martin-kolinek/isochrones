@@ -2,13 +2,43 @@ package org.isochrone.hh
 
 import org.isochrone.dijkstra.DijkstraAlgorithmComponent
 import org.isochrone.graphlib.GraphComponentBase
+import org.isochrone.util.db.MyPostgresDriver.simple._
+import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
+import org.isochrone.graphlib.GraphType
+import org.isochrone.OptionParserComponent
+import scopt.OptionParser
+import org.isochrone.ArgumentParser
 
-trait NeighbourhoodSizeFinderComponent {
-    self: DijkstraAlgorithmComponent with GraphComponentBase =>
+trait NeighbourhoodSizeFinderComponent extends GraphComponentBase {
+    self: DijkstraAlgorithmProviderComponent with HHTableComponent with NeighbourhoodCountComponent =>
 
-    object NeighbourhoodSizeFinder {
+    type NodeType = Long
+
+    def neighSizeFinder(g: GraphType[NodeType]) = new NeighbourhoodSizeFinder(dijkstraForGraph(g))
+
+    class NeighbourhoodSizeFinder(dijk: DijkstraAlgorithmClass) {
         def findNeighbourhoodSize(nd: NodeType, count: Int) = {
-            DijkstraHelpers.compute(nd).view.drop(count - 1).head._2
+            dijk.helper.compute(nd).view.drop(count - 1).head._2
+        }
+
+        def saveNeighbourhoodSize(nd: NodeType)(implicit s: Session) = {
+            hhTables.neighbourhoods.insert(nd -> findNeighbourhoodSize(nd, neighbourhoodCount))
         }
     }
+}
+
+trait NeighbourhoodCountComponent {
+    def neighbourhoodCount: Int
+}
+
+trait ConfigNeighbourhoodCountComponent extends OptionParserComponent with NeighbourhoodCountComponent {
+    self: ArgumentParser =>
+    lazy val neighCountLens = registerConfig(20)
+
+    abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
+        super.parserOptions(pars)
+        pars.opt[Int]("neighbourhood-count").text("The size of highway hierarchies neighbourhoods (default = 20)")
+    }
+
+    lazy val neighbourhoodCount = neighCountLens.get(parsedConfig)
 }

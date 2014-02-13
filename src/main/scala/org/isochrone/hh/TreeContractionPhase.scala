@@ -7,7 +7,7 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import com.vividsolutions.jts.geom.Geometry
 import scala.annotation.tailrec
 
-trait TreeContraction {
+object TreeContraction {
     def contractTrees(input: RoadNetTables, output: EdgeTable, s: Session) = {
         @tailrec
         def contractTreesInt(): Unit = {

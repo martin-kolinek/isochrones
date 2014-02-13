@@ -6,11 +6,12 @@ import org.isochrone.simplegraph.SimpleGraphComponent
 
 class LineContractionTest extends FunSuite {
     test("Line contraction works without db") {
-        val comp = new LineContractionComponentBase with GraphComponent with SimpleGraphComponent {
+        val comp = new LineContractionComponentBase with SimpleGraphComponent {
             type NodeType = Int
-            val graph = SimpleGraph.undirOneCost(1 -> 2, 2 -> 3, 3 -> 4, 4 -> 5)
 
-            val contractor = new LineContractionBase {}
+            val contractor = new LineContractionBase {
+                val graph = SimpleGraph.undirOneCost(1 -> 2, 2 -> 3, 3 -> 4, 4 -> 5)
+            }
             val ln = contractor.getNodeLine(3)
             if (ln.start == 5) {
                 assert(ln.end === 1)

@@ -22,6 +22,7 @@ import org.isochrone.executors.AreaFixerExecutor
 import org.isochrone.executors.AllAreaCoverCostsExecutor
 import org.isochrone.executors.WalkingEdgesAdderExecutor
 import org.isochrone.executors.HHCreateExecutor
+import org.isochrone.executors.HHStepExecutor
 
 object Main extends App with Logging
         with DijkstraIsochroneComputer
@@ -35,7 +36,8 @@ object Main extends App with Logging
         with AreaFixerExecutor
         with AllAreaCoverCostsExecutor
         with WalkingEdgesAdderExecutor
-        with HHCreateExecutor {
+        with HHCreateExecutor
+        with HHStepExecutor {
 
     trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>
