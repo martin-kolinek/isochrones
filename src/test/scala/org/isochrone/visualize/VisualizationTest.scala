@@ -115,7 +115,7 @@ class VisualizationTest extends FunSuite with MustMatchers {
     }
 
     test("visualizer creates a geometry") {
-        val comp = new IsochronesComputationComponent with AreaInfoComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DijkstraAlgorithmProviderComponent with CirclePointsCountComponent with ApproxEquidistAzimuthProjComponent with OnlyLinesComponent {
+        val comp = new IsochronesComputationComponent with AreaInfoComponent with NodePositionComponent with GraphComponent with SpeedCostAssignerComponent with SomePreciseAreaVisualizer with VisualizationIsochroneOutputComponent with SimpleGraphComponent with DijkstraAlgorithmProviderComponent with CirclePointsCountComponent with ApproxEquidistAzimuthProjComponent {
             def circlePointCount = 10
             def onlyLines = false
             type NodeType = Int

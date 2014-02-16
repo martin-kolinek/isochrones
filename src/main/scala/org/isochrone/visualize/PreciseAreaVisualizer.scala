@@ -52,3 +52,7 @@ trait PreciseAreaVisualizerComponent extends AreaVisualizerComponentTypes with C
     }
 }
 
+trait SomePreciseAreaVisualizer extends AreaVisualizerComponent with PreciseAreaVisualizerComponent {
+    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent =>
+    val areaVisualizer = new PreciseAreaVisualizer {}
+}

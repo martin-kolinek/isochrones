@@ -26,7 +26,7 @@ import com.vividsolutions.jts.geom.Polygon
 import scala.collection.JavaConversions._
 
 trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent with Logging with PosAreaComponent {
-    self: IsochronesComputationComponent with AreaInfoComponent with GraphComponentBase with AreaVisualizerComponent with OnlyLinesComponent =>
+    self: IsochronesComputationComponent with AreaInfoComponent with GraphComponentBase with AreaVisualizerComponent =>
 
     val geomFact2 = new GeometryFactory(new PrecisionModel, 4326)
 
@@ -69,32 +69,15 @@ trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent wit
             case poly: Polygon => geomFact2.createPolygon(poly.getExteriorRing.getCoordinates()): Geometry
         }
         logger.info("Constructed polygons from shells")
+        val partiallyUnion = CascadedPolygonUnion.union(areaNodes.keys.map(geoms))
+        logger.info("Found partiallyCovered")
+        val coveredWithoutPartially = coveredGeoms.map(_ difference partiallyUnion)
+        logger.info("Found difference between covered and partially covered")
         val outGeoms = (for ((id, nodes) <- areaNodes) yield {
             val arGeom = geoms(id)
             areaVisualizer.areaGeom(posAreas(id), arGeom, nodes)
         }).flatten.flatMap(_.individualGeometries)
         logger.info("Retrieved info from AreaVisualizer")
-        Some(CascadedPolygonUnion.union(coveredGeoms ++ outGeoms)).filterNot(_.isEmpty)
+        coveredGeoms ++ Some(CascadedPolygonUnion.union(outGeoms)).filterNot(_.isEmpty)
     }
-}
-
-trait OnlyLinesComponent {
-    def onlyLines: Boolean
-}
-
-trait ConfigOnlyLinesComponent extends OptionParserComponent with OnlyLinesComponent {
-    self: ArgumentParser =>
-
-    lazy val onlyLinesLens = registerConfig(false)
-    lazy val onlyLines = onlyLinesLens.get(parsedConfig)
-
-    abstract override def parserOptions(pars: OptionParser[OptionConfig]) {
-        super.parserOptions(pars)
-        pars.opt[Boolean]("only-lines").text("output only lines, not whole polygons (default = false)").action((x, c) => onlyLinesLens.set(c)(x))
-    }
-}
-
-trait SomePreciseAreaVisualizer extends AreaVisualizerComponent with PreciseAreaVisualizerComponent {
-    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent with OnlyLinesComponent =>
-    val areaVisualizer = new PreciseAreaVisualizer {}
 }
