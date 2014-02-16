@@ -27,4 +27,3 @@ trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent wi
 
     val execute = () => writeOutput()
 }
-
