@@ -61,23 +61,23 @@ trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent wit
         logger.info("Retrieved area geometries")
         val posAreas = areaInfoRetriever.getAreas(areaNodes.keys)
         logger.info("Retrieved area information")
-        val coveredUnion = CascadedPolygonUnion.union(allIds.filter(covered).map(geoms))
+        val coveredUnion = Option(CascadedPolygonUnion.union(allIds.filter(covered).map(geoms)))
         logger.info("Found union of covered area")
-        val coveredPolys = coveredUnion.individualGeometries
+        val coveredPolys = coveredUnion.toTraversable.flatMap(_.individualGeometries)
         logger.info("Extracted individual geometrie")
         val coveredGeoms = coveredPolys.map {
             case poly: Polygon => geomFact2.createPolygon(poly.getExteriorRing.getCoordinates()): Geometry
         }
         logger.info("Constructed polygons from shells")
-        val partiallyUnion = CascadedPolygonUnion.union(areaNodes.keys.map(geoms))
+        val partiallyUnion = Option(CascadedPolygonUnion.union(areaNodes.keys.map(geoms)))
         logger.info("Found partiallyCovered")
-        val coveredWithoutPartially = coveredGeoms.map(_ difference partiallyUnion)
+        val coveredWithoutPartially = coveredGeoms.map(g => (g /: partiallyUnion)(_ difference _))
         logger.info("Found difference between covered and partially covered")
         val outGeoms = (for ((id, nodes) <- areaNodes) yield {
             val arGeom = geoms(id)
             areaVisualizer.areaGeom(posAreas(id), arGeom, nodes)
         }).flatten.flatMap(_.individualGeometries)
         logger.info("Retrieved info from AreaVisualizer")
-        coveredGeoms ++ Some(CascadedPolygonUnion.union(outGeoms)).filterNot(_.isEmpty)
+        coveredGeoms ++ Option(CascadedPolygonUnion.union(outGeoms)).filterNot(_.isEmpty)
     }
 }
