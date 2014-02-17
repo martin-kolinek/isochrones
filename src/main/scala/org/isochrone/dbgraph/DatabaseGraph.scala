@@ -105,20 +105,40 @@ class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Sess
     def query(region: Int): QueryType = basicQuery(region)
 }
 
-trait NodeCacheSizeParserComponent extends OptionParserComponent {
-    lazy val nodeCacheSizeLens = registerConfig(500)
+trait DBGraphConfigParserComponent extends OptionParserComponent with Logging {
+    case class DBGraphConfig(preloadAll: Boolean, nodeCacheSize: Int) {
+        def effectiveNodeCacheSize = if (preloadAll) Int.MaxValue else nodeCacheSize
+        def preload(g: DatabaseGraph) {
+            if (preloadAll) {
+                logger.info("Preloading graph")
+                g.regions.foreach(g.ensureRegion)
+                logger.info("Done preloading graph")
+            }
+        }
+    }
+
+    lazy val dbGraphConfLens = registerConfig(DBGraphConfig(false, 500))
 
     abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
         super.parserOptions(pars)
-        pars.opt[Int]("node-cache").action((x, c) => nodeCacheSizeLens.set(c)(x))
+        pars.opt[Int]("node-cache").action((x, c) => dbGraphConfLens.modify(c)(_.copy(nodeCacheSize = x)))
+        pars.opt[Boolean]("preload-all").text("whether to preload whole database graph into memory").
+            action((x, c) => dbGraphConfLens.modify(c)(_.copy(preloadAll = x)))
     }
 }
 
-trait ConfigDatabaseGraphComponent extends GraphWithRegionsComponent with NodeCacheSizeParserComponent with NodePositionComponent {
+trait ConfigDatabaseGraphComponent extends GraphWithRegionsComponent with DBGraphConfigParserComponent with NodePositionComponent {
     self: RoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
     type NodeType = Long
     type RegionType = Int
-    val graph = new DatabaseGraph(roadNetTables, nodeCacheSizeLens.get(parsedConfig), session)
+
+    val graph = {
+        val graphConfig = dbGraphConfLens.get(parsedConfig)
+        val ret = new DatabaseGraph(roadNetTables, graphConfig.effectiveNodeCacheSize, session)
+        graphConfig.preload(ret)
+        ret
+    }
+
     val nodePos = graph
 }
 
@@ -130,11 +150,17 @@ trait DefaultDatabaseGraphComponent extends GraphWithRegionsComponent with NodeP
     val nodePos = graph
 }
 
-trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphComponent with NodePositionComponent with NodeCacheSizeParserComponent {
+trait ConfigMultiLevelDatabaseGraph extends MultiLevelGraphComponent with GraphComponent with NodePositionComponent with DBGraphConfigParserComponent {
     self: MultiLevelRoadNetTableComponent with SessionProviderComponent with ArgumentParser =>
     type NodeType = Long
     type RegionType = Int
-    val levels = roadNetTableLevels.map(x => new DatabaseGraph(x, nodeCacheSizeLens.get(parsedConfig), session))
+
+    val levels = {
+        val graphConf = dbGraphConfLens.get(parsedConfig)
+        val ret = roadNetTableLevels.map(x => new DatabaseGraph(x, graphConf.effectiveNodeCacheSize, session))
+        ret.foreach(graphConf.preload)
+        ret
+    }
 
     val graph = levels.head
     val nodePos = graph

@@ -11,12 +11,12 @@ import org.isochrone.dbgraph.HHDatabaseGraph
 import org.isochrone.db.ConfigRegularPartitionComponent
 import org.isochrone.db.RegularPartitionComponent
 import org.isochrone.ArgumentParser
-import org.isochrone.dbgraph.NodeCacheSizeParserComponent
+import org.isochrone.dbgraph.DBGraphConfigParserComponent
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 
-trait HHStepComponent extends NodeCacheSizeParserComponent with GraphComponentBase {
+trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase {
     self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent =>
 
     type NodeType = Long
@@ -63,7 +63,7 @@ trait HHStepComponent extends NodeCacheSizeParserComponent with GraphComponentBa
             database.withTransaction { implicit s: Session =>
                 TreeContraction.contractTrees(higherRoadNetTables, hhTables.shortcutEdges, s)
                 for ((reg, i) <- regularPartition.regions.zipWithIndex) {
-                    val lcontractor = lineContractor(new DatabaseGraph(higherRoadNetTables, nodeCacheSizeLens.get(parsedConfig), s), higherRoadNetTables, hhTables.shortcutEdges)
+                    val lcontractor = lineContractor(new DatabaseGraph(higherRoadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s), higherRoadNetTables, hhTables.shortcutEdges)
                     logger.info(s"Processing region $i/${regularPartition.regionCount}")
                     lcontractor.contractLines(reg.dbBBox)
                 }
@@ -73,7 +73,7 @@ trait HHStepComponent extends NodeCacheSizeParserComponent with GraphComponentBa
         def findNeighbourhoodSizes() {
             logger.info("Finding neighbourhood sizes")
             database.withTransaction { implicit s: Session =>
-                val finder = neighSizeFinder(new DatabaseGraph(roadNetTables, nodeCacheSizeLens.get(parsedConfig), s))
+                val finder = neighSizeFinder(new DatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s))
                 Query(roadNetTables.roadNodes).sortBy(_.id).map(_.id).foreach { n =>
                     logger.info(s"Processing node $n")
                     finder.saveNeighbourhoodSize(n)

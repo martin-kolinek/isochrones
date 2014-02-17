@@ -44,7 +44,7 @@ abstract class DatabaseGraphBase(protected val roadNetTables: RoadNetTables, max
         regionMap(rg)
     }
 
-    protected final def ensureRegion(rg: Int) {
+    final def ensureRegion(rg: Int) {
         if (!regionMap.contains(rg))
             retrieveRegion(rg)
     }
