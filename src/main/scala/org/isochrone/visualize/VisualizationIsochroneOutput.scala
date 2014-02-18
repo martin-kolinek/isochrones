@@ -24,13 +24,17 @@ import org.isochrone.areas.PosAreaComponent
 import org.isochrone.graphlib.GraphComponentBase
 import com.vividsolutions.jts.geom.Polygon
 import scala.collection.JavaConversions._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent with Logging with PosAreaComponent {
     self: IsochronesComputationComponent with AreaInfoComponent with GraphComponentBase with AreaVisualizerComponent =>
 
     val geomFact2 = new GeometryFactory(new PrecisionModel, 4326)
 
-    def isochroneGeometry = {
+    def isochroneGeometry: Traversable[Geometry] = {
         val isoList = isochrone.toList
         logger.info(s"Got isochrone (size = ${isoList.size}), computing geometry")
         val ndArs = areaInfoRetriever.getNodesAreas(isoList.map(_.nd))
@@ -56,28 +60,56 @@ trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent wit
 
         logger.info("Grouped to areas and found neighbouring areas")
         val allIds = (areaNeighbours.keys ++ areaNeighbours.values.flatten).toSet
-        logger.info(s"Found all required areas (size = ${allIds.size}")
+        logger.info(s"Found all required areas (size = ${allIds.size})")
         val geoms = areaInfoRetriever.getAreaGeometries(allIds)
-        logger.info("Retrieved area geometries")
         val posAreas = areaInfoRetriever.getAreas(areaNodes.keys)
-        logger.info("Retrieved area information")
-        val coveredUnion = Option(CascadedPolygonUnion.union(allIds.filter(covered).map(geoms)))
-        logger.info("Found union of covered area")
-        val coveredPolys = coveredUnion.toTraversable.flatMap(_.individualGeometries)
-        logger.info("Extracted individual geometrie")
-        val coveredGeoms = coveredPolys.map {
-            case poly: Polygon => geomFact2.createPolygon(poly.getExteriorRing.getCoordinates()): Geometry
+        logger.info("Retrieved data about areas from db")
+
+        val coveredGeomsF = Future {
+            logger.debug("Determining coveredGeoms")
+            val union = Option(CascadedPolygonUnion.union(allIds.filter(covered).map(geoms)))
+            val indiv = union.toTraversable.flatMap(_.individualGeometries)
+            indiv.map {
+                case poly: Polygon => geomFact2.createPolygon(poly.getExteriorRing.getCoordinates()): Geometry
+            }
         }
-        logger.info("Constructed polygons from shells")
-        val partiallyUnion = Option(CascadedPolygonUnion.union(areaNodes.keys.map(geoms)))
-        logger.info("Found partiallyCovered")
-        val coveredWithoutPartially = coveredGeoms.map(g => (g /: partiallyUnion)(_ difference _))
-        logger.info("Found difference between covered and partially covered")
-        val outGeoms = (for ((id, nodes) <- areaNodes) yield {
-            val arGeom = geoms(id)
-            areaVisualizer.areaGeom(posAreas(id), arGeom, nodes)
-        }).flatten.flatMap(_.individualGeometries)
-        logger.info("Retrieved info from AreaVisualizer")
-        coveredGeoms ++ Option(CascadedPolygonUnion.union(outGeoms)).filterNot(_.isEmpty)
+        coveredGeomsF.foreach(_ => logger.debug("Got covered geoms"))
+
+        val partiallyCoveredF = Future {
+            logger.debug("Determining partiallyCovered")
+            Option(CascadedPolygonUnion.union(areaNodes.keys.map(geoms)))
+        }
+        partiallyCoveredF.foreach(_ => logger.debug("Got partially covered"))
+
+        val coveredWithoutPartially = for {
+            coveredGeoms <- coveredGeomsF
+            partiallyCovered <- partiallyCoveredF
+        } yield {
+            logger.debug("Determining coveredWithoutPartially")
+            coveredGeoms.map(g => (g /: partiallyCovered)(_ difference _))
+        }
+        coveredWithoutPartially.foreach(_ => logger.debug("Got covered without partially"))
+
+        logger.debug("Determining outGeoms")
+        val outGeoms = areaNodes.map {
+            case (id, nodes) => {
+                val arGeom = geoms(id)
+                areaVisualizer.areaGeom(posAreas(id), arGeom, nodes)
+            }
+        }.flatten.flatMap(_.individualGeometries)
+        logger.debug("Got outGeoms")
+
+        val outUnionF = Future {
+            logger.debug("Determining outUnion")
+            CascadedPolygonUnion.union(outGeoms)
+        }
+        outUnionF.foreach(_ => logger.debug("Got out union"))
+
+        val result = for {
+            out <- outUnionF
+            covWithoutPart <- coveredWithoutPartially
+        } yield covWithoutPart ++ Option(out).toTraversable
+        result.foreach(_ => logger.info("Got result"))
+        Await.result(result, Duration.Inf)
     }
 }
