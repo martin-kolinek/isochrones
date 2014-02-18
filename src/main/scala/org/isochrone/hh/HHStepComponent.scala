@@ -97,7 +97,8 @@ trait DefaultHHStepComponent
         with ConfigNeighbourhoodCountComponent
         with DijkstraAlgorithmProviderComponent
         with NeighbourhoodSizeFinderComponent
-        with HHStepComponent {
+        with HHStepComponent
+        with FirstPhaseParametersFromArg {
     self: HigherLevelRoadNetTableComponent with RoadNetTableComponent with ArgumentParser with DatabaseProvider with HHTableComponent =>
 
     override type NodeType = Long

@@ -28,7 +28,7 @@ trait DijkstraAlgorithmProviderComponent extends IsochroneComputerComponent {
     }
 
     class DijkstraAlgorithmClass(graph: GraphType[NodeType]) extends IsochroneComputer {
-        def alg(start: Traversable[(NodeType, Double)], closedFunc: (NodeType, Double, Option[(NodeType, Double)]) => Unit, opened: (NodeType, NodeType) => Unit, cancel: () => Boolean) {
+        def alg(start: Traversable[(NodeType, Double)], closedFunc: (NodeType, Double, Option[(NodeType, Double)]) => Unit, opened: (NodeType, NodeType, Double) => Unit, cancel: () => Boolean) {
             val closed = new HashSet[NodeType]
             val costMap = new HashMap[NodeType, Double]
             val previous = new HashMap[NodeType, (NodeType, Double)]
@@ -46,7 +46,7 @@ trait DijkstraAlgorithmProviderComponent extends IsochroneComputerComponent {
                         open -= neighbour
                     }
                     if (better.getOrElse(true)) {
-                        opened(neighbour, current)
+                        opened(neighbour, current, newCost)
                         open += neighbour -> newCost
                         previous(neighbour) = current -> cost
                     }
@@ -57,7 +57,7 @@ trait DijkstraAlgorithmProviderComponent extends IsochroneComputerComponent {
         def compute(start: Traversable[(NodeType, Double)]) = new Traversable[(NodeType, Double)] {
             self =>
             def foreach[U](func: ((NodeType, Double)) => U) {
-                alg(start, (node, cost, prev) => func(node -> cost), (x, y) => {}, () => false)
+                alg(start, (node, cost, prev) => func(node -> cost), (x, y, z) => {}, () => false)
             }
         }
 

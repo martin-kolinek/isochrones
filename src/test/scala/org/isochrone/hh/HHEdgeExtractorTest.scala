@@ -9,7 +9,8 @@ import org.isochrone.graphlib.GraphComponentBase
 
 class HHEdgeExtractorTest extends FunSuite {
     test("Highway hierarchies pick edge on line") {
-        val comp = new FirstPhaseComponentImpl with SecondPhaseComponent with SimpleGraphComponent with DijkstraAlgorithmProviderComponent with GraphComponentBase {
+        val comp = new FirstPhaseComponentImpl with SecondPhaseComponent with SimpleGraphComponent with DijkstraAlgorithmProviderComponent with GraphComponentBase with FirstPhaseParameters {
+            def maverickThresholdMultiplier = Double.PositiveInfinity
             type NodeType = Int
             val graph = {
                 val edg = (1 to 25).map(x => (x, x + 1))
