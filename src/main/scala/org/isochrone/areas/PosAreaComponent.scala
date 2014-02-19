@@ -61,7 +61,14 @@ trait PosAreaComponent extends AreaComponent {
 
         lazy val edgeSet = {
             val nds = points.map(_.nd)
-            (nds :+ nds.head).sliding(2).map(_.toSet).toSet
+            (nds.view :+ nds.head).sliding(2).map(_.toSet).toSet
+        }
+
+        lazy val neighbourMap = {
+            val nds = points.map(_.nd)
+            (nds.view ++ nds.take(2)).sliding(3).map {
+                case Seq(a, b, c) => b -> Seq(a, c)
+            }.toMap
         }
 
         private def coords = (points :+ points.head).map(ptToCoordinate).toArray

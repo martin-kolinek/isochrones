@@ -91,24 +91,18 @@ trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent wit
         coveredWithoutPartially.foreach(_ => logger.debug("Got covered without partially"))
 
         logger.debug("Determining outGeoms")
-        val outGeoms = areaNodes.map {
-            case (id, nodes) => {
+        val outGeomsF = Future.sequence(areaNodes.map {
+            case (id, nodes) => Future {
                 val arGeom = geoms(id)
                 areaVisualizer.areaGeom(posAreas(id), arGeom, nodes)
             }
-        }.flatten.flatMap(_.individualGeometries)
-        logger.debug("Got outGeoms")
-
-        val outUnionF = Future {
-            logger.debug("Determining outUnion")
-            CascadedPolygonUnion.union(outGeoms)
-        }
-        outUnionF.foreach(_ => logger.debug("Got out union"))
+        }).map(_.flatten.flatMap(_.individualGeometries))
+        outGeomsF.foreach(_ => logger.debug("Got outGeoms"))
 
         val result = for {
-            out <- outUnionF
+            out <- outGeomsF
             covWithoutPart <- coveredWithoutPartially
-        } yield covWithoutPart ++ Option(out).toTraversable
+        } yield covWithoutPart ++ out
         result.foreach(_ => logger.info("Got result"))
         Await.result(result, Duration.Inf)
     }

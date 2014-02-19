@@ -19,35 +19,41 @@ import org.isochrone.OptionParserComponent
 import org.isochrone.ArgumentParser
 import scopt.OptionParser
 import com.vividsolutions.jts.operation.union.CascadedPolygonUnion
+import com.vividsolutions.jts.geom.GeometryCollection
 
 trait PreciseAreaVisualizerComponent extends AreaVisualizerComponentTypes with CircleDrawingComponent {
-    self: GraphComponent with NodePositionComponent with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent =>
+    self: GraphComponentBase with SpeedCostAssignerComponent with CirclePointsCountComponent with AzimuthalProjectionComponent =>
     private val geomFact = new GeometryFactory(new PrecisionModel, 4326)
 
     trait PreciseAreaVisualizer extends AreaVisualizer {
         def areaGeom(area: PosArea, areaGeom: Geometry, nodes: List[IsochroneNode]): Traversable[Geometry] = {
-            nodes.flatMap(getNodeGeom(area.points.map(_.nd).toSet))
-        }
 
-        def getNodeGeom(arnds: Set[NodeType])(nd: IsochroneNode): Traversable[Geometry] = {
-            graph.neighbours(nd.nd).filter(x => arnds.contains(x._1)).map(x => edgeGeom(nd, x._1, x._2))
-        }
+            val nodePositions = area.points.map(p => p.nd -> p.pos).toMap
 
-        def edgeGeom(nd: IsochroneNode, nd2: NodeType, cst: Double) = {
-            val List(cx, cy) = vector.tupled(nodePos.nodePosition(nd.nd))
-            val proj = projectionForPoint(cx, cy)
-            val List(x, y) = vector.tupled(nodePos.nodePosition(nd2))
-            val circ = CircleDrawing.circle(cx, cy, noRoadCostToMeters(nd.remaining))
-            if (nd.remaining <= cst) {
-                val projected2 = vector.tupled(proj.project(x, y))
-                val List(adjx, adjy) = projected2 :* nd.remaining / cst
-                val (unprojx, unprojy) = proj.unproject(adjx, adjy)
-                val pt = geomFact.createPoint(new Coordinate(unprojx, unprojy))
-                (circ union pt).convexHull
-            } else {
-                val circ2 = CircleDrawing.circle(x, y, noRoadCostToMeters(nd.remaining - cst))
-                (circ union circ2).convexHull
+            def getNodeGeom(nd: IsochroneNode): Traversable[Geometry] = {
+                area.neighbourMap(nd.nd).map(n2 => (nd, n2, area.cost(nd.nd, n2))).map((edgeGeom _).tupled)
             }
+
+            def edgeGeom(nd: IsochroneNode, nd2: NodeType, cst: Double) = {
+                val List(cx, cy) = nodePositions(nd.nd)
+                val proj = projectionForPoint(cx, cy)
+                val List(x, y) = nodePositions(nd2)
+                val circ = CircleDrawing.circle(cx, cy, noRoadCostToMeters(nd.remaining))
+                if (nd.remaining <= cst) {
+                    val projected2 = vector.tupled(proj.project(x, y))
+                    val List(adjx, adjy) = projected2 :* nd.remaining / cst
+                    val (unprojx, unprojy) = proj.unproject(adjx, adjy)
+                    val pt = geomFact.createPoint(new Coordinate(unprojx, unprojy))
+                    val coll = new GeometryCollection(Array(circ, pt), geomFact)
+                    coll.convexHull
+                } else {
+                    val circ2 = CircleDrawing.circle(x, y, noRoadCostToMeters(nd.remaining - cst))
+                    val coll = new GeometryCollection(Array(circ, circ2), geomFact)
+                    coll.convexHull
+                }
+            }
+
+            Option(CascadedPolygonUnion.union(nodes.flatMap(getNodeGeom)))
         }
     }
 }
