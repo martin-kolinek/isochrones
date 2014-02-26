@@ -11,6 +11,7 @@ import org.isochrone.graphlib.GraphComponent
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.EdgeTable
 import scala.collection.mutable.HashSet
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait LineContractionComponentBase {
     self: GraphComponentBase =>
@@ -19,18 +20,21 @@ trait LineContractionComponentBase {
         val graph: GraphType[NodeType]
         def findEndOfLine(nd: NodeType, prev: NodeType) = {
             @tailrec
-            def findEndOfLineInt(nd: NodeType, prev: NodeType, res: List[NodeType]): List[NodeType] = {
+            def findEndOfLineInt(nd: NodeType, prev: NodeType, res: List[NodeType], set: Set[NodeType]): Option[List[NodeType]] = {
                 val neighs = graph.neighbours(nd)
                 val withNd = nd :: res
                 if (neighs.size != 2)
-                    withNd
+                    Some(withNd)
                 else {
                     val next = neighs.find(_._1 != prev).get._1
-                    findEndOfLineInt(next, nd, withNd)
+                    if (set.contains(next))
+                        None
+                    else
+                        findEndOfLineInt(next, nd, withNd, set + nd)
                 }
             }
 
-            findEndOfLineInt(nd, prev, Nil)
+            findEndOfLineInt(nd, prev, List(prev), Set())
         }
 
         case class Line(start: NodeType, inner: List[NodeType], end: NodeType) {
@@ -39,12 +43,15 @@ trait LineContractionComponentBase {
 
         def getNodeLine(nd: NodeType) = {
             val neigh = graph.neighbours(nd).head._1
-            val toEndPoint1 = findEndOfLine(neigh, nd)
-            val line = findEndOfLine(toEndPoint1.tail.head, toEndPoint1.head)
-            val end = toEndPoint1.head
-            val start = line.head
-            val inner = line.tail
-            Line(start, inner, end)
+            for {
+                toEndPoint1 <- findEndOfLine(neigh, nd)
+                line <- findEndOfLine(toEndPoint1.tail.head, toEndPoint1.head)
+            } yield {
+                val end = toEndPoint1.head
+                val start = line.head
+                val inner = line.tail.dropRight(1)
+                Line(start, inner, end)
+            }
         }
 
         def getShortcuts(ln: Line) = {
@@ -65,7 +72,6 @@ trait LineContractionComponentBase {
 
             getOneWayShortcuts(ln.start, ln.inner, ln.end) ++ getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start)
         }
-
     }
 }
 
@@ -75,7 +81,7 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
 
     def lineContractor(g: GraphType[NodeType], rnet: RoadNetTables, output: EdgeTable) = new LineContraction(g, rnet, output)
 
-    class LineContraction(g: GraphType[NodeType], rnet: RoadNetTables, output: EdgeTable) extends LineContractionBase {
+    class LineContraction(g: GraphType[NodeType], rnet: RoadNetTables, output: EdgeTable) extends LineContractionBase with Logging {
         val graph = g
         def contractLines(bbox: Column[Geometry])(implicit s: Session) = {
             val nodesToProcessQuery = for {
@@ -84,24 +90,38 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
             } yield n.id
 
             val processed = new HashSet[NodeType]
-
-            nodesToProcessQuery.foreach { nd =>
-                if (!processed.contains(nd)) {
-                    val line = getNodeLine(nd)
-                    processed ++= line.inner
-                    insertShortcuts(line, s)
-                    deleteInner(line, s)
+            val total = Query(nodesToProcessQuery.length).first
+            nodesToProcessQuery.elements.zipWithIndex.foreach {
+                case (nd, idx) => {
+                    if (!processed.contains(nd)) {
+                        logger.debug(s"Processing $idx/$total")
+                        val line = getNodeLine(nd)
+                        line.foreach { l =>
+                            processed ++= l.inner
+                            insertShortcuts(l, s)
+                            deleteInner(l, s)
+                        }
+                    }
                 }
             }
         }
 
         def insertShortcuts(ln: Line, session: Session) = {
+            def startEndShortcut(s: NodeType, e: NodeType) = Set(s, e) == Set(ln.start, ln.end)
+
             for ((s, e, c) <- getShortcuts(ln)) {
                 val q = for {
                     n1 <- rnet.roadNodes if n1.id === s
                     n2 <- rnet.roadNodes if n2.id === e
                 } yield (n1.id, n2.id, c, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
-                output.insert(q)(session)
+                if (startEndShortcut(s, e)) {
+                    val qWithNonDup = for {
+                        edg @ (start, end, _, _, _) <- q
+                        if !Query(rnet.roadNet).filter(e => e.start === start && e.end === end).exists
+                    } yield edg
+                    rnet.roadNet.insert(qWithNonDup)(session)
+                } else
+                    output.insert(q)(session)
             }
         }
 
@@ -110,7 +130,7 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
                 rnet.roadNet.filter(e => e.start === a && e.end === b).delete(s)
             }
 
-            for (Seq(a, b) <- ln.inner.sliding(2)) {
+            for (Seq(a, b) <- (ln.start +: ln.inner :+ ln.end).sliding(2)) {
                 delEdge(a, b)
                 delEdge(b, a)
             }

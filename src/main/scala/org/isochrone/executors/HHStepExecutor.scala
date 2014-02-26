@@ -28,8 +28,12 @@ trait HHStepExecutor extends ActionExecutor {
             val execute = () => HHStep.findNeighbourhoodSizes()
         }) + ("hhextract" --> new Comp {
             val execute = () => HHStep.createHigherLevel()
+        }) + ("hhcontracttrees" --> new Comp {
+            val execute = () => HHStep.contractTrees()
+        }) + ("hhcontractlines" --> new Comp {
+            val execute = () => HHStep.contractLines()
         }) + ("hhcontract" --> new Comp {
-            val execute = () => HHStep.contractHigherLevel()
+            val execute = () => HHStep.contractAll()
         })
 
 }

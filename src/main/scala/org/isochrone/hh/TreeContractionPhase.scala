@@ -6,11 +6,13 @@ import org.isochrone.db.EdgeTable
 import org.isochrone.util.db.MyPostgresDriver.simple._
 import com.vividsolutions.jts.geom.Geometry
 import scala.annotation.tailrec
+import com.typesafe.scalalogging.slf4j.Logging
 
-object TreeContraction {
+object TreeContraction extends Logging {
     def contractTrees(input: RoadNetTables, output: EdgeTable, s: Session) = {
         @tailrec
         def contractTreesInt(): Unit = {
+            logger.info("Tree contraction step")
             val leafEdgeQuery = for {
                 e <- input.roadNet
                 if !(Query(input.roadNet)).filter(x => x.start === e.start && x.end =!= e.end).exists
@@ -34,12 +36,13 @@ object TreeContraction {
             val cnt1 = leafEdgeQuery.delete(s)
             val cnt2 = oneWayEdgeQuery.delete(s)
             val cnt = cnt1 + cnt2
+            logger.info(s"Contracted $cnt edges")
             if (cnt > 0)
                 contractTreesInt()
         }
 
         contractTreesInt()
-
+        logger.info("Removing isolated nodes")
         val isolatedNodes = for {
             n <- input.roadNodes
             if !Query(input.roadNet).filter(_.start === n.id).exists

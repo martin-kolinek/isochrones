@@ -15,6 +15,7 @@ import org.isochrone.dbgraph.DBGraphConfigParserComponent
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
+import scala.collection.mutable.HashSet
 
 trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase {
     self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent =>
@@ -28,24 +29,32 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                 val hhgraph = new HHDatabaseGraph(hhTables, roadNetTables, 200, ses)
                 val fs = firstPhase(hhgraph, hhgraph)
                 val ss = secondPhase(hhgraph, hhgraph)
+                val regcount = regularPartition.regions.size
                 higherRoadNetTables.roadNodes.insert(Query(roadNetTables.roadNodes))
-                Query(roadNetTables.roadNodes).sortBy(_.id).map(_.id).zipWithIndex.foreach {
-                    case (rn, idx) =>
-                        logger.info(s"Processing node $rn (idx = $idx)")
-                        val tree = fs.nodeTree(rn)
-                        val hhedges = ss.extractHighwayEdges(tree)
-                        logger.info(s"Found ${hhedges.size} highway edges")
-                        hhedges.foreach {
-                            case (s, e) => {
-                                /*val insQ = for {
-                                r <- roadNetTables.roadNet if r.start === s && r.end === e
-                                if !Query(higherRoadNetTables.roadNet).filter(h => h.start === r.start && h.end === r.end).exists
-                            } yield r*/
-                                //logger.debug(s"Insert query: ${higherRoadNetTables.roadNet.insertStatementFor(insQ)}")
-                                //higherRoadNetTables.roadNet.insert(insQ)
-
+                regularPartition.regions.zipWithIndex.foreach {
+                    case (reg, regidx) => {
+                        logger.info(s"Processing region $regidx/$regcount")
+                        val alreadyAdded = new HashSet[(NodeType, NodeType)]
+                        Query(roadNetTables.roadNodes).filter(_.geom @&& reg.dbBBox).sortBy(_.id).map(_.id).zipWithIndex.foreach {
+                            case (rn, idx) => {
+                                logger.debug(s"Processing node $rn (idx = $idx)")
+                                val tree = fs.nodeTree(rn)
+                                val hhedges = ss.extractHighwayEdges(tree)
+                                logger.debug(s"Found ${hhedges.size} highway edges")
+                                hhedges.foreach {
+                                    case edg @ (s, e) if !alreadyAdded.contains(edg) => {
+                                        val insQ = for {
+                                            r <- roadNetTables.roadNet if r.start === s && r.end === e
+                                            if !Query(higherRoadNetTables.roadNet).filter(h => h.start === r.start && h.end === r.end).exists
+                                        } yield r
+                                        higherRoadNetTables.roadNet.insert(insQ)
+                                        alreadyAdded += edg
+                                    }
+                                    case _ => {}
+                                }
                             }
                         }
+                    }
                 }
 
                 val reversed = for {
@@ -58,15 +67,22 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
             }
         }
 
-        def contractHigherLevel() {
+        def contractLines() {
             logger.info("Contracting higher level")
             database.withTransaction { implicit s: Session =>
-                TreeContraction.contractTrees(higherRoadNetTables, hhTables.shortcutEdges, s)
+
                 for ((reg, i) <- regularPartition.regions.zipWithIndex) {
                     val lcontractor = lineContractor(new DatabaseGraph(higherRoadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s), higherRoadNetTables, hhTables.shortcutEdges)
                     logger.info(s"Processing region $i/${regularPartition.regionCount}")
                     lcontractor.contractLines(reg.dbBBox)
                 }
+            }
+        }
+
+        def contractTrees() {
+            logger.info("Contracting trees")
+            database.withTransaction { implicit s: Session =>
+                TreeContraction.contractTrees(higherRoadNetTables, hhTables.shortcutEdges, s)
             }
         }
 
@@ -81,10 +97,15 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
             }
         }
 
+        def contractAll() {
+            contractTrees()
+            contractLines()
+        }
+
         def makeStep() {
             findNeighbourhoodSizes()
             createHigherLevel()
-            contractHigherLevel()
+            contractAll()
         }
     }
 }

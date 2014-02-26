@@ -12,7 +12,7 @@ class LineContractionTest extends FunSuite {
             val contractor = new LineContractionBase {
                 val graph = SimpleGraph.undirOneCost(1 -> 2, 2 -> 3, 3 -> 4, 4 -> 5)
             }
-            val ln = contractor.getNodeLine(3)
+            val ln = contractor.getNodeLine(3).get
             if (ln.start == 5) {
                 assert(ln.end === 1)
                 assert(ln.inner === List(4, 3, 2))
@@ -33,6 +33,15 @@ class LineContractionTest extends FunSuite {
             assert(grouped(1) === (2 to 5).map(x => x -> (x - 1)).toSet)
             assert(grouped(5) === (1 to 4).map(x => x -> (5 - x)).toSet)
         }
+    }
 
+    test("Line contraction ignores cycles") {
+        val comp = new LineContractionComponentBase with SimpleGraphComponent {
+            type NodeType = Int
+            val contractor = new LineContractionBase {
+                val graph = SimpleGraph.undirOneCost(1 -> 2, 2 -> 3, 3 -> 1)
+            }
+            assert(contractor.getNodeLine(1).isEmpty)
+        }
     }
 }
