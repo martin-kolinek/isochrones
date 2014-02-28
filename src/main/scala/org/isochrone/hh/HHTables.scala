@@ -11,10 +11,17 @@ class NodeNeighbourhoods(name: String) extends Table[(Long, Double)](name) {
     def * = nodeId ~ neighbourhood
 }
 
+class DescendLimits(name: String) extends Table[(Long, Double)](name) {
+    def nodeId = column[Long]("node_id")
+    def descendLimit = column[Double]("descend")
+    def * = nodeId ~ descendLimit
+}
+
 trait HHTables {
     val neighbourhoods: NodeNeighbourhoods
     val reverseNeighbourhoods: NodeNeighbourhoods
     val shortcutEdges: EdgeTable
+    val descendLimit: DescendLimits
 }
 
 trait HHTableComponent {
@@ -25,6 +32,7 @@ class DefaultHHTablesWithPrefix(prefix: String) extends HHTables {
     val neighbourhoods = new NodeNeighbourhoods(prefix + "hh_node_neighbourhoods")
     val reverseNeighbourhoods = new NodeNeighbourhoods(prefix + "hh_node_rev_neighbourhoods")
     val shortcutEdges = new EdgeTable(prefix + "hh_shortcuts")
+    val descendLimit = new DescendLimits(prefix + "hh_descend")
 }
 
 trait ConfigHHTableComponent extends HHTableComponent with RoadNetTableParsingComponent {
