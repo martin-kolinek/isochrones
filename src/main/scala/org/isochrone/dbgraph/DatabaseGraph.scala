@@ -22,6 +22,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.util.Timing
 import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.graphlib.MapGraphType
+import org.isochrone.db.EdgeTable
 
 trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] with MapGraphType[Long] with NodePosition[Long] {
     self: DatabaseGraphBase =>
@@ -34,12 +35,15 @@ trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] wi
 
     protected case class BasicNodeProps(neighs: Map[Long, Double], pos: (Double, Double))
 
-    final def basicQuery(region: Int): BasicQueryType = {
-        val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === e.start)
-        for ((n, e) <- startJoin.sortBy(x => (x._1.id, x._2.end)) if n.region === region) yield (n.id, e.end.?, e.cost.?, n.geom)
+    def edgeStartSelector(tbl: EdgeTable) = tbl.start
+    def edgeEndSelector(tbl: EdgeTable) = tbl.end
+
+    def basicQuery(region: Int): BasicQueryType = {
+        val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === edgeStartSelector(e))
+        for ((n, e) <- startJoin.sortBy(x => (x._1.id, edgeEndSelector(x._2))) if n.region === region) yield (n.id, edgeEndSelector(e).?, e.cost.?, n.geom)
     }
 
-    final def basicNodePropsFromQueryResult(qrs: List[BasicQueryResult]): Traversable[(Long, BasicNodeProps)] = {
+    def basicNodePropsFromQueryResult(qrs: List[BasicQueryResult]): Traversable[(Long, BasicNodeProps)] = {
         for ((n, lst) <- qrs.groupBy(_._1).view) yield {
             val neighs = lst.collect { case (st, Some(en), Some(c), _) => (en, c) }.toMap
             val pos = (lst.head._4.getInteriorPoint.getX, lst.head._4.getInteriorPoint.getY)
@@ -90,8 +94,15 @@ trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] wi
     def nodes = roadNetTables.roadNodes.map(_.id).list()(session)
 }
 
-class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality {
+trait ReverseDatabaseGraphFunctionality extends BasicDatabaseGraphFunctionality {
+    self: DatabaseGraphBase =>
 
+    override def edgeStartSelector(tbl: EdgeTable) = tbl.end
+    override def edgeEndSelector(tbl: EdgeTable) = tbl.start
+}
+
+class DatabaseGraphWithoutFunc(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) {
+    self: BasicDatabaseGraphFunctionality =>
     def extractBasicNodeProps(np: NodeProperties) = np
 
     type NodeProperties = BasicNodeProps
@@ -104,6 +115,10 @@ class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Sess
 
     def query(region: Int): QueryType = basicQuery(region)
 }
+
+class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphWithoutFunc(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality
+
+class ReverseDatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphWithoutFunc(roadNetTables, maxRegions, session) with ReverseDatabaseGraphFunctionality
 
 trait DBGraphConfigParserComponent extends OptionParserComponent with Logging {
     case class DBGraphConfig(preloadAll: Boolean, nodeCacheSize: Int) {

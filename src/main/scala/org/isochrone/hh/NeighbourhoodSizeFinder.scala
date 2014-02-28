@@ -10,7 +10,7 @@ import scopt.OptionParser
 import org.isochrone.ArgumentParser
 
 trait NeighbourhoodSizeFinderComponent extends GraphComponentBase {
-    self: DijkstraAlgorithmProviderComponent with HHTableComponent with NeighbourhoodCountComponent =>
+    self: DijkstraAlgorithmProviderComponent with NeighbourhoodCountComponent =>
 
     type NodeType = Long
 
@@ -21,8 +21,8 @@ trait NeighbourhoodSizeFinderComponent extends GraphComponentBase {
             dijk.helper.compute(nd).view.drop(count - 1).head._2
         }
 
-        def saveNeighbourhoodSize(nd: NodeType)(implicit s: Session) = {
-            hhTables.neighbourhoods.insert(nd -> findNeighbourhoodSize(nd, neighbourhoodCount))
+        def saveNeighbourhoodSize(nd: NodeType, result: NodeNeighbourhoods)(implicit s: Session) = {
+            result.insert(nd -> findNeighbourhoodSize(nd, neighbourhoodCount))
         }
     }
 }

@@ -63,6 +63,26 @@ class DbGraphTest extends FunSuite with TestDatabase with RoadNetTableCreation {
         }
     }
 
+    test("ReverseDatabaseGraph works") {
+        new DefaultRoadNetTableComponent with TestDatabaseComponent {
+            database.withSession { implicit s: Session =>
+                (1l to 5l).map((_, 1, geomfact.createPoint(new Coordinate(0, 0)))).foreach(roadNetTables.roadNodes.insert(_))
+                val edges = Seq()
+                roadNetTables.roadNet.insertAll(addNeededCols((1, 2, 0.1),
+                    (1, 3, 0.2),
+                    (2, 4, 0.3),
+                    (3, 2, 0.4),
+                    (2, 1, 0.5),
+                    (4, 5, 0.6)): _*)
+                val g = new ReverseDatabaseGraph(roadNetTables, 200, s)
+                val neigh = g.neighbours(2)
+                info(neigh.toString)
+                assert(neigh.size === 2)
+                assert(neigh.toSet === Set(3 -> 0.4, 1 -> 0.1))
+            }
+        }
+    }
+
     test("DatabaseGraph return empty list for nonexistent nodes)") {
         new DefaultRoadNetTableComponent with TestDatabaseComponent {
             database.withSession { implicit session: Session =>

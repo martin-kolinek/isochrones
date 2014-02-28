@@ -13,6 +13,7 @@ class NodeNeighbourhoods(name: String) extends Table[(Long, Double)](name) {
 
 trait HHTables {
     val neighbourhoods: NodeNeighbourhoods
+    val reverseNeighbourhoods: NodeNeighbourhoods
     val shortcutEdges: EdgeTable
 }
 
@@ -22,6 +23,7 @@ trait HHTableComponent {
 
 class DefaultHHTablesWithPrefix(prefix: String) extends HHTables {
     val neighbourhoods = new NodeNeighbourhoods(prefix + "hh_node_neighbourhoods")
+    val reverseNeighbourhoods = new NodeNeighbourhoods(prefix + "hh_node_rev_neighbourhoods")
     val shortcutEdges = new EdgeTable(prefix + "hh_shortcuts")
 }
 

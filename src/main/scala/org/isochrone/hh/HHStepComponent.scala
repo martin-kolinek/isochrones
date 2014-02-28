@@ -16,6 +16,7 @@ import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.graphlib.GraphComponentBase
 import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import scala.collection.mutable.HashSet
+import org.isochrone.dbgraph.ReverseDatabaseGraph
 
 trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase {
     self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent =>
@@ -42,7 +43,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                                 val hhedges = ss.extractHighwayEdges(tree)
                                 logger.debug(s"Found ${hhedges.size} highway edges")
                                 hhedges.foreach {
-                                    case edg @ (s, e) if !alreadyAdded.contains(edg) => {
+                                    case edg@(s, e) if !alreadyAdded.contains(edg) => {
                                         val insQ = for {
                                             r <- roadNetTables.roadNet if r.start === s && r.end === e
                                             if !Query(higherRoadNetTables.roadNet).filter(h => h.start === r.start && h.end === r.end).exists
@@ -89,10 +90,16 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
         def findNeighbourhoodSizes() {
             logger.info("Finding neighbourhood sizes")
             database.withTransaction { implicit s: Session =>
-                val finder = neighSizeFinder(new DatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s))
-                Query(roadNetTables.roadNodes).sortBy(_.id).map(_.id).foreach { n =>
-                    logger.info(s"Processing node $n")
-                    finder.saveNeighbourhoodSize(n)
+                for (
+                    (g, out) <- Seq(
+                        new DatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s) -> hhTables.neighbourhoods,
+                        new ReverseDatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s) -> hhTables.reverseNeighbourhoods)
+                ) {
+                    val finder = neighSizeFinder(g)
+                    Query(roadNetTables.roadNodes).sortBy(_.id).map(_.id).foreach { n =>
+                        logger.info(s"Processing node $n")
+                        finder.saveNeighbourhoodSize(n, out)
+                    }
                 }
             }
         }
