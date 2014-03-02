@@ -8,6 +8,7 @@ import org.isochrone.OptionParserComponent
 import scopt.OptionParser
 import org.isochrone.ArgumentParser
 import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.db.BufferOptionParserComponent
 
 trait IncrementalPartitionComponent {
     self: BBoxPartitionerProvider with RegularPartitionComponent with RoadNetTableComponent with DatabaseProvider =>
@@ -37,16 +38,6 @@ trait IncrementalPartitionComponent {
     }
 
     val partitioner: IncrementalPartitioner
-}
-
-trait BufferOptionParserComponent extends OptionParserComponent {
-    lazy val bufferSizeLens = registerConfig(2)
-
-    abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
-        super.parserOptions(pars)
-        pars.opt[Int]("buffer-size").action((x, c) => bufferSizeLens.set(c)(x)).
-            text("the buffer size used in incremental partitioner (default = 2)")
-    }
 }
 
 trait ConfigIncrementalPartitionComponent extends IncrementalPartitionComponent with BufferOptionParserComponent {

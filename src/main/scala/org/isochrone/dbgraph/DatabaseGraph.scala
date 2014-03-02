@@ -123,7 +123,7 @@ class ReverseDatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, sessio
 trait DBGraphConfigParserComponent extends OptionParserComponent with Logging {
     case class DBGraphConfig(preloadAll: Boolean, nodeCacheSize: Int) {
         def effectiveNodeCacheSize = if (preloadAll) Int.MaxValue else nodeCacheSize
-        def preload(g: DatabaseGraph) {
+        def preload(g: BasicDatabaseGraphFunctionality with DatabaseGraphBase) {
             if (preloadAll) {
                 logger.info("Preloading graph")
                 g.regions.foreach(g.ensureRegion)

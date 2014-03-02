@@ -40,3 +40,12 @@ trait ConfigHHTableComponent extends HHTableComponent with RoadNetTableParsingCo
 
     val hhTables = new DefaultHHTablesWithPrefix(roadNetPrefixLens.get(parsedConfig))
 }
+
+trait HigherHHTableComponent {
+    val higherHHTables: HHTables
+}
+
+trait ConfigHigherHHTableComponent extends HigherHHTableComponent with RoadNetTableParsingComponent {
+    self: ArgumentParser =>
+    val higherHHTables = new DefaultHHTablesWithPrefix(roadNetPrefixLens.get(parsedConfig))
+}

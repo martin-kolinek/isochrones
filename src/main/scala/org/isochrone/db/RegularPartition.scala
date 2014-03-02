@@ -47,3 +47,13 @@ trait ConfigRegularPartitionComponent extends RegularPartitionParserComponent wi
 
     val regularPartition = new RegularPartition(regionSizeLens.get(parsedConfig))
 }
+
+trait BufferOptionParserComponent extends OptionParserComponent {
+    lazy val bufferSizeLens = registerConfig(2)
+
+    abstract override def parserOptions(pars: OptionParser[OptionConfig]) = {
+        super.parserOptions(pars)
+        pars.opt[Int]("buffer-size").action((x, c) => bufferSizeLens.set(c)(x)).
+            text("the buffer size used in incremental partitioner (default = 2)")
+    }
+}

@@ -19,7 +19,7 @@ import scala.collection.mutable.HashSet
 import org.isochrone.dbgraph.ReverseDatabaseGraph
 
 trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase {
-    self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent =>
+    self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HigherHHTableComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent =>
 
     type NodeType = Long
 
@@ -83,7 +83,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
         def contractTrees() {
             logger.info("Contracting trees")
             database.withTransaction { implicit s: Session =>
-                TreeContraction.contractTrees(higherRoadNetTables, hhTables.shortcutEdges, s)
+                TreeContraction.contractTrees(higherRoadNetTables, higherHHTables.shortcutEdges, s)
             }
         }
 
@@ -125,6 +125,7 @@ trait DefaultHHStepComponent
         with ConfigNeighbourhoodCountComponent
         with DijkstraAlgorithmProviderComponent
         with NeighbourhoodSizeFinderComponent
+        with ConfigHigherHHTableComponent
         with HHStepComponent
         with FirstPhaseParametersFromArg {
     self: HigherLevelRoadNetTableComponent with RoadNetTableComponent with ArgumentParser with DatabaseProvider with HHTableComponent =>

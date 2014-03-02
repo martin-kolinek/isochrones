@@ -21,5 +21,8 @@ class TestGraph extends FunSuite with TestDatabase {
         assert(comp.graph.neighbourhoodSize(1) === 1)
         assert(comp.graph.neighbourhoodSize(2) === 2)
         assert(comp.graph.neighbourhoodSize(3) === 3)
+        assert(comp.graph.descendLimit(1) === 5)
+        assert(comp.graph.descendLimit(2) === 6)
+        assert(comp.graph.descendLimit(3) === 7)
     }
 }
