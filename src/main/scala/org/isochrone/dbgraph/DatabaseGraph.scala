@@ -40,7 +40,7 @@ trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] wi
 
     def basicQuery(region: Int): BasicQueryType = {
         val startJoin = roadNetTables.roadNodes leftJoin roadNetTables.roadNet on ((n, e) => n.id === edgeStartSelector(e))
-        for ((n, e) <- startJoin.sortBy(x => (x._1.id, edgeEndSelector(x._2))) if n.region === region) yield (n.id, edgeEndSelector(e).?, e.cost.?, n.geom)
+        for ((n, e) <- startJoin if n.region === region) yield (n.id, edgeEndSelector(e).?, e.cost.?, n.geom)
     }
 
     def basicNodePropsFromQueryResult(qrs: List[BasicQueryResult]): Traversable[(Long, BasicNodeProps)] = {

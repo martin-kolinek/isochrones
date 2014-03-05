@@ -7,13 +7,14 @@ import org.isochrone.graphlib.GraphWithRegionsComponentBase
 import org.isochrone.db.SessionProviderComponent
 import org.isochrone.hh.NeighbourhoodSizes
 import org.isochrone.hh.DescendLimitProvider
+import org.isochrone.hh.ShortcutReverseLimitProvider
 
-class HHDatabaseGraph(hhTables: HHTables, roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality with NeighbourhoodSizes[Long] with DescendLimitProvider[Long] {
-    case class HHNodeProps(np: BasicNodeProps, dh: Double, descLimit: Double)
+class HHDatabaseGraph(hhTables: HHTables, roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality with NeighbourhoodSizes[Long] with DescendLimitProvider[Long] with ShortcutReverseLimitProvider[Long] {
+    case class HHNodeProps(np: BasicNodeProps, dh: Double, descLimit: Double, shortcutRevLimit: Double)
 
-    type QueryResult = (BasicQueryResult, Double, Double)
+    type QueryResult = (BasicQueryResult, Double, Option[Double], Option[Double])
 
-    type QueryType = Query[((WrappedBasicQueryResult), Column[Double], Column[Double]), QueryResult]
+    type QueryType = Query[((WrappedBasicQueryResult), Column[Double], Column[Option[Double]], Column[Option[Double]]), QueryResult]
 
     type NodeProperties = HHNodeProps
 
@@ -22,16 +23,20 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: RoadNetTables, maxRegio
     def nodePropsFromQueryResult(qrs: List[QueryResult]) = {
         val basic = basicNodePropsFromQueryResult(qrs.map(_._1)).toMap
         qrs.map { x =>
-            x._1._1 -> HHNodeProps(basic(x._1._1), x._2, x._3)
+            x._1._1 -> HHNodeProps(basic(x._1._1), x._2, x._3.getOrElse(Double.PositiveInfinity), x._4.getOrElse(Double.PositiveInfinity))
         }
     }
 
     def query(region: Int) = {
-        for {
+        val innerJoin = for {
             b <- basicQuery(region)
             hh <- hhTables.neighbourhoods if hh.nodeId === b._1
-            desc <- hhTables.descendLimit if desc.nodeId === b._1
-        } yield (b, hh.neighbourhood, desc.descendLimit)
+        } yield (b, hh)
+        for {
+            (((b, hh), desc), shortRev) <- innerJoin.
+                leftJoin(hhTables.descendLimit).on(_._1._1 === _.nodeId).
+                leftJoin(hhTables.shortcutReverseLimit).on(_._1._1._1 === _.nodeId)
+        } yield (b, hh.neighbourhood, desc.descendLimit.?, shortRev.descendLimit.?)
     }
 
     def neighbourhoodSize(nd: Long) = {
@@ -40,6 +45,10 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: RoadNetTables, maxRegio
 
     def descendLimit(nd: Long) = {
         propsForNode(nd).descLimit
+    }
+
+    def shortcutReverseLimit(nd: Long) = {
+        propsForNode(nd).shortcutRevLimit
     }
 }
 

@@ -22,6 +22,7 @@ trait HHTables {
     val reverseNeighbourhoods: NodeNeighbourhoods
     val shortcutEdges: EdgeTable
     val descendLimit: DescendLimits
+    val shortcutReverseLimit: DescendLimits
 }
 
 trait HHTableComponent {
@@ -33,6 +34,7 @@ class DefaultHHTablesWithPrefix(prefix: String) extends HHTables {
     val reverseNeighbourhoods = new NodeNeighbourhoods(prefix + "hh_node_rev_neighbourhoods")
     val shortcutEdges = new EdgeTable(prefix + "hh_shortcuts")
     val descendLimit = new DescendLimits(prefix + "hh_descend")
+    val shortcutReverseLimit = new DescendLimits(prefix + "hh_shortcut_rev")
 }
 
 trait ConfigHHTableComponent extends HHTableComponent with RoadNetTableParsingComponent {

@@ -10,3 +10,12 @@ trait DescendLimitComponent {
     self: GraphComponentBase =>
     val descendLimitProvider: NeighbourhoodSizes[NodeType]
 }
+
+trait ShortcutReverseLimitProvider[NodeType] {
+    def shortcutReverseLimit(nd: NodeType): Double
+}
+
+trait ShortcutLimitComponent {
+    self: GraphComponentBase =>
+    val shortcutRevLimitProvider: ShortcutReverseLimitProvider[NodeType]
+}
