@@ -1,6 +1,6 @@
 package org.isochrone.db
 
-import scala.slick.session.Session
+import org.isochrone.util.db.MyPostgresDriver.simple._
 
 trait SessionProviderComponent {
 	val session:Session

@@ -59,7 +59,7 @@ trait RoadImporterComponent {
 
         val backRoads = for {
             rn <- roadNetTables.roadNet
-            if !Query(roadNetTables.roadNet).filter(rn2 => rn2.start === rn.end && rn2.end === rn.start).exists
+            if !roadNetTables.roadNet.filter(rn2 => rn2.start === rn.end && rn2.end === rn.start).exists
             sn <- roadNetTables.roadNodes if sn.id === rn.start
             en <- roadNetTables.roadNodes if en.id === rn.end
         } yield (rn.end, rn.start, getNoRoadCost(sn.geom, en.geom), true, en.geom.shortestLine(sn.geom).asColumnOf[Geometry])
@@ -68,9 +68,9 @@ trait RoadImporterComponent {
             database.withTransaction { implicit s: Session =>
                 import roadNetTables._
                 roadNet.insert(roadNetQuery)
-                sqlu"""INSERT INTO #${roadNetTables.roadNodes.tableName}(id, region, geom)
-                SELECT DISTINCT n.id, 0, n.geom FROM #${roadNetTables.roadNet.tableName} rn 
-                    inner join #${osmTables.nodes.tableName} n on rn.start_node = n.id OR rn.end_node = n.id
+                sqlu"""INSERT INTO #${roadNetTables.roadNodes.baseTableRow.tableName}(id, region, geom)
+                SELECT DISTINCT n.id, 0, n.geom FROM #${roadNetTables.roadNet.baseTableRow.tableName} rn 
+                    inner join #${osmTables.nodes.baseTableRow.tableName} n on rn.start_node = n.id OR rn.end_node = n.id
                 """.execute()
                 roadNet.insert(backRoads)
                 roadRegions.insert(0 -> Double.PositiveInfinity)

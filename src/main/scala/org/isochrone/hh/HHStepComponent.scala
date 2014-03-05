@@ -31,12 +31,12 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                 val fs = firstPhase(hhgraph, hhgraph)
                 val ss = secondPhase(hhgraph, hhgraph)
                 val regcount = regularPartition.regions.size
-                higherRoadNetTables.roadNodes.insert(Query(roadNetTables.roadNodes))
+                higherRoadNetTables.roadNodes.insert(roadNetTables.roadNodes)
                 regularPartition.regions.zipWithIndex.foreach {
                     case (reg, regidx) => {
                         logger.info(s"Processing region $regidx/$regcount")
                         val alreadyAdded = new HashSet[(NodeType, NodeType)]
-                        Query(roadNetTables.roadNodes).filter(_.geom @&& reg.dbBBox).sortBy(_.id).map(_.id).zipWithIndex.foreach {
+                        roadNetTables.roadNodes.filter(_.geom @&& reg.dbBBox).sortBy(_.id).map(_.id).zipWithIndex.foreach {
                             case (rn, idx) => {
                                 logger.debug(s"Processing node $rn (idx = $idx)")
                                 val tree = fs.nodeTree(rn)
@@ -46,7 +46,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                                     case edg@(s, e) if !alreadyAdded.contains(edg) => {
                                         val insQ = for {
                                             r <- roadNetTables.roadNet if r.start === s && r.end === e
-                                            if !Query(higherRoadNetTables.roadNet).filter(h => h.start === r.start && h.end === r.end).exists
+                                            if !higherRoadNetTables.roadNet.filter(h => h.start === r.start && h.end === r.end).exists
                                         } yield r
                                         higherRoadNetTables.roadNet.insert(insQ)
                                         alreadyAdded += edg
@@ -60,8 +60,8 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
 
                 val reversed = for {
                     e <- roadNetTables.roadNet
-                    if Query(higherRoadNetTables.roadNet).filter(rev => rev.start === e.end && rev.end === e.start).exists &&
-                        !Query(higherRoadNetTables.roadNet).filter(e2 => e2.start === e.start && e2.end === e.end).exists
+                    if higherRoadNetTables.roadNet.filter(rev => rev.start === e.end && rev.end === e.start).exists &&
+                        !higherRoadNetTables.roadNet.filter(e2 => e2.start === e.start && e2.end === e.end).exists
                 } yield e
                 logger.info("Inserting reverse edges")
                 higherRoadNetTables.roadNet.insert(reversed)
@@ -96,7 +96,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                         new ReverseDatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s) -> hhTables.reverseNeighbourhoods)
                 ) {
                     val finder = neighSizeFinder(g)
-                    Query(roadNetTables.roadNodes).sortBy(_.id).map(_.id).foreach { n =>
+                    roadNetTables.roadNodes.sortBy(_.id).map(_.id).foreach { n =>
                         logger.info(s"Processing node $n")
                         finder.saveNeighbourhoodSize(n, out)
                     }

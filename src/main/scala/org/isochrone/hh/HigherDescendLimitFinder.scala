@@ -55,7 +55,7 @@ trait HigherDescendLimitFinderComponent extends NonDbHigherDescendLimitFinderCom
                     }.map {
                         case (nd, dl) => nd.id -> dl.descendLimit.?
                     }.toMap
-                    val nodes = Query(roadNetTables.roadNodes).filter(_.geom @&& reg.dbBBox).map(_.id).elements
+                    val nodes = roadNetTables.roadNodes.filter(_.geom @&& reg.dbBBox).map(_.id).iterator
 
                     val result = getDescendLimits(grp, grp, grp, initial.mapValues(_.getOrElse(0.0)), nodes)
 
@@ -72,7 +72,7 @@ trait HigherDescendLimitFinderComponent extends NonDbHigherDescendLimitFinderCom
 
                     higherHHTables.descendLimit.insertAll(toIns.toSeq: _*)
                     toUpd.foreach {
-                        case (nd, res) => Query(higherHHTables.descendLimit).filter(_.nodeId === nd).map(_.descendLimit).update(res)
+                        case (nd, res) => higherHHTables.descendLimit.filter(_.nodeId === nd).map(_.descendLimit).update(res)
                     }
                 }
             }

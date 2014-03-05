@@ -24,8 +24,8 @@ class TestGraph extends FunSuite with TestDatabase {
         assert(comp.graph.descendLimit(1) === 5)
         assert(comp.graph.descendLimit(2) === 6)
         assert(comp.graph.descendLimit(3) === 7)
-        assert(comp.graph.descendLimit(1) === 13)
-        assert(comp.graph.descendLimit(2) === 15)
-        assert(comp.graph.descendLimit(3) === Double.PositiveInfinity)
+        assert(comp.graph.shortcutReverseLimit(1) === 13)
+        assert(comp.graph.shortcutReverseLimit(2) === 15)
+        assert(comp.graph.shortcutReverseLimit(3) === Double.PositiveInfinity)
     }
 }

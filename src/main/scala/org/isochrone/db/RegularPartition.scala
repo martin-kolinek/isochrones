@@ -17,7 +17,7 @@ trait RegularPartitionComponent {
             def dbBBox: Column[Geometry] = makeBox(makePoint(left, bottom), makePoint(right, top))
         }
         val (top, left, bottom, right) = database.withSession { implicit s: Session =>
-            sql"SELECT MAX(ST_Y(geom)), MIN(ST_X(geom)), MIN(ST_Y(geom)), MAX(ST_X(geom)) FROM #${roadNetTables.roadNodes.tableName}".as[(Double, Double, Double, Double)].first
+            sql"SELECT MAX(ST_Y(geom)), MIN(ST_X(geom)), MIN(ST_Y(geom)), MAX(ST_X(geom)) FROM #${roadNetTables.roadNodes.baseTableRow.tableName}".as[(Double, Double, Double, Double)].first
 
         }
 

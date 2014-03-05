@@ -8,48 +8,49 @@ import org.isochrone.ArgumentParser
 import shapeless.Lens
 import scopt.OptionParser
 
-class EdgeTable(name: String) extends Table[(Long, Long, Double, Boolean, Geometry)](name) {
+class EdgeTable(tag: Tag, name: String) extends Table[(Long, Long, Double, Boolean, Geometry)](tag, name) {
     def start = column[Long]("start_node")
     def end = column[Long]("end_node")
     def cost = column[Double]("cost")
     def virtual = column[Boolean]("virtual")
     def geom = column[Geometry]("geom")
-    def * = start ~ end ~ cost ~ virtual ~ geom
+    def * = (start, end, cost, virtual, geom)
 }
 
-class NodeTable(name: String) extends Table[(Long, Int, Geometry)](name) {
+class NodeTable(tag: Tag, name: String) extends Table[(Long, Int, Geometry)](tag, name) {
     def id = column[Long]("id", O.PrimaryKey)
     def region = column[Int]("region")
     def geom = column[Geometry]("geom")
-    def * = id ~ region ~ geom
+    def * = (id, region, geom)
 }
 
-class RegionTable(name: String) extends Table[(Int, Double)](name) {
+class RegionTable(tag: Tag, name: String) extends Table[(Int, Double)](tag, name) {
     def id = column[Int]("id")
     def diameter = column[Double]("diameter")
-    def * = id ~ diameter
+    def * = (id, diameter)
 }
 
-class AreaTable(name: String) extends Table[(Long, Long, Int, Double)](name) {
+class AreaTable(tag: Tag, name: String) extends Table[(Long, Long, Int, Double)](tag, name) {
     def id = column[Long]("id")
     def nodeId = column[Long]("node_id")
     def sequenceNo = column[Int]("sequence_no")
     def costToCover = column[Double]("cost_to_cover")
-    def * = id ~ nodeId ~ sequenceNo ~ costToCover
+    def * = (id, nodeId, sequenceNo, costToCover)
 }
 
-class AreaGeometriesTable(name: String) extends Table[(Long, Geometry)](name) {
+class AreaGeometriesTable(tag: Tag, name: String) extends Table[(Long, Geometry)](tag, name) {
     def id = column[Long]("id")
     def geom = column[Geometry]("geom")
-    def * = id ~ geom
+    def * = (id, geom)
 }
 
 trait RoadNetTables {
-    val roadNet: EdgeTable
-    val roadNodes: NodeTable
-    val roadRegions: RegionTable
-    val roadAreas: AreaTable
-    val areaGeoms: AreaGeometriesTable
+    val roadNet: TableQuery[EdgeTable]
+    val roadNodes: TableQuery[NodeTable]
+    val roadRegions: TableQuery[RegionTable]
+    val roadAreas: TableQuery[AreaTable]
+    val areaGeoms: TableQuery[AreaGeometriesTable]
+    
 }
 
 trait RoadNetTableComponent {
@@ -65,11 +66,11 @@ trait DefaultRoadNetTableComponent extends RoadNetTableComponent {
 }
 
 class DefaultRoadNetTablesWithPrefix(prefix: String) extends RoadNetTables {
-    val roadNet = new EdgeTable(prefix + "road_net")
-    val roadNodes = new NodeTable(prefix + "road_nodes")
-    val roadRegions = new RegionTable(prefix + "road_regions")
-    val roadAreas = new AreaTable(prefix + "road_areas")
-    val areaGeoms = new AreaGeometriesTable(prefix + "area_geoms")
+    val roadNet = TableQuery(t => new EdgeTable(t, prefix + "road_net"))
+    val roadNodes = TableQuery(t => new NodeTable(t, prefix + "road_nodes"))
+    val roadRegions = TableQuery(t => new RegionTable(t, prefix + "road_regions"))
+    val roadAreas = TableQuery(t => new AreaTable(t, prefix + "road_areas"))
+    val areaGeoms = TableQuery(t => new AreaGeometriesTable(t, prefix + "area_geoms"))
 }
 
 trait ConfigRoadNetTableComponent extends RoadNetTableComponent with RoadNetTableParsingComponent {

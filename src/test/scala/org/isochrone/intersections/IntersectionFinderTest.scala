@@ -25,20 +25,20 @@ class IntersectionFinderTest extends FunSuite with TestDatabase {
             val roadNetTables = new DefaultRoadNetTablesWithPrefix("test_")
             assert(IntersectionFinder.hasIntersections(2, -2, -2, 2))
             val totalcost = database.withSession { implicit s: Session =>
-                Query(roadNetTables.roadNet).filter(x => x.start === 5000000000l && x.end === 5000000002l).map(_.cost).firstOption.get
+                roadNetTables.roadNet.filter(x => x.start === 5000000000l && x.end === 5000000002l).map(_.cost).firstOption.get
             }
             IntersectionFinder.removeIntersections(2, -2, -2, 2)
             database.withTransaction { implicit s: Session =>
-                val lst = Query(roadNetTables.roadNet).map(x => (x.start, x.end)).list
+                val lst = roadNetTables.roadNet.map(x => (x.start, x.end)).list
                 info(lst.toString)
                 assert(lst.size == lst.toSet.size)
             }
             assert(!IntersectionFinder.hasIntersections(2, -2, -2, 2))
             database.withSession { implicit s: Session =>
-                val cst1 = Query(roadNetTables.roadNet).filter(x => x.start === 5000000000l && x.end === 5000000004l).map(_.cost).firstOption.get
-                val cst2 = Query(roadNetTables.roadNet).filter(x => x.start === 5000000004l && x.end === 5000000002l).map(_.cost).firstOption.get
-                val cst3 = Query(roadNetTables.roadNet).filter(x => x.start === 5000000001l && x.end === 5000000004l).map(_.cost).firstOption.get
-                val cst4 = Query(roadNetTables.roadNet).filter(x => x.start === 5000000004l && x.end === 5000000003l).map(_.cost).firstOption.get
+                val cst1 = roadNetTables.roadNet.filter(x => x.start === 5000000000l && x.end === 5000000004l).map(_.cost).firstOption.get
+                val cst2 = roadNetTables.roadNet.filter(x => x.start === 5000000004l && x.end === 5000000002l).map(_.cost).firstOption.get
+                val cst3 = roadNetTables.roadNet.filter(x => x.start === 5000000001l && x.end === 5000000004l).map(_.cost).firstOption.get
+                val cst4 = roadNetTables.roadNet.filter(x => x.start === 5000000004l && x.end === 5000000003l).map(_.cost).firstOption.get
                 assert(math.abs(cst1 - 3) < 0.0001)
                 assert(math.abs(cst2 - 3) < 0.0001)
                 assert(math.abs(cst3 - 1) < 0.0001)
@@ -53,7 +53,7 @@ class IntersectionFinderTest extends FunSuite with TestDatabase {
             assert(IntersectionFinder.hasIntersections(2, -2, -2, 2))
             IntersectionFinder.removeIntersections(2, -2, -2, 2)
             database.withTransaction { implicit s: Session =>
-                val lst = Query(roadNetTables.roadNet).map(x => (x.start, x.end)).list
+                val lst = roadNetTables.roadNet.map(x => (x.start, x.end)).list
                 info(lst.toString)
                 assert(lst.size == lst.toSet.size)
             }

@@ -79,19 +79,19 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
 
     type NodeType = Long
 
-    def lineContractor(g: GraphType[NodeType], rnet: RoadNetTables, output: EdgeTable) = new LineContraction(g, rnet, output)
+    def lineContractor(g: GraphType[NodeType], rnet: RoadNetTables, output: TableQuery[EdgeTable]) = new LineContraction(g, rnet, output)
 
-    class LineContraction(g: GraphType[NodeType], rnet: RoadNetTables, output: EdgeTable) extends LineContractionBase with Logging {
+    class LineContraction(g: GraphType[NodeType], rnet: RoadNetTables, output: TableQuery[EdgeTable]) extends LineContractionBase with Logging {
         val graph = g
         def contractLines(bbox: Column[Geometry])(implicit s: Session) = {
             val nodesToProcessQuery = for {
                 n <- rnet.roadNodes if n.geom @&& bbox
-                if Query(rnet.roadNet).filter(e => e.start === n.id).length === 2
+                if rnet.roadNet.filter(e => e.start === n.id).length === 2
             } yield n.id
 
             val processed = new HashSet[NodeType]
             val total = Query(nodesToProcessQuery.length).first
-            nodesToProcessQuery.elements.zipWithIndex.foreach {
+            nodesToProcessQuery.iterator.zipWithIndex.foreach {
                 case (nd, idx) => {
                     if (!processed.contains(nd)) {
                         logger.debug(s"Processing $idx/$total")
@@ -117,7 +117,7 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
                 if (startEndShortcut(s, e)) {
                     val qWithNonDup = for {
                         edg @ (start, end, _, _, _) <- q
-                        if !Query(rnet.roadNet).filter(e => e.start === start && e.end === end).exists
+                        if !rnet.roadNet.filter(e => e.start === start && e.end === end).exists
                     } yield edg
                     rnet.roadNet.insert(qWithNonDup)(session)
                 } else

@@ -42,7 +42,7 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
         database.withTransaction { implicit s: Session =>
             logger.info(s"Processing region $bbox ($idx/${regularPartition.regionCount})")
             val gr = new DatabaseGraph(roadNetTables, 1000, s)
-            val q = Query(roadNetTables.roadNodes).filter(_.geom @&& bbox.dbBBox).map(x => (x.id, x.geom)).sortBy(_._1)
+            val q = roadNetTables.roadNodes.filter(_.geom @&& bbox.dbBBox).map(x => (x.id, x.geom)).sortBy(_._1)
             val newgraph = (SimpleGraph() /: Random.shuffle(q.list).zipWithIndex)(processNode(gr, s))
             val filtered = filterNodes(newgraph, gr)
             filtered.foreach {

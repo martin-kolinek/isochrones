@@ -29,7 +29,7 @@ trait GraphConnectorComponent {
         }
 
         def findUnconnected(implicit s: Session) = {
-            val regions = Query(roadNetTables.roadNodes).groupBy(_.region).map(_._1).list
+            val regions = roadNetTables.roadNodes.groupBy(_.region).map(_._1).list
 
             val regionJoints = for {
                 n1 <- roadNetTables.roadNodes

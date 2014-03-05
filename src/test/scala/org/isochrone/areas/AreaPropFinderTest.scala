@@ -31,7 +31,7 @@ class AreaPropFinderTest extends FunSuite with TestDatabase {
 
             assert(comp.roadNetTables.roadAreas.filter(_.id === 2l).sortBy(_.sequenceNo).map(_.costToCover).list === List(15.0, 14.0, 15.0, 15.0))
 
-            assert(Query(comp.roadNetTables.areaGeoms).list.size === 2)
+            assert(comp.roadNetTables.areaGeoms.list.size === 2)
         }
 
     }

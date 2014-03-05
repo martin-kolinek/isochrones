@@ -30,7 +30,7 @@ class IncrementalPartitionTest extends FunSuite with TestDatabase {
             partitioner.partition()
 
             database.withSession { implicit s: Session =>
-                val lst = Query(roadNetTables.roadNodes).map(x => (x.id, x.region)).list
+                val lst = roadNetTables.roadNodes.map(x => (x.id, x.region)).list
                 val regions =
                     lst.groupBy(_._2).map {
                         case (reg, nodes) => nodes.map(_._1).toSet

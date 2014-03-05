@@ -24,6 +24,19 @@ import org.isochrone.executors.WalkingEdgesAdderExecutor
 import org.isochrone.executors.HHCreateExecutor
 import org.isochrone.executors.HHStepExecutor
 
+object Test{
+    import org.isochrone.util.db.MyPostgresDriver.simple._
+    
+    class Tbl(tag:Tag) extends Table[(Int, Int)](tag, "adsf") {
+        def a = column[Int]("a")
+        def b = column[Int]("b")
+        def * = (a, b)
+    }
+    
+    val x = TableQuery[Tbl]
+    x.delete(???)
+}
+
 object Main extends App with Logging
         with DijkstraIsochroneComputer
         with HigherLevelCreator

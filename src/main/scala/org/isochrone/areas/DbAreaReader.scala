@@ -27,7 +27,7 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
             val finalCostQ = for {
                 a1 <- roadNetTables.roadAreas if a1.sequenceNo === 0
                 a2 <- roadNetTables.roadAreas if a2.id === a1.id
-                if !Query(roadNetTables.roadAreas).filter(_.id === a1.id).filter(_.sequenceNo > a2.sequenceNo).map(_.sequenceNo).exists
+                if !roadNetTables.roadAreas.filter(_.id === a1.id).filter(_.sequenceNo > a2.sequenceNo).map(_.sequenceNo).exists
                 rn <- roadNetTables.roadNet if rn.start === a1.nodeId && rn.end === a2.nodeId
                 rn2 <- roadNetTables.roadNet if rn2.end === a1.nodeId && rn2.start === a2.nodeId
             } yield (a1.id, a1.nodeId, a2.nodeId, rn.cost, rn2.cost)
@@ -38,9 +38,9 @@ trait DbAreaReaderComponent extends AreaReaderComponent {
 
             val iter = q.sortBy { case (n, a) => (a.id, a.sequenceNo) }.map {
                 case (n, a) => (a.id, n.id, n.geom)
-            }.elements()(session)
-            val costIter = costQ.sortBy(_._1).elements()(session)
-            val finalCostIter = finalCostQ.sortBy(_._1).elements()(session)
+            }.iterator()(session)
+            val costIter = costQ.sortBy(_._1).iterator()(session)
+            val finalCostIter = finalCostQ.sortBy(_._1).iterator()(session)
 
             for (((l, costs), finCost) <- iter.partitionBy(_._1) zip costIter.partitionBy(_._1) zip finalCostIter) yield {
                 val pts = l.map {

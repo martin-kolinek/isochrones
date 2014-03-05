@@ -31,7 +31,7 @@ class WalkingEdgesAdderTest extends FunSuite with TestDatabase {
         comp.addWalkingEdges()
         comp.database.withTransaction { implicit s: Session =>
             val rn = comp.roadNetTables.roadNet
-            val lst = Query(rn).list
+            val lst = rn.list
             info(lst.toString)
             assert(lst.size == 6)
             val newEdge = lst.find(x => x._1 == 1 && x._2 == 3 || x._1 == 1 && x._2 == 5)

@@ -9,18 +9,18 @@ import scala.annotation.tailrec
 import com.typesafe.scalalogging.slf4j.Logging
 
 object TreeContraction extends Logging {
-    def contractTrees(input: RoadNetTables, output: EdgeTable, s: Session) = {
+    def contractTrees(input: RoadNetTables, output: TableQuery[EdgeTable], s: Session) = {
         @tailrec
         def contractTreesInt(): Unit = {
             logger.info("Tree contraction step")
             val leafEdgeQuery = for {
                 e <- input.roadNet
-                if !(Query(input.roadNet)).filter(x => x.start === e.start && x.end =!= e.end).exists
+                if !input.roadNet.filter(x => x.start === e.start && x.end =!= e.end).exists
             } yield e
 
             val oneWayEdgeQuery = for {
                 e <- input.roadNet
-                if !(Query(input.roadNet)).filter(x => x.end === e.start && x.start === e.end).exists
+                if !input.roadNet.filter(x => x.end === e.start && x.start === e.end).exists
             } yield e
 
             val newEdgeQuery = for {
@@ -45,7 +45,7 @@ object TreeContraction extends Logging {
         logger.info("Removing isolated nodes")
         val isolatedNodes = for {
             n <- input.roadNodes
-            if !Query(input.roadNet).filter(_.start === n.id).exists
+            if !input.roadNet.filter(_.start === n.id).exists
         } yield n.id
 
         val toDel = output.filter(o => o.start.in(isolatedNodes) && o.end.in(isolatedNodes))

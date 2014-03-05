@@ -6,7 +6,7 @@ import org.isochrone.db.DatabaseProvider
 
 trait ShortcutReverseLimitFinder {
     self: DatabaseProvider =>
-    def findShortcutReverseLimits(shortcutTable: EdgeTable, descendLimits: DescendLimits, shortcutReverse: DescendLimits) = {
+    def findShortcutReverseLimits(shortcutTable: TableQuery[EdgeTable], descendLimits: TableQuery[DescendLimits], shortcutReverse: TableQuery[DescendLimits]) = {
         database.withTransaction { implicit s: Session =>
             val q = for {
                 s <- shortcutTable

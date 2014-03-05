@@ -19,17 +19,17 @@ class DuplicitRemoverTest extends FunSuite with TestDatabase {
         comp.DuplicitRemover.removeDuplicates()
 
         comp.database.withTransaction { implicit s: Session =>
-            val lst = Query(comp.roadNetTables.roadNodes).map(_.id).list.sorted
+            val lst = comp.roadNetTables.roadNodes.map(_.id).list.sorted
             info(lst.toString)
             assert(lst == List(1, 3))
-            val rs = Query(comp.roadNetTables.roadNet).map(x => (x.start, x.end)).list
+            val rs = comp.roadNetTables.roadNet.map(x => (x.start, x.end)).list
             assert(!rs.map(_._1).contains(2))
             assert(!rs.map(_._1).contains(4))
             assert(!rs.map(_._2).contains(2))
             assert(!rs.map(_._2).contains(4))
         }
         comp.database.withTransaction { implicit s: Session =>
-            val lst = Query(comp.roadNetTables.roadNet).list
+            val lst = comp.roadNetTables.roadNet.list
             info(lst.toString)
             assert(lst.size == 1)
         }

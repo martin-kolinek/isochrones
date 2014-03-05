@@ -15,7 +15,7 @@ trait AreaPropertiesFinderComponent extends AreaCoverCostComponent with AreaGeom
     object AreaPropertiesSaver extends Logging {
         def saveAreaProperties() {
             database.withTransaction { implicit s: Session =>
-                Query(roadNetTables.areaGeoms).delete
+                roadNetTables.areaGeoms.delete
                 for (ar <- reader.areas) {
                     logger.info(s"Processing area ${ar.id}")
                     val costs = AreaCoverCostDeterminer.getCostsForArea(ar)

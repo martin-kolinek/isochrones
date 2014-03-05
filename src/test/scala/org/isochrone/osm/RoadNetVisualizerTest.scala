@@ -18,13 +18,13 @@ class RoadNetVisualizerTest extends FunSuite with TestDatabase {
             roadImporter.execute()
             visualizer.execute()
             database.withSession { implicit s: Session =>
-                val lst = Query(visualizationTables.roadNetVisualization).filter(x => x.start === 262930213l && x.end === 262930214l || x.end === 262930213l && x.start === 262930214l).map(_.direction).list()
+                val lst = visualizationTables.roadNetVisualization.filter(x => x.start === 262930213l && x.end === 262930214l || x.end === 262930213l && x.start === 262930214l).map(_.direction).list()
                 assert(lst.size == 1)
                 assert(lst.head == 0)
-                val lst2 = Query(visualizationTables.roadNetVisualization).filter(x => x.start === 249661252l && x.end === 55466850l).map(_.direction).list()
+                val lst2 = visualizationTables.roadNetVisualization.filter(x => x.start === 249661252l && x.end === 55466850l).map(_.direction).list()
                 assert(lst2.size == 1)
                 assert(lst2.head == 1)
-                val lst3 = Query(visualizationTables.roadNetVisualization).filter(x => x.start === 55466850l && x.end === 249661252l).map(_.direction).list()
+                val lst3 = visualizationTables.roadNetVisualization.filter(x => x.start === 55466850l && x.end === 249661252l).map(_.direction).list()
                 assert(lst3.size == 0)
             }
         }
@@ -33,7 +33,7 @@ class RoadNetVisualizerTest extends FunSuite with TestDatabase {
     test("RoadNetVisualizaer visualizes virtual roads") {
         trait TestVisComp extends VisualizationTableComponent {
             val visualizationTables = new VisualizationTables {
-                val roadNetVisualization = new RoadNetVisualization("con_test_vis")
+                val roadNetVisualization = TableQuery(t => new RoadNetVisualization(t, "con_test_vis"))
             }
         }
 
@@ -52,7 +52,7 @@ class RoadNetVisualizerTest extends FunSuite with TestDatabase {
         comp.visualizer.execute()
 
         comp.database.withSession { implicit s: Session =>
-            val lst = Query(comp.visualizationTables.roadNetVisualization).filter(x => x.start === 3l && x.end === 1l || x.start === 1l && x.end === 3l).map(_.direction).list
+            val lst = comp.visualizationTables.roadNetVisualization.filter(x => x.start === 3l && x.end === 1l || x.start === 1l && x.end === 3l).map(_.direction).list
             info(lst.toString)
             assert(lst == List(2))
         }

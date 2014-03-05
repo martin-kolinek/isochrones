@@ -1,6 +1,6 @@
 package org.isochrone.db
 
-import scala.slick.session.Database
+import org.isochrone.util.db.MyPostgresDriver.simple._
 
 trait DatabaseProvider {
 	def database:Database

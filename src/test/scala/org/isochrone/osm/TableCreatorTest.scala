@@ -19,12 +19,12 @@ trait TestTableCreatorComponent
 class TableCreatorTest extends FunSuite with TestDatabase {
     def queries(comp: RoadNetTableComponent with VisualizationTableComponent) = {
         import comp._
-        Seq(Query(roadNetTables.roadNet),
-            Query(roadNetTables.roadNodes),
-            Query(visualizationTables.roadNetVisualization),
-            Query(roadNetTables.roadAreas),
-            Query(roadNetTables.roadRegions),
-            Query(roadNetTables.areaGeoms))
+        Seq(roadNetTables.roadNet,
+            roadNetTables.roadNodes,
+            visualizationTables.roadNetVisualization,
+            roadNetTables.roadAreas,
+            roadNetTables.roadRegions,
+            roadNetTables.areaGeoms)
     }
 
     test("TableCreator creates tables") {
@@ -32,7 +32,7 @@ class TableCreatorTest extends FunSuite with TestDatabase {
             component =>
             tableCreator.create()
 
-            database.withSession { implicit s: Session =>
+            database.withSession { implicit s =>
                 for (q <- queries(component)) {
                     assert(q.list.size == 0)
                 }

@@ -2,7 +2,7 @@ package org.isochrone.dbgraph
 
 import org.isochrone.util.LRUCache
 import scala.collection.mutable.HashMap
-import scala.slick.driver.BasicDriver.simple._
+import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.graphlib.GraphType
 import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.SessionProviderComponent

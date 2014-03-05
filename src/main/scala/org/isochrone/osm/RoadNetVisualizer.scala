@@ -27,8 +27,8 @@ insert into "$out"(start_node, end_node, direction, linestring)
         from "$rnet" rn inner join
              "$rnet" rn2 on rn.start_node = rn2.end_node and rn.end_node = rn2.start_node
         where rn.virtual = true and rn2.virtual = true and (rn.start_node < rn2.start_node or (rn.start_node = rn2.start_node and rn.end_node < rn2.end_node));"""
-                Query(visualizationTables.roadNetVisualization).delete
-                Q.updateNA(insertQuery(visualizationTables.roadNetVisualization.tableName, roadNetTables.roadNet.tableName, roadNetTables.roadNodes.tableName)).execute
+                visualizationTables.roadNetVisualization.delete
+                Q.updateNA(insertQuery(visualizationTables.roadNetVisualization.baseTableRow.tableName, roadNetTables.roadNet.baseTableRow.tableName, roadNetTables.roadNodes.baseTableRow.tableName)).execute
             }
         }
     }

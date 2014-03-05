@@ -2,7 +2,7 @@ package org.isochrone.dbgraph
 
 import org.scalatest.FunSuite
 import resource._
-import scala.slick.driver.SQLiteDriver.simple._
+import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.TestDatabase
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Suite

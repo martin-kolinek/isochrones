@@ -11,12 +11,12 @@ class TreeContractionTest extends FunSuite with TestDatabase {
     test("Tree contraction works") {
         new TestDatabaseComponent {
             val roadNetTables = new DefaultRoadNetTablesWithPrefix("tree_")
-            val output = new EdgeTable("tree_road_net_out")
+            val output = TableQuery(t => new EdgeTable(t, "tree_road_net_out"))
             database.withTransaction { implicit s: Session =>
                 TreeContraction.contractTrees(roadNetTables, output, s)
-                val got = Query(output).map(x => (x.start, x.end, x.cost)).to[Set]
+                val got = output.map(x => (x.start, x.end, x.cost)).buildColl[Set]
                 assert(got === Set((4, 3, 1.0), (5, 3, 2.0), (6, 3, 3.0), (7, 3, 3.0)))
-                val got2 = Query(roadNetTables.roadNet).map(x => x.start -> x.end).to[Set]
+                val got2 = roadNetTables.roadNet.map(x => x.start -> x.end).buildColl[Set]
                 assert(got2 === Set(1 -> 2, 2 -> 1, 1 -> 3, 3 -> 1, 2 -> 3, 3 -> 2))
             }
         }

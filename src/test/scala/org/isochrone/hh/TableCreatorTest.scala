@@ -15,13 +15,13 @@ class TableCreatorTest extends FunSuite with TestDatabase with MustMatchers {
 
         comp.HHTableCreator.createTables
         comp.database.withTransaction { implicit s: Session =>
-            assert(Query(comp.hhTables.neighbourhoods).list.size === 0)
-            assert(Query(comp.hhTables.shortcutEdges).list.size === 0)
+            assert(comp.hhTables.neighbourhoods.list.size === 0)
+            assert(comp.hhTables.shortcutEdges.list.size === 0)
         }
         comp.HHTableCreator.dropTables
         comp.database.withTransaction { implicit s: Session =>
             intercept[PSQLException] {
-                Query(comp.hhTables.neighbourhoods).list
+                comp.hhTables.neighbourhoods.list
             }
         }
     }

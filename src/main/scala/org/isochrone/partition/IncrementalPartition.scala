@@ -22,7 +22,7 @@ trait IncrementalPartitionComponent {
 
                 for ((bbox, i) <- regularPartition.regions.zipWithIndex) {
                     logger.info(s"Partitioning region $bbox ($i/${regularPartition.regionCount})")
-                    val bboxNodes = roadNetTables.roadNodes.filter(_.geom @&& bbox.dbBBox).map(_.id).to[Set]
+                    val bboxNodes = roadNetTables.roadNodes.filter(_.geom @&& bbox.dbBBox).map(_.id).buildColl[Set]
                     val partition = createPartitioner(bbox.withBuffer(bufferSize)).partitioner.partition()
                     val regionsInBBox = partition.filter(_.exists(bboxNodes.contains)).toSeq
                     val maxRegionNum = Query(roadNetTables.roadNodes.map(_.region).max).first.getOrElse(0)

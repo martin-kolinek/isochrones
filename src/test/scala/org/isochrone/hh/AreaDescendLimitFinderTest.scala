@@ -14,7 +14,7 @@ class AreaDescendLimitFinderTest extends FunSuite with TestDatabase {
             val roadNetTables = new DefaultRoadNetTablesWithPrefix("hhar_")
             AreaDescendLimitFinder.execute()
             database.withSession { implicit s: Session =>
-                val lst = Query(hhTables.descendLimit).list
+                val lst = hhTables.descendLimit.list
                 info(lst.toString)
                 assert(lst.size === 5)
                 assert(lst.toSet === Set(1 -> 3, 2 -> 2, 3 -> 1.5, 4 -> 3.5, 5 -> 4.5))

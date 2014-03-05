@@ -14,21 +14,21 @@ trait DuplicitRemoverComponent extends RoadNetPrimaryKeyCreator {
         def removeDuplicates() {
             database.withTransaction { implicit s: Session =>
                 dropRoadNetPrimaryKey
-                val rnet = roadNetTables.roadNet.tableName
-                val rnodes = roadNetTables.roadNodes.tableName
-                Query(roadNetTables.roadNet).filter(x => x.start === x.end).delete
+                val rnet = roadNetTables.roadNet.baseTableRow.tableName
+                val rnodes = roadNetTables.roadNodes.baseTableRow.tableName
+                roadNetTables.roadNet.filter(x => x.start === x.end).delete
                 sqlu"""UPDATE "#$rnet" SET start_node = nn.id 
                        from "#$rnodes" oldn, "#$rnodes" nn 
                        where nn.id < oldn.id and ST_Equals(nn.geom, oldn.geom) and "#$rnet".start_node = oldn.id""".execute
-                Query(roadNetTables.roadNet).filter(x => x.start === x.end).delete
+                roadNetTables.roadNet.filter(x => x.start === x.end).delete
                 sqlu"""UPDATE "#$rnet" SET end_node = nn.id 
                        from "#$rnodes" oldn, "#$rnodes" nn 
                        where nn.id < oldn.id and ST_Equals(nn.geom, oldn.geom) and "#$rnet".end_node = oldn.id""".execute
-                Query(roadNetTables.roadNet).filter(x => x.start === x.end).delete
+                roadNetTables.roadNet.filter(x => x.start === x.end).delete
 
                 val q = for {
                     on <- roadNetTables.roadNodes
-                    if Query(roadNetTables.roadNodes).
+                    if roadNetTables.roadNodes.
                         filter(_.geom.gEquals(on.geom)).
                         filter(_.id < on.id).
                         exists

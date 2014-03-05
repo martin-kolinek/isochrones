@@ -37,8 +37,8 @@ trait DbAreaInfoComponent extends AreaInfoComponent with GraphComponentBase {
             logger.debug(s"Retrieving nodes, count = ${nds.size}")
             val ndList = "(" + nds.mkString(",") + ")"
             val q = sql"""select a2.node_id, a2.id, a2.cost_to_cover 
-                from (select distinct id from "#${roadNetTables.roadAreas.tableName}" where node_id in #$ndList) a1
-                    inner join "#${roadNetTables.roadAreas.tableName}" a2 on a1.id = a2.id 
+                from (select distinct id from "#${roadNetTables.roadAreas.baseTableRow.tableName}" where node_id in #$ndList) a1
+                    inner join "#${roadNetTables.roadAreas.baseTableRow.tableName}" a2 on a1.id = a2.id 
                 order by a2.id""".as[(Long, Long, Double)]
             logger.debug("Before retrieving")
             val retr = q.list
@@ -49,7 +49,7 @@ trait DbAreaInfoComponent extends AreaInfoComponent with GraphComponentBase {
         }
 
         def getAreaGeometries(ars: Traversable[Long]) = {
-            Query(roadNetTables.areaGeoms).filter(_.id.inSet(ars)).toMap
+            roadNetTables.areaGeoms.filter(_.id.inSet(ars)).toMap
         }
 
         def getAreas(ars: Traversable[Long]) = {

@@ -21,7 +21,7 @@ trait NeighbourhoodSizeFinderComponent extends GraphComponentBase {
             dijk.helper.compute(nd).view.drop(count - 1).head._2
         }
 
-        def saveNeighbourhoodSize(nd: NodeType, result: NodeNeighbourhoods)(implicit s: Session) = {
+        def saveNeighbourhoodSize(nd: NodeType, result: TableQuery[NodeNeighbourhoods])(implicit s: Session) = {
             result.insert(nd -> findNeighbourhoodSize(nd, neighbourhoodCount))
         }
     }

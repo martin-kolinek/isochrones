@@ -1,5 +1,5 @@
 package org.isochrone.executors
-import scala.slick.driver.BasicDriver.simple._
+import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.graphlib._
 import org.isochrone.util.Timing._
 import org.isochrone.ActionComponent
