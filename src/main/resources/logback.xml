@@ -20,6 +20,8 @@
 	</root>
 	<logger name="scala.slick" level="off">
 	</logger>
+	<logger name="com.github.tminglei.slickpg" level="off">
+	</logger>
 	<logger name="org.isochrone.dbgraph" level="off">
 	</logger>
 </configuration>

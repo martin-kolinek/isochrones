@@ -4,6 +4,7 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.db.RoadNetTableParsingComponent
 import org.isochrone.ArgumentParser
 import org.isochrone.db.EdgeTable
+import org.isochrone.db.HigherRoadNetTableParsingComponent
 
 class NodeNeighbourhoods(tag: Tag, name: String) extends Table[(Long, Double)](tag, name) {
     def nodeId = column[Long]("node_id")
@@ -47,7 +48,7 @@ trait HigherHHTableComponent {
     val higherHHTables: HHTables
 }
 
-trait ConfigHigherHHTableComponent extends HigherHHTableComponent with RoadNetTableParsingComponent {
+trait ConfigHigherHHTableComponent extends HigherHHTableComponent with HigherRoadNetTableParsingComponent {
     self: ArgumentParser =>
-    val higherHHTables = new DefaultHHTablesWithPrefix(roadNetPrefixLens.get(parsedConfig))
+    val higherHHTables = new DefaultHHTablesWithPrefix(higherRoadNetPrefixLens.get(parsedConfig))
 }

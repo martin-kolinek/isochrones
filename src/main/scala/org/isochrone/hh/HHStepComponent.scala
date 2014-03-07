@@ -18,10 +18,10 @@ import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import scala.collection.mutable.HashSet
 import org.isochrone.dbgraph.ReverseDatabaseGraph
 
-trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase {
-    self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HigherHHTableComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent =>
+trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase with HigherDescendLimitFinderComponent with ShortcutReverseLimitFinderComponent with HigherNodeRemoverComponent {
+    self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HigherHHTableComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent with DijkstraAlgorithmProviderComponent =>
 
-    type NodeType = Long
+    override type NodeType = Long
 
     object HHStep extends Logging {
         def createHigherLevel() {
@@ -43,7 +43,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                                 val hhedges = ss.extractHighwayEdges(tree)
                                 logger.debug(s"Found ${hhedges.size} highway edges")
                                 hhedges.foreach {
-                                    case edg@(s, e) if !alreadyAdded.contains(edg) => {
+                                    case edg @ (s, e) if !alreadyAdded.contains(edg) => {
                                         val insQ = for {
                                             r <- roadNetTables.roadNet if r.start === s && r.end === e
                                             if !higherRoadNetTables.roadNet.filter(h => h.start === r.start && h.end === r.end).exists
@@ -73,7 +73,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
             database.withTransaction { implicit s: Session =>
 
                 for ((reg, i) <- regularPartition.regions.zipWithIndex) {
-                    val lcontractor = lineContractor(new DatabaseGraph(higherRoadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s), higherRoadNetTables, hhTables.shortcutEdges)
+                    val lcontractor = lineContractor(new DatabaseGraph(higherRoadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s), higherRoadNetTables, higherHHTables.shortcutEdges)
                     logger.info(s"Processing region $i/${regularPartition.regionCount}")
                     lcontractor.contractLines(reg.dbBBox)
                 }
@@ -109,10 +109,25 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
             contractLines()
         }
 
+        def findHigherDescendLimits() {
+            HigherDescendLimitFinder.findDescendLimits()
+        }
+
+        def findShortcutReverseLimits() {
+            ShorctutReverseLimitFinder.findShortcutReverseLimits(higherHHTables.shortcutEdges, higherHHTables.descendLimit, higherHHTables.shortcutReverseLimit)
+        }
+
+        def removeUnneededHigherNodes() {
+            HigherNodeRemover.removeHigherNodes(higherRoadNetTables)
+        }
+
         def makeStep() {
             findNeighbourhoodSizes()
             createHigherLevel()
             contractAll()
+            removeUnneededHigherNodes()
+            findHigherDescendLimits()
+            findShortcutReverseLimits()
         }
     }
 }

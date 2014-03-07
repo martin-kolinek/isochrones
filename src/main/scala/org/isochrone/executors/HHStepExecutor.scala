@@ -34,6 +34,12 @@ trait HHStepExecutor extends ActionExecutor {
             val execute = () => HHStep.contractLines()
         }) + ("hhcontract" --> new Comp {
             val execute = () => HHStep.contractAll()
+        }) + ("hhdescendlim" --> new Comp {
+            val execute = () => HHStep.findHigherDescendLimits()
+        }) + ("hhshortcutrevlim" --> new Comp {
+            val execute = () => HHStep.findShortcutReverseLimits()
+        }) + ("hhfiltnodes" --> new Comp {
+            val execute = () => HHStep.removeUnneededHigherNodes()
         })
 
 }

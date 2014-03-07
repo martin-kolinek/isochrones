@@ -23,19 +23,7 @@ import org.isochrone.executors.AllAreaCoverCostsExecutor
 import org.isochrone.executors.WalkingEdgesAdderExecutor
 import org.isochrone.executors.HHCreateExecutor
 import org.isochrone.executors.HHStepExecutor
-
-object Test{
-    import org.isochrone.util.db.MyPostgresDriver.simple._
-    
-    class Tbl(tag:Tag) extends Table[(Int, Int)](tag, "adsf") {
-        def a = column[Int]("a")
-        def b = column[Int]("b")
-        def * = (a, b)
-    }
-    
-    val x = TableQuery[Tbl]
-    x.delete(???)
-}
+import org.isochrone.executors.AreaDescendLimitExecutor
 
 object Main extends App with Logging
         with DijkstraIsochroneComputer
@@ -50,7 +38,8 @@ object Main extends App with Logging
         with AllAreaCoverCostsExecutor
         with WalkingEdgesAdderExecutor
         with HHCreateExecutor
-        with HHStepExecutor {
+        with HHStepExecutor
+        with AreaDescendLimitExecutor {
 
     trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>

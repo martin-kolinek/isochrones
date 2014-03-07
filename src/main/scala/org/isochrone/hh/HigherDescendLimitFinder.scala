@@ -12,12 +12,14 @@ import org.isochrone.ArgumentParser
 import org.isochrone.db.BufferOptionParserComponent
 import org.isochrone.dbgraph.DBGraphConfigParserComponent
 import org.isochrone.db.HigherLevelRoadNetTableComponent
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait NonDbHigherDescendLimitFinderComponent {
     self: GraphComponentBase with DijkstraAlgorithmProviderComponent =>
-    trait NonDbHigherDescendLimitFinder {
+    trait NonDbHigherDescendLimitFinder extends Logging {
         def getDescendLimits(grp: GraphType[NodeType], neighSize: NeighbourhoodSizes[NodeType], descLim: DescendLimitProvider[NodeType], initial: Map[NodeType, Double], nodes: TraversableOnce[NodeType]): Map[NodeType, Double] = {
             def updateDescendLimit(mp: Map[NodeType, Double], start: NodeType): Map[NodeType, Double] = {
+                logger.debug(s"Working on node $start")
                 val ns = neighSize.neighbourhoodSize(start)
                 val nodes = dijkstraForGraph(grp).helper.compute(start).view.takeWhile(_._2 <= ns)
                 val startDescLimit = descLim.descendLimit(start)
@@ -26,7 +28,9 @@ trait NonDbHigherDescendLimitFinderComponent {
                         if (!map.contains(node))
                             throw new Exception("Tried to modify not loaded node descend limit")
                         val current = map(node)
-                        map + (node -> math.max(current, fromStart + startDescLimit))
+                        val newComp = fromStart + startDescLimit
+                        logger.debug(s"Node $node, current = $current, newComp = $newComp")
+                        map + (node -> math.max(current, newComp))
                     }
                 }
             }
@@ -42,37 +46,51 @@ trait HigherDescendLimitFinderComponent extends NonDbHigherDescendLimitFinderCom
 
         def findDescendLimits() {
             val bufferSize = bufferSizeLens.get(parsedConfig)
-            regularPartition.regions.foreach { reg =>
-                database.withTransaction { implicit s: Session =>
-                    val grp = {
-                        val grphConf = dbGraphConfLens.get(parsedConfig)
-                        val ret = new HHDatabaseGraph(hhTables, roadNetTables, grphConf.effectiveNodeCacheSize, s)
-                        grphConf.preload(ret)
-                        ret
-                    }
-                    val initial = (higherRoadNetTables.roadNodes leftJoin higherHHTables.descendLimit).filter {
-                        case (nd, _) => nd.geom @&& reg.withBuffer(bufferSize).dbBBox
-                    }.map {
-                        case (nd, dl) => nd.id -> dl.descendLimit.?
-                    }.toMap
-                    val nodes = roadNetTables.roadNodes.filter(_.geom @&& reg.dbBBox).map(_.id).iterator
+            val totalRegs = regularPartition.regionCount
+            logger.info(s"Saving to ${higherHHTables.descendLimit.baseTableRow.tableName}")
+            regularPartition.regions.zipWithIndex.foreach {
+                case (reg, idx) => {
+                    logger.info(s"Processing region $idx/$totalRegs")
+                    database.withTransaction { implicit s: Session =>
+                        val grp = {
+                            val grphConf = dbGraphConfLens.get(parsedConfig)
+                            val ret = new HHDatabaseGraph(hhTables, roadNetTables, grphConf.effectiveNodeCacheSize, s)
+                            grphConf.preload(ret)
+                            ret
+                        }
 
-                    val result = getDescendLimits(grp, grp, grp, initial.mapValues(_.getOrElse(0.0)), nodes)
+                        val initial = {
+                            val initialQ = (roadNetTables.roadNodes leftJoin higherHHTables.descendLimit).on(_.id === _.nodeId).filter {
+                                case (nd, _) => nd.geom @&& reg.withBuffer(bufferSize).dbBBox
+                            }.map {
+                                case (nd, dl) => nd.id -> dl.descendLimit.?
+                            }
+                            initialQ.toMap
+                        }
 
-                    val toIns = result.filter {
-                        case (nd, _) => initial(nd).isEmpty
-                    }
+                        val higherNodes = higherRoadNetTables.roadNodes.filter(_.geom @&& reg.withBuffer(bufferSize).dbBBox).map(_.id).buildColl[Set]
 
-                    val toUpd = result.filter {
-                        case (nd, res) => initial(nd) match {
-                            case Some(initRes) if initRes < res => true
+                        val result = {
+                            val nodes = roadNetTables.roadNodes.filter(_.geom @&& reg.dbBBox).map(_.id).iterator
+                            getDescendLimits(grp, grp, grp, initial.mapValues(_.getOrElse(0.0)), nodes)
+                        }
+
+                        val toIns = result.filter {
+                            case (nd, _) => initial(nd).isEmpty && higherNodes.contains(nd)
+                        }
+                        logger.info(s"Inserting ${toIns.size}")
+                        val toUpd = result.filter {
+                            case (nd, res) if higherNodes.contains(nd) => initial(nd) match {
+                                case Some(initRes) if initRes < res => true
+                                case _ => false
+                            }
                             case _ => false
                         }
-                    }
-
-                    higherHHTables.descendLimit.insertAll(toIns.toSeq: _*)
-                    toUpd.foreach {
-                        case (nd, res) => higherHHTables.descendLimit.filter(_.nodeId === nd).map(_.descendLimit).update(res)
+                        logger.info(s"Updating ${toUpd.size}")
+                        higherHHTables.descendLimit.insertAll(toIns.toSeq: _*)
+                        toUpd.foreach {
+                            case (nd, res) => higherHHTables.descendLimit.filter(_.nodeId === nd).map(_.descendLimit).update(res)
+                        }
                     }
                 }
             }
