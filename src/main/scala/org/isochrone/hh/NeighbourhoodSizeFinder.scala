@@ -8,6 +8,7 @@ import org.isochrone.graphlib.GraphType
 import org.isochrone.OptionParserComponent
 import scopt.OptionParser
 import org.isochrone.ArgumentParser
+import org.isochrone.dijkstra.DijkstraAlgorithmClass
 
 trait NeighbourhoodSizeFinderComponent extends GraphComponentBase {
     self: DijkstraAlgorithmProviderComponent with NeighbourhoodCountComponent =>
@@ -16,9 +17,9 @@ trait NeighbourhoodSizeFinderComponent extends GraphComponentBase {
 
     def neighSizeFinder(g: GraphType[NodeType]) = new NeighbourhoodSizeFinder(dijkstraForGraph(g))
 
-    class NeighbourhoodSizeFinder(dijk: DijkstraAlgorithmClass) {
+    class NeighbourhoodSizeFinder(dijk: DijkstraAlgorithmClass[NodeType]) {
         def findNeighbourhoodSize(nd: NodeType, count: Int) = {
-            dijk.helper.compute(nd).view.drop(count - 1).head._2
+            dijk.helper.compute(nd).view.take(count).last._2
         }
 
         def saveNeighbourhoodSize(nd: NodeType, result: TableQuery[NodeNeighbourhoods])(implicit s: Session) = {

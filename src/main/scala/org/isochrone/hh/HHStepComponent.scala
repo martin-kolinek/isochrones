@@ -27,7 +27,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
         def createHigherLevel() {
             logger.info("Creating higher level")
             database.withTransaction { implicit ses: Session =>
-                val hhgraph = new HHDatabaseGraph(hhTables, roadNetTables, 200, ses)
+                val hhgraph = new HHDatabaseGraph(hhTables, roadNetTables, None, 200, ses)
                 val fs = firstPhase(hhgraph, hhgraph)
                 val ss = secondPhase(hhgraph, hhgraph)
                 val regcount = regularPartition.regions.size

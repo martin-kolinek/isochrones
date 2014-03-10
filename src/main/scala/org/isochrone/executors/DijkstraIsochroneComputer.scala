@@ -44,7 +44,6 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
                 with DijkstraAlgorithmProviderComponent
                 with MultiLevelDijkstraComponent
                 with ConfigMultiLevelRoadNetTableComponent
-                with ConfigRoadNetTableComponent
                 with ConfigMultiLevelDatabaseGraph
                 with SingleSessionProvider
                 with FromOptionDatabaseComponent

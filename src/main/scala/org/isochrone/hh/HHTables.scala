@@ -5,6 +5,10 @@ import org.isochrone.db.RoadNetTableParsingComponent
 import org.isochrone.ArgumentParser
 import org.isochrone.db.EdgeTable
 import org.isochrone.db.HigherRoadNetTableParsingComponent
+import org.isochrone.OptionParserComponent
+import shapeless.Lens
+import scopt.OptionParser
+import org.isochrone.db.MultiLevelRoadNetTableParsingComponent
 
 class NodeNeighbourhoods(tag: Tag, name: String) extends Table[(Long, Double)](tag, name) {
     def nodeId = column[Long]("node_id")
@@ -51,4 +55,15 @@ trait HigherHHTableComponent {
 trait ConfigHigherHHTableComponent extends HigherHHTableComponent with HigherRoadNetTableParsingComponent {
     self: ArgumentParser =>
     val higherHHTables = new DefaultHHTablesWithPrefix(higherRoadNetPrefixLens.get(parsedConfig))
+}
+
+trait MultiLevelHHTableComponent {
+    val hhTableLevels: IndexedSeq[HHTables]
+}
+
+trait ConfigMultiLevelHHTableComponent extends MultiLevelHHTableComponent with MultiLevelRoadNetTableParsingComponent with OptionParserComponent {
+    self: ArgumentParser =>
+
+    val hhTableLevels = multiLevelRoadNetPrefixLens.get(parsedConfig).map(new DefaultHHTablesWithPrefix(_)).toIndexedSeq
+
 }

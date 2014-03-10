@@ -26,6 +26,7 @@ import org.isochrone.dbgraph.DatabaseGraph
 import scala.collection.mutable.HashSet
 import scala.annotation.tailrec
 import org.isochrone.visualize.ApproxEquidistAzimuthProjComponent
+import org.isochrone.dijkstra.DijkstraAlgorithmClass
 
 trait WalkingEdgesAdderComponent {
     def addWalkingEdges()
@@ -110,7 +111,7 @@ trait SimpleWalkingEdgesAdderComponent extends WalkingEdgesAdderComponent with G
         }
     }
 
-    private def findWalkingEdge(start: NodeType, sg: SimpleGraph, union: GraphType[NodeType], dijk: DijkstraAlgorithmClass, dbNodes: Map[NodeType, Double]): (SimpleGraph, Map[NodeType, Double]) = {
+    private def findWalkingEdge(start: NodeType, sg: SimpleGraph, union: GraphType[NodeType], dijk: DijkstraAlgorithmClass[NodeType], dbNodes: Map[NodeType, Double]): (SimpleGraph, Map[NodeType, Double]) = {
         var currentNodes = dbNodes
         dijk.helper.compute(start).foreach {
             case (nd, cost) => {

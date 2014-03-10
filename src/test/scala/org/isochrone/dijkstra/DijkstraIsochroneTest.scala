@@ -15,7 +15,7 @@ class DijkstraIsochroneTest extends FunSuite {
             lazy val edges = (1 to 10).map((0, _, 0.5)) ++ (1 to 10).map(x => (x, x + 10, 0.5))
             lazy val graph = SimpleGraph(edges: _*)
             lazy val iso = DijkstraHelpers.isochrone(0, 0.6).toList
-            assert(iso.filter(_.nd != 0).map(_.remaining).forall(q => math.abs(q - 0.1) < 0.01))
+            assert(iso.filter(_._1 != 0).map(_._2).forall(q => math.abs(q - 0.1) < 0.01))
         }
     }
 

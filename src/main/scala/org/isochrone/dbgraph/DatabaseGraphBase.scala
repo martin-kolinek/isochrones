@@ -7,8 +7,9 @@ import scala.collection.mutable.HashMap
 import org.isochrone.db.RoadNetTables
 import org.isochrone.util.Timing
 import org.isochrone.graphlib.GraphWithRegionsType
+import org.isochrone.db.BasicRoadNetTables
 
-abstract class DatabaseGraphBase(protected val roadNetTables: RoadNetTables, maxRegions: Int, protected val session: Session) extends Logging {
+abstract class DatabaseGraphBase(protected val roadNetTables: BasicRoadNetTables, maxRegions: Int, protected val session: Session) extends Logging {
     protected final val regionMap = new LRUCache[Int, Traversable[Long]]((k, v, m) => {
         val ret = m.size > maxRegions
         if (ret) {

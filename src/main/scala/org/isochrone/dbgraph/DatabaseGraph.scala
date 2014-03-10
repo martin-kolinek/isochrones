@@ -23,6 +23,7 @@ import org.isochrone.util.Timing
 import com.vividsolutions.jts.geom.Geometry
 import org.isochrone.graphlib.MapGraphType
 import org.isochrone.db.EdgeTable
+import org.isochrone.db.BasicRoadNetTables
 
 trait BasicDatabaseGraphFunctionality extends GraphWithRegionsType[Long, Int] with MapGraphType[Long] with NodePosition[Long] {
     self: DatabaseGraphBase =>
@@ -101,7 +102,7 @@ trait ReverseDatabaseGraphFunctionality extends BasicDatabaseGraphFunctionality 
     override def edgeEndSelector(tbl: EdgeTable) = tbl.start
 }
 
-class DatabaseGraphWithoutFunc(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) {
+class DatabaseGraphWithoutFunc(roadNetTables: BasicRoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphBase(roadNetTables, maxRegions, session) {
     self: BasicDatabaseGraphFunctionality =>
     def extractBasicNodeProps(np: NodeProperties) = np
 
@@ -116,9 +117,9 @@ class DatabaseGraphWithoutFunc(roadNetTables: RoadNetTables, maxRegions: Int, se
     def query(region: Int): QueryType = basicQuery(region)
 }
 
-class DatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphWithoutFunc(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality
+class DatabaseGraph(roadNetTables: BasicRoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphWithoutFunc(roadNetTables, maxRegions, session) with BasicDatabaseGraphFunctionality
 
-class ReverseDatabaseGraph(roadNetTables: RoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphWithoutFunc(roadNetTables, maxRegions, session) with ReverseDatabaseGraphFunctionality
+class ReverseDatabaseGraph(roadNetTables: BasicRoadNetTables, maxRegions: Int, session: Session) extends DatabaseGraphWithoutFunc(roadNetTables, maxRegions, session) with ReverseDatabaseGraphFunctionality
 
 trait DBGraphConfigParserComponent extends OptionParserComponent with Logging {
     case class DBGraphConfig(preloadAll: Boolean, nodeCacheSize: Int) {

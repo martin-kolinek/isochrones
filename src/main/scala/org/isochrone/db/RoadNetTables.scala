@@ -44,13 +44,15 @@ class AreaGeometriesTable(tag: Tag, name: String) extends Table[(Long, Geometry)
     def * = (id, geom)
 }
 
-trait RoadNetTables {
+trait BasicRoadNetTables {
     val roadNet: TableQuery[EdgeTable]
     val roadNodes: TableQuery[NodeTable]
     val roadRegions: TableQuery[RegionTable]
+}
+
+trait RoadNetTables extends BasicRoadNetTables {
     val roadAreas: TableQuery[AreaTable]
     val areaGeoms: TableQuery[AreaGeometriesTable]
-    
 }
 
 trait RoadNetTableComponent {
@@ -116,11 +118,12 @@ trait MultiLevelRoadNetTableParsingComponent extends OptionParserComponent {
     }
 }
 
-trait MultiLevelRoadNetTableComponent {
+trait MultiLevelRoadNetTableComponent extends RoadNetTableComponent {
     val roadNetTableLevels: List[RoadNetTables]
+    val roadNetTables = roadNetTableLevels.head
 }
 
 trait ConfigMultiLevelRoadNetTableComponent extends MultiLevelRoadNetTableComponent with MultiLevelRoadNetTableParsingComponent {
     self: ArgumentParser =>
-    val roadNetTableLevels = multiLevelRoadNetPrefixLens.get(parsedConfig).map(x => new DefaultRoadNetTablesWithPrefix(x))
+    lazy val roadNetTableLevels = multiLevelRoadNetPrefixLens.get(parsedConfig).map(x => new DefaultRoadNetTablesWithPrefix(x))
 }

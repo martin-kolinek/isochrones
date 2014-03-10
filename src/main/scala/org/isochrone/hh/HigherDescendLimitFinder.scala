@@ -26,7 +26,7 @@ trait NonDbHigherDescendLimitFinderComponent {
                 (mp /: nodes) {
                     case (map, (node, fromStart)) => {
                         if (!map.contains(node))
-                            throw new Exception("Tried to modify not loaded node descend limit")
+                            throw new Exception(s"Tried to modify not loaded node descend limit (node = $node)")
                         val current = map(node)
                         val newComp = fromStart + startDescLimit
                         logger.debug(s"Node $node, current = $current, newComp = $newComp")
@@ -46,6 +46,7 @@ trait HigherDescendLimitFinderComponent extends NonDbHigherDescendLimitFinderCom
 
         def findDescendLimits() {
             val bufferSize = bufferSizeLens.get(parsedConfig)
+            logger.debug(s"Buffer Size: $bufferSize")
             val totalRegs = regularPartition.regionCount
             logger.info(s"Saving to ${higherHHTables.descendLimit.baseTableRow.tableName}")
             regularPartition.regions.zipWithIndex.foreach {
@@ -54,7 +55,7 @@ trait HigherDescendLimitFinderComponent extends NonDbHigherDescendLimitFinderCom
                     database.withTransaction { implicit s: Session =>
                         val grp = {
                             val grphConf = dbGraphConfLens.get(parsedConfig)
-                            val ret = new HHDatabaseGraph(hhTables, roadNetTables, grphConf.effectiveNodeCacheSize, s)
+                            val ret = new HHDatabaseGraph(hhTables, roadNetTables, None, grphConf.effectiveNodeCacheSize, s)
                             grphConf.preload(ret)
                             ret
                         }
@@ -65,6 +66,7 @@ trait HigherDescendLimitFinderComponent extends NonDbHigherDescendLimitFinderCom
                             }.map {
                                 case (nd, dl) => nd.id -> dl.descendLimit.?
                             }
+                            logger.debug(initialQ.selectStatement)
                             initialQ.toMap
                         }
 

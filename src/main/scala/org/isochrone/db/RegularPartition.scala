@@ -12,7 +12,7 @@ trait RegularPartitionComponent {
 
     class RegularPartition(regionSize: Double) {
         case class BoundingBox(top: Double, left: Double, bottom: Double, right: Double) {
-            def withBuffer(regions: Int): BoundingBox = BoundingBox(top + regionSize, left - regionSize, bottom - regionSize, right + regionSize)
+            def withBuffer(regions: Int): BoundingBox = BoundingBox(top + regions * regionSize, left - regions * regionSize, bottom - regions * regionSize, right + regions * regionSize)
 
             def dbBBox: Column[Geometry] = makeBox(makePoint(left, bottom), makePoint(right, top))
         }
