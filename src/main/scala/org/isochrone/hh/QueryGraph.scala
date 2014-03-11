@@ -12,9 +12,9 @@ trait QueryGraphComponent {
     case class NodeWithLevel(nd: NodeType, level: Int)
 
     class QueryGraph(levels: IndexedSeq[GraphType[NodeType] with HHProps[NodeType]],
-                     shortcuts: IndexedSeq[GraphType[NodeType]],
-                     reverseShortcuts: IndexedSeq[GraphType[NodeType]],
-                     limit: Double) extends MapGraphType[NodeWithLevel] with Logging {
+            shortcuts: IndexedSeq[GraphType[NodeType]],
+            reverseShortcuts: IndexedSeq[GraphType[NodeType]],
+            limit: Double) extends MapGraphType[NodeWithLevel] with Logging {
         logger.debug(s"Creating QueryGraph (levels = $levels)")
         def neighbours(nodeWithLevel: NodeWithLevel) = {
             logger.debug(s"neighbours of $nodeWithLevel")
@@ -32,7 +32,7 @@ trait QueryGraphComponent {
             }
             val toLowerLevel = {
                 if (closedCost(nodeWithLevel) + g.descendLimit(nodeWithLevel.nd) > limit && nodeWithLevel.level > 0)
-                    levels(nodeWithLevel.level - 1).neighbours(nodeWithLevel.nd).map(withLevel)
+                    List(nodeWithLevel.copy(level = nodeWithLevel.level - 1) -> 0.0)
                 else
                     Nil
             }
@@ -67,7 +67,8 @@ trait QueryGraphComponent {
             val entranceCost = closedCost(lastEntrance)
             val fromEntrance = (closedCost(nd) - entranceCost) + neigh._2
             val entranceNeigh = levels(lastEntrance.level).neighbourhoodSize(lastEntrance.nd)
-            fromEntrance < entranceNeigh
+            val ndReverseNeigh = levels(nd.level).reverseNeighSize(nd.nd)
+            fromEntrance < entranceNeigh + ndReverseNeigh
         }
 
         def closedCost(nd: NodeWithLevel): Double = closedCosts(nd)
@@ -76,7 +77,8 @@ trait QueryGraphComponent {
             closedCosts(closed) = closedCost
             previous match {
                 case None => previousEntranceNodes(closed) = closed
-                case Some((NodeWithLevel(nd, level), _)) if (level < closed.level) || shortcuts(level).edgeCost(nd, closed.nd).nonEmpty => previousEntranceNodes(closed) = closed
+                case Some((NodeWithLevel(nd, level), _)) if (level != closed.level) ||
+                    shortcuts(level).edgeCost(nd, closed.nd).nonEmpty => previousEntranceNodes(closed) = closed
                 case Some((prev, _)) => previousEntranceNodes(closed) = previousEntranceNodes(prev)
             }
         }

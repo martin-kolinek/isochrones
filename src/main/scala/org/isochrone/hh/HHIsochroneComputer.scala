@@ -8,6 +8,7 @@ import org.isochrone.dbgraph.MultiLevelHHDatabaseGraphComponent
 import scala.collection.mutable.ListBuffer
 import org.isochrone.dijkstra.GenericDijkstraAlgorithmProvider
 import org.isochrone.compute.SomeIsochroneComputerComponent
+import scala.collection.mutable.HashSet
 
 trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraphComponent with GraphComponentBase {
     self: GenericDijkstraAlgorithmProvider with MultiLevelHHDatabaseGraphComponent =>
@@ -17,18 +18,18 @@ trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraph
             def withLevelZero(n: (NodeType, Double)) = (NodeWithLevel(n._1, 0), n._2)
             val qg = new QueryGraph(hhDbGraphs.toIndexedSeq, shortcutGraphs, reverseShortcutGraph, max)
             val dijk = dijkstraForGraph(qg)
-            val result = new ListBuffer[IsochroneNode]
+            val result = new HashSet[IsochroneNode]
             var stop = false
             dijk.alg(start.map(withLevelZero), (cl, clc, prev) => {
                 qg.onClosed(cl, clc, prev)
                 if (clc <= max)
-                    result += IsochroneNode(cl.nd, clc)
+                    result += IsochroneNode(cl.nd, max - clc)
                 else
                     stop = true
             }, (a, b, c) => {}, () => stop)
             result.toList
         }
     }
-    
+
     val isoComputer = HHIsoComputer
 }

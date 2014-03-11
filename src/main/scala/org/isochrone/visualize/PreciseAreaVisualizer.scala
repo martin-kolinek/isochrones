@@ -60,8 +60,10 @@ trait PreciseAreaVisualizerComponent extends AreaVisualizerComponentTypes with C
                 logger.debug(s"edgeGeom ret: $ret")
                 ret
             }
-
-            Option(CascadedPolygonUnion.union(nodes.flatMap(getNodeGeom)))
+            val nodeGeoms = nodes.flatMap(getNodeGeom).flatMap(_.individualGeometries).toList
+            logger.debug(s"node geometries: $nodeGeoms")
+            Option(CascadedPolygonUnion.union(nodeGeoms))
+            //nodeGeoms
         }
     }
 }

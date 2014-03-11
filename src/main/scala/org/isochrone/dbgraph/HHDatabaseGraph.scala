@@ -22,11 +22,11 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: BasicRoadNetTables, hig
         extends DatabaseGraphBase(roadNetTables, maxRegions, session)
         with BasicDatabaseGraphFunctionality
         with HHProps[Long] {
-    case class HHNodeProps(np: BasicNodeProps, dh: Double, descLimit: Double, shortcutRevLimit: Double, hasHigher: Boolean)
+    case class HHNodeProps(np: BasicNodeProps, dh: Double, descLimit: Double, shortcutRevLimit: Double, reverseNeighSize: Double, hasHigher: Boolean)
 
-    type QueryResult = (BasicQueryResult, Option[Double], Option[Double], Option[Double], Option[Long])
+    type QueryResult = (BasicQueryResult, Option[Double], Option[Double], Option[Double], Option[Double], Option[Long])
 
-    type QueryType = Query[((WrappedBasicQueryResult), Column[Option[Double]], Column[Option[Double]], Column[Option[Double]], Column[Option[Long]]), QueryResult]
+    type QueryType = Query[((WrappedBasicQueryResult), Column[Option[Double]], Column[Option[Double]], Column[Option[Double]], Column[Option[Double]], Column[Option[Long]]), QueryResult]
 
     type NodeProperties = HHNodeProps
 
@@ -35,21 +35,22 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: BasicRoadNetTables, hig
     def nodePropsFromQueryResult(qrs: List[QueryResult]) = {
         val basic = basicNodePropsFromQueryResult(qrs.map(_._1)).toMap
         qrs.map { x =>
-            x._1._1 -> HHNodeProps(basic(x._1._1), x._2.getOrElse(Double.PositiveInfinity), x._3.getOrElse(Double.PositiveInfinity), x._4.getOrElse(Double.PositiveInfinity), x._5.nonEmpty)
+            x._1._1 -> HHNodeProps(basic(x._1._1), x._2.getOrElse(Double.PositiveInfinity), x._3.getOrElse(Double.PositiveInfinity), x._4.getOrElse(Double.PositiveInfinity), x._5.getOrElse(Double.PositiveInfinity), x._6.nonEmpty)
         }
     }
 
     def query(region: Int) = {
         val withoutHigher: QueryType = for {
-            (((b, hh), desc), shortRev) <- basicQuery(region).
+            ((((b, hh), desc), shortRev), revNeigh) <- basicQuery(region).
                 leftJoin(hhTables.neighbourhoods).on(_._1 === _.nodeId).
                 leftJoin(hhTables.descendLimit).on(_._1._1 === _.nodeId).
-                leftJoin(hhTables.shortcutReverseLimit).on(_._1._1._1 === _.nodeId)
-        } yield (b, hh.neighbourhood.?, desc.descendLimit.?, shortRev.descendLimit.?, None)
+                leftJoin(hhTables.shortcutReverseLimit).on(_._1._1._1 === _.nodeId).
+                leftJoin(hhTables.reverseNeighbourhoods).on(_._1._1._1._1 === _.nodeId)
+        } yield (b, hh.neighbourhood.?, desc.descendLimit.?, shortRev.descendLimit.?, revNeigh.neighbourhood.?, None)
 
         (withoutHigher /: higherNodeTable) { (wh, higherNd) =>
             for ((x, y) <- wh.leftJoin(higherNd).on(_._1._1 === _.id))
-                yield (x._1, x._2, x._3, x._4, y.id.?)
+                yield (x._1, x._2, x._3, x._4, x._5, y.id.?)
         }
     }
 
@@ -67,6 +68,10 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: BasicRoadNetTables, hig
 
     def hasHigherLevel(nd: Long) = {
         propsForNode(nd).hasHigher
+    }
+
+    def reverseNeighSize(nd: Long) = {
+        propsForNode(nd).reverseNeighSize
     }
 
     override def toString = s"HHDatabaseGraph($roadNetTables)"
