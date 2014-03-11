@@ -67,7 +67,12 @@ trait QueryGraphComponent {
             val entranceCost = closedCost(lastEntrance)
             val fromEntrance = (closedCost(nd) - entranceCost) + neigh._2
             val entranceNeigh = levels(lastEntrance.level).neighbourhoodSize(lastEntrance.nd)
-            val ndReverseNeigh = levels(nd.level).reverseNeighSize(nd.nd)
+            val ndReverseNeigh = levels(nd.level).reverseNeighSize(neigh._1)
+            logger.debug(s"isLeavingEntranceNeigh(${neigh._1})")
+            logger.debug(s"last entrance = $lastEntrance")
+            logger.debug(s"fromEntrance: $fromEntrance")
+            logger.debug(s"entranceNeigh: $entranceNeigh")
+            logger.debug(s"ndReverseNeigh: $ndReverseNeigh")
             fromEntrance < entranceNeigh + ndReverseNeigh
         }
 
@@ -79,7 +84,8 @@ trait QueryGraphComponent {
                 case None => previousEntranceNodes(closed) = closed
                 case Some((NodeWithLevel(nd, level), _)) if (level != closed.level) ||
                     shortcuts(level).edgeCost(nd, closed.nd).nonEmpty => previousEntranceNodes(closed) = closed
-                case Some((prev, _)) => previousEntranceNodes(closed) = previousEntranceNodes(prev)
+                case Some((prev, _)) if !previousEntranceNodes.contains(closed) => previousEntranceNodes(closed) = previousEntranceNodes(prev)
+                case _ => {}
             }
         }
     }

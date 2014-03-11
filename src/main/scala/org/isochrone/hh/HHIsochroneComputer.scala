@@ -21,6 +21,7 @@ trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraph
             val result = new HashSet[IsochroneNode]
             var stop = false
             dijk.alg(start.map(withLevelZero), (cl, clc, prev) => {
+                logger.debug(s"Closing $cl with cost $clc from $prev")
                 qg.onClosed(cl, clc, prev)
                 if (clc <= max)
                     result += IsochroneNode(cl.nd, max - clc)
