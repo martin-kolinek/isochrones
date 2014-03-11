@@ -73,6 +73,7 @@ class DefaultRoadNetTablesWithPrefix(prefix: String) extends RoadNetTables {
     val roadRegions = TableQuery(t => new RegionTable(t, prefix + "road_regions"))
     val roadAreas = TableQuery(t => new AreaTable(t, prefix + "road_areas"))
     val areaGeoms = TableQuery(t => new AreaGeometriesTable(t, prefix + "area_geoms"))
+    override def toString = s"DefaultRoadNetTablesWithPrefix($prefix)"
 }
 
 trait ConfigRoadNetTableComponent extends RoadNetTableComponent with RoadNetTableParsingComponent {

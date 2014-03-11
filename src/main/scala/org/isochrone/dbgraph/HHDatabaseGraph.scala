@@ -24,9 +24,9 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: BasicRoadNetTables, hig
         with HHProps[Long] {
     case class HHNodeProps(np: BasicNodeProps, dh: Double, descLimit: Double, shortcutRevLimit: Double, hasHigher: Boolean)
 
-    type QueryResult = (BasicQueryResult, Double, Option[Double], Option[Double], Option[Long])
+    type QueryResult = (BasicQueryResult, Option[Double], Option[Double], Option[Double], Option[Long])
 
-    type QueryType = Query[((WrappedBasicQueryResult), Column[Double], Column[Option[Double]], Column[Option[Double]], Column[Option[Long]]), QueryResult]
+    type QueryType = Query[((WrappedBasicQueryResult), Column[Option[Double]], Column[Option[Double]], Column[Option[Double]], Column[Option[Long]]), QueryResult]
 
     type NodeProperties = HHNodeProps
 
@@ -35,20 +35,17 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: BasicRoadNetTables, hig
     def nodePropsFromQueryResult(qrs: List[QueryResult]) = {
         val basic = basicNodePropsFromQueryResult(qrs.map(_._1)).toMap
         qrs.map { x =>
-            x._1._1 -> HHNodeProps(basic(x._1._1), x._2, x._3.getOrElse(Double.PositiveInfinity), x._4.getOrElse(Double.PositiveInfinity), x._5.nonEmpty)
+            x._1._1 -> HHNodeProps(basic(x._1._1), x._2.getOrElse(Double.PositiveInfinity), x._3.getOrElse(Double.PositiveInfinity), x._4.getOrElse(Double.PositiveInfinity), x._5.nonEmpty)
         }
     }
 
     def query(region: Int) = {
-        val innerJoin = for {
-            b <- basicQuery(region)
-            hh <- hhTables.neighbourhoods if hh.nodeId === b._1
-        } yield (b, hh)
         val withoutHigher: QueryType = for {
-            (((b, hh), desc), shortRev) <- innerJoin.
+            (((b, hh), desc), shortRev) <- basicQuery(region).
+                leftJoin(hhTables.neighbourhoods).on(_._1 === _.nodeId).
                 leftJoin(hhTables.descendLimit).on(_._1._1 === _.nodeId).
                 leftJoin(hhTables.shortcutReverseLimit).on(_._1._1._1 === _.nodeId)
-        } yield (b, hh.neighbourhood, desc.descendLimit.?, shortRev.descendLimit.?, None)
+        } yield (b, hh.neighbourhood.?, desc.descendLimit.?, shortRev.descendLimit.?, None)
 
         (withoutHigher /: higherNodeTable) { (wh, higherNd) =>
             for ((x, y) <- wh.leftJoin(higherNd).on(_._1._1 === _.id))
@@ -67,10 +64,12 @@ class HHDatabaseGraph(hhTables: HHTables, roadNetTables: BasicRoadNetTables, hig
     def shortcutReverseLimit(nd: Long) = {
         propsForNode(nd).shortcutRevLimit
     }
-    
-    def hasHigherLevel(nd:Long) = {
+
+    def hasHigherLevel(nd: Long) = {
         propsForNode(nd).hasHigher
     }
+
+    override def toString = s"HHDatabaseGraph($roadNetTables)"
 }
 
 trait HHDatabaseGraphComponent extends GraphWithRegionsComponentBase {

@@ -118,7 +118,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
         }
 
         def removeUnneededHigherNodes() {
-            HigherNodeRemover.removeHigherNodes(higherRoadNetTables)
+            HigherNodeRemover.removeHigherNodes(higherRoadNetTables, higherHHTables)
         }
 
         def makeStep() {

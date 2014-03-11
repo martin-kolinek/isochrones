@@ -15,8 +15,9 @@ trait QueryGraphComponent {
                      shortcuts: IndexedSeq[GraphType[NodeType]],
                      reverseShortcuts: IndexedSeq[GraphType[NodeType]],
                      limit: Double) extends MapGraphType[NodeWithLevel] with Logging {
-
+        logger.debug(s"Creating QueryGraph (levels = $levels)")
         def neighbours(nodeWithLevel: NodeWithLevel) = {
+            logger.debug(s"neighbours of $nodeWithLevel")
             def withLevel(n: (NodeType, Double)) = NodeWithLevel(n._1, nodeWithLevel.level) -> n._2
 
             val g = levels(nodeWithLevel.level)
@@ -44,10 +45,12 @@ trait QueryGraphComponent {
                 else
                     Nil
             }
-            
-            val ret = (sameLevel ++ toUpperLevel ++ toLowerLevel ++ shortcutEdges ++ reverseShortcutEdges).toMap
-            logger.debug(ret.toString)
-            ret
+            logger.debug(s"sameLevel: $sameLevel")
+            logger.debug(s"toUpperLevel: $toUpperLevel")
+            logger.debug(s"toLowerLevel: $toLowerLevel")
+            logger.debug(s"shortcutEdges: $shortcutEdges")
+            logger.debug(s"reverseShortcutEdges: $reverseShortcutEdges")
+            (sameLevel ++ toUpperLevel ++ toLowerLevel ++ shortcutEdges ++ reverseShortcutEdges).toMap
         }
 
         def nodes = for {
@@ -64,7 +67,7 @@ trait QueryGraphComponent {
             val entranceCost = closedCost(lastEntrance)
             val fromEntrance = (closedCost(nd) - entranceCost) + neigh._2
             val entranceNeigh = levels(lastEntrance.level).neighbourhoodSize(lastEntrance.nd)
-            entranceNeigh < fromEntrance
+            fromEntrance < entranceNeigh
         }
 
         def closedCost(nd: NodeWithLevel): Double = closedCosts(nd)

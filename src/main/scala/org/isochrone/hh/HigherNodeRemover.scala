@@ -8,12 +8,16 @@ import com.typesafe.scalalogging.slf4j.Logging
 trait HigherNodeRemoverComponent {
     self: DatabaseProvider =>
     object HigherNodeRemover extends Logging {
-        def removeHigherNodes(rnet: RoadNetTables) {
+        def removeHigherNodes(rnet: RoadNetTables, hh: HHTables) {
             database.withTransaction { implicit s =>
                 val deleted = rnet.roadNodes.filter { nd =>
                     !rnet.roadNet.filter(net => net.start === nd.id).exists
                 }.filter { nd =>
                     !rnet.roadNet.filter(net => net.end === nd.id).exists
+                }.filter { nd =>
+                    !hh.shortcutEdges.filter(net => net.start === nd.id).exists
+                }.filter { nd =>
+                    !hh.shortcutEdges.filter(net => net.end === nd.id).exists
                 }.delete
                 logger.info(s"Deleted $deleted nodes")
             }
