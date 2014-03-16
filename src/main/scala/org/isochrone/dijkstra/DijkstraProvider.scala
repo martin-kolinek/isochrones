@@ -8,6 +8,7 @@ import org.isochrone.compute.IsochroneComputerComponent
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.HashMap
 import org.isochrone.util.collection.mutable.IndexedPriorityQueue
+import com.typesafe.scalalogging.slf4j.Logging
 
 class DijkstraHelperClass[NodeType](dijk: DijkstraAlgorithmClass[NodeType]) {
     def isochrone(start: NodeType, max: Double) =
@@ -22,15 +23,17 @@ class DijkstraHelperClass[NodeType](dijk: DijkstraAlgorithmClass[NodeType]) {
     def compute(start: NodeType) = dijk.compute(Traversable(start -> 0.0))
 }
 
-class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType]) {
+class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType])(implicit ndOrd: Ordering[NodeType]) extends Logging {
+    import Ordering.Tuple2
     def alg(start: Traversable[(NodeType, Double)], closedFunc: (NodeType, Double, Option[(NodeType, Double)]) => Unit, opened: (NodeType, NodeType, Double) => Unit, cancel: () => Boolean) {
         val closed = new HashSet[NodeType]
         val costMap = new HashMap[NodeType, Double]
         val previous = new HashMap[NodeType, (NodeType, Double)]
-        val open = IndexedPriorityQueue(start.toSeq: _*)
+        val open = IndexedPriorityQueue(start.map(x => (x._1, (x._2, x._1))).toSeq: _*)
         costMap ++= start
         while (!open.empty && !cancel()) {
-            val (current, curCost) = open.minimum
+            val (current, (curCost, _)) = open.minimum
+            logger.debug(s"Closing $current")
             open -= current
             closed += current
             closedFunc(current, curCost, previous.get(current))
@@ -42,7 +45,7 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType]) {
                 }
                 if (better.getOrElse(true)) {
                     opened(neighbour, current, newCost)
-                    open += neighbour -> newCost
+                    open += neighbour -> (newCost -> neighbour)
                     previous(neighbour) = current -> cost
                 }
             }
@@ -68,11 +71,11 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType]) {
 }
 
 trait GenericDijkstraAlgorithmProvider {
-    def dijkstraForGraph[NodeType](g: GraphType[NodeType]) = new DijkstraAlgorithmClass[NodeType](g)
+    def dijkstraForGraph[NodeType: Ordering](g: GraphType[NodeType]) = new DijkstraAlgorithmClass[NodeType](g)
 }
 
 trait DijkstraAlgorithmProviderComponent {
     self: GraphComponentBase =>
 
-    def dijkstraForGraph(g: GraphType[NodeType]): DijkstraAlgorithmClass[NodeType] = new DijkstraAlgorithmClass[NodeType](g)
+    def dijkstraForGraph(g: GraphType[NodeType]): DijkstraAlgorithmClass[NodeType] = new DijkstraAlgorithmClass[NodeType](g)(Ordering.by(_.hashCode))
 }

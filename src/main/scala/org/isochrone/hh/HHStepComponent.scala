@@ -43,7 +43,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                                 val hhedges = ss.extractHighwayEdges(tree)
                                 logger.debug(s"Found ${hhedges.size} highway edges")
                                 hhedges.foreach {
-                                    case edg @ (s, e) if !alreadyAdded.contains(edg) => {
+                                    case edg@(s, e) if !alreadyAdded.contains(edg) => {
                                         val insQ = for {
                                             r <- roadNetTables.roadNet if r.start === s && r.end === e
                                             if !higherRoadNetTables.roadNet.filter(h => h.start === r.start && h.end === r.end).exists
@@ -73,7 +73,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
             database.withTransaction { implicit s: Session =>
 
                 for ((reg, i) <- regularPartition.regions.zipWithIndex) {
-                    val lcontractor = lineContractor(new DatabaseGraph(higherRoadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s), higherRoadNetTables, higherHHTables.shortcutEdges)
+                    val lcontractor = lineContractor(new DatabaseGraph(higherRoadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s), higherRoadNetTables, higherHHTables.shortcutEdges, higherHHTables.reverseShortcutEdges)
                     logger.info(s"Processing region $i/${regularPartition.regionCount}")
                     lcontractor.contractLines(reg.dbBBox)
                 }
@@ -83,7 +83,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
         def contractTrees() {
             logger.info("Contracting trees")
             database.withTransaction { implicit s: Session =>
-                TreeContraction.contractTrees(higherRoadNetTables, higherHHTables.shortcutEdges, s)
+                TreeContraction.contractTrees(higherRoadNetTables, higherHHTables.shortcutEdges, higherHHTables.reverseShortcutEdges, s)
             }
         }
 

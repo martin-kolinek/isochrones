@@ -22,7 +22,8 @@ class LineContractionTest extends FunSuite {
             } else
                 fail()
 
-            val shortcuts = contractor.getShortcuts(ln)
+            val (shortcuts, revShort) = contractor.getShortcuts(ln)
+            assert(shortcuts.toSet === revShort.map(x => (x._2, x._1, x._3)).toSet)
             val grouped = shortcuts.groupBy(_._2).mapValues { v =>
                 v.map {
                     case (s, e, c) => s -> c

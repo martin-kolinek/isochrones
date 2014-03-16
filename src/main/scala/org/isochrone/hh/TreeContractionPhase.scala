@@ -9,13 +9,18 @@ import scala.annotation.tailrec
 import com.typesafe.scalalogging.slf4j.Logging
 
 object TreeContraction extends Logging {
-    def contractTrees(input: RoadNetTables, output: TableQuery[EdgeTable], s: Session) = {
+    def contractTrees(input: RoadNetTables, output: TableQuery[EdgeTable], revOutput: TableQuery[EdgeTable], s: Session) = {
         @tailrec
         def contractTreesInt(): Unit = {
             logger.info("Tree contraction step")
             val leafEdgeQuery = for {
                 e <- input.roadNet
                 if !input.roadNet.filter(x => x.start === e.start && x.end =!= e.end).exists
+            } yield e
+
+            val backwardsLeafEdgeQuery = for {
+                e <- input.roadNet
+                if !input.roadNet.filter(x => x.end === e.end && x.start =!= e.start).exists
             } yield e
 
             val oneWayEdgeQuery = for {
@@ -30,8 +35,17 @@ object TreeContraction extends Logging {
                 n2 <- input.roadNodes if l.end === n2.id
             } yield (o.start, l.end, l.cost + o.cost, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
 
+            val revNewEdgeQuery = for {
+                l <- backwardsLeafEdgeQuery
+                o <- revOutput if o.start === l.end
+                n1 <- input.roadNodes if o.start === n1.id
+                n2 <- input.roadNodes if l.end === n2.id
+            } yield (l.start, o.end, l.cost + o.cost, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
+
             output.insert(leafEdgeQuery)(s)
             output.insert(newEdgeQuery)(s)
+            revOutput.insert(backwardsLeafEdgeQuery)(s)
+            revOutput.insert(revNewEdgeQuery)(s)
 
             val cnt1 = leafEdgeQuery.delete(s)
             val cnt2 = oneWayEdgeQuery.delete(s)
@@ -48,7 +62,8 @@ object TreeContraction extends Logging {
             if !input.roadNet.filter(_.start === n.id).exists
         } yield n.id
 
-        val toDel = output.filter(o => o.start.in(isolatedNodes) && o.end.in(isolatedNodes))
-        toDel.delete(s)
+        def toDel(out:TableQuery[EdgeTable]) = out.filter(o => o.start.in(isolatedNodes) && o.end.in(isolatedNodes))
+        toDel(output).delete(s)
+        toDel(revOutput).delete(s)
     }
 }

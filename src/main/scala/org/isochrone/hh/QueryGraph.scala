@@ -11,10 +11,12 @@ trait QueryGraphComponent {
 
     case class NodeWithLevel(nd: NodeType, level: Int)
 
+    implicit val NodeWithLevelOrdering = Ordering[(Int, Int)].on[NodeWithLevel](x => -x.level -> x.nd.hashCode)
+
     class QueryGraph(levels: IndexedSeq[GraphType[NodeType] with HHProps[NodeType]],
-            shortcuts: IndexedSeq[GraphType[NodeType]],
-            reverseShortcuts: IndexedSeq[GraphType[NodeType]],
-            limit: Double) extends MapGraphType[NodeWithLevel] with Logging {
+                     shortcuts: IndexedSeq[GraphType[NodeType]],
+                     reverseShortcuts: IndexedSeq[GraphType[NodeType]],
+                     limit: Double) extends MapGraphType[NodeWithLevel] with Logging {
         logger.debug(s"Creating QueryGraph (levels = $levels)")
         def neighbours(nodeWithLevel: NodeWithLevel) = {
             logger.debug(s"neighbours of $nodeWithLevel")
@@ -86,6 +88,14 @@ trait QueryGraphComponent {
                     shortcuts(level).edgeCost(nd, closed.nd).nonEmpty => previousEntranceNodes(closed) = closed
                 case Some((prev, _)) if !previousEntranceNodes.contains(closed) => previousEntranceNodes(closed) = previousEntranceNodes(prev)
                 case _ => {}
+            }
+        }
+
+        def onOpened(child: NodeWithLevel, parent: NodeWithLevel, newCost: Double) {
+            if (child.level != parent.level || shortcuts(child.level).edgeCost(child.nd, parent.nd).nonEmpty) {
+                previousEntranceNodes(child) = child
+            } else if (!previousEntranceNodes.contains(child)) {
+                previousEntranceNodes(child) = previousEntranceNodes(parent)
             }
         }
     }

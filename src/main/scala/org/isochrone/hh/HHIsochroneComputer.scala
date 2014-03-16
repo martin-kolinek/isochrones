@@ -27,7 +27,7 @@ trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraph
                     result += IsochroneNode(cl.nd, max - clc)
                 else
                     stop = true
-            }, (a, b, c) => {}, () => stop)
+            }, qg.onOpened, () => stop)
             result.toList
         }
     }

@@ -26,6 +26,7 @@ trait HHTables {
     val neighbourhoods: TableQuery[NodeNeighbourhoods]
     val reverseNeighbourhoods: TableQuery[NodeNeighbourhoods]
     val shortcutEdges: TableQuery[EdgeTable]
+    val reverseShortcutEdges: TableQuery[EdgeTable]
     val descendLimit: TableQuery[DescendLimits]
     val shortcutReverseLimit: TableQuery[DescendLimits]
 }
@@ -38,6 +39,7 @@ class DefaultHHTablesWithPrefix(prefix: String) extends HHTables {
     val neighbourhoods = TableQuery(t => new NodeNeighbourhoods(t, prefix + "hh_node_neighbourhoods"))
     val reverseNeighbourhoods = TableQuery(t => new NodeNeighbourhoods(t, prefix + "hh_node_rev_neighbourhoods"))
     val shortcutEdges = TableQuery(t => new EdgeTable(t, prefix + "hh_shortcuts"))
+    val reverseShortcutEdges = TableQuery(t => new EdgeTable(t, prefix + "hh_rev_shortcuts"))
     val descendLimit = TableQuery(t => new DescendLimits(t, prefix + "hh_descend"))
     val shortcutReverseLimit = TableQuery(t => new DescendLimits(t, prefix + "hh_shortcut_rev"))
 }

@@ -6,7 +6,7 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 trait HHTableCreatorComponent {
     self: HHTableComponent with DatabaseProvider =>
     object HHTableCreator {
-        private def ddls = (hhTables.neighbourhoods.ddl ++ hhTables.shortcutEdges.ddl ++ hhTables.reverseNeighbourhoods.ddl ++ hhTables.descendLimit.ddl ++ hhTables.shortcutReverseLimit.ddl)
+        private def ddls = (hhTables.neighbourhoods.ddl ++ hhTables.shortcutEdges.ddl ++ hhTables.reverseNeighbourhoods.ddl ++ hhTables.descendLimit.ddl ++ hhTables.shortcutReverseLimit.ddl ++ hhTables.reverseShortcutEdges.ddl)
 
         def createTables() = database.withSession { implicit s: Session =>
             ddls.create

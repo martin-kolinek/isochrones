@@ -7,11 +7,12 @@ import scala.collection.mutable.Map
 import scala.collection.immutable.SortedMap
 import scala.collection.mutable.TreeSet
 import scala.collection.mutable.HashMap
+import com.typesafe.scalalogging.slf4j.Logging
 
 class IndexedPriorityQueue[ItemType, PriorityType: Ordering] private (
         val priorities: TreeMap[PriorityType, SortedMap[Long, ItemType]],
         val inverse: Map[ItemType, PriorityType],
-        val insertIndexMap: Map[ItemType, Long]) extends Iterable[(ItemType, PriorityType)] {
+        val insertIndexMap: Map[ItemType, Long]) extends Iterable[(ItemType, PriorityType)] with Logging {
     val imp = implicitly[Ordering[PriorityType]]
     import imp._
     var insertIndex = 0l
@@ -48,7 +49,11 @@ class IndexedPriorityQueue[ItemType, PriorityType: Ordering] private (
         inverse -= item
     }
 
-    def minimum = priorities.firstEntry.getValue.head._2 -> priorities.firstEntry.getKey
+    def minimum = {
+        import scala.collection.JavaConversions._
+        logger.debug(s"priorities: ${priorities.take(5)}")
+        priorities.firstEntry.getValue.head._2 -> priorities.firstEntry.getKey
+    }
 
     def maximum = priorities.lastEntry.getValue.head._2 -> priorities.lastEntry.getKey
 

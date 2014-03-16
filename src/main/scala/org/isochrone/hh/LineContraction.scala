@@ -55,22 +55,23 @@ trait LineContractionComponentBase {
         }
 
         def getShortcuts(ln: Line) = {
-            def ammendWithCosts(end: NodeType, inner: List[NodeType]) = {
+            def ammendWithCosts(end: NodeType, inner: List[NodeType], reverse: Boolean) = {
                 (inner :\ List(end -> 0.0)) { (nd, l) =>
                     val (prev, prevTotal) = l.head
-                    val total = prevTotal + graph.edgeCost(prev, nd).get
+                    val total = prevTotal + (if (reverse) graph.edgeCost(nd, prev).get else graph.edgeCost(prev, nd).get)
                     nd -> total :: l
                 }
             }
 
-            def getOneWayShortcuts(start: NodeType, inner: List[NodeType], end: NodeType) = {
-                val withCosts = ammendWithCosts(end, start :: inner)
+            def getOneWayShortcuts(start: NodeType, inner: List[NodeType], end: NodeType, reverse: Boolean) = {
+                val withCosts = ammendWithCosts(end, start :: inner, reverse)
                 withCosts.view.filterNot(_._1 == end).map {
-                    case (nd, cost) => (nd, end, cost)
+                    case (nd, cost) => if (reverse) (end, nd, cost) else (nd, end, cost)
                 }.force
             }
 
-            getOneWayShortcuts(ln.start, ln.inner, ln.end) ++ getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start)
+            (getOneWayShortcuts(ln.start, ln.inner, ln.end, false) ++ getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start, false),
+                getOneWayShortcuts(ln.start, ln.inner, ln.end, true) ++ getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start, true))
         }
     }
 }
@@ -79,9 +80,9 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
 
     type NodeType = Long
 
-    def lineContractor(g: GraphType[NodeType], rnet: RoadNetTables, output: TableQuery[EdgeTable]) = new LineContraction(g, rnet, output)
+    def lineContractor(g: GraphType[NodeType], rnet: RoadNetTables, output: TableQuery[EdgeTable], revOutput: TableQuery[EdgeTable]) = new LineContraction(g, rnet, output, revOutput)
 
-    class LineContraction(g: GraphType[NodeType], rnet: RoadNetTables, output: TableQuery[EdgeTable]) extends LineContractionBase with Logging {
+    class LineContraction(g: GraphType[NodeType], rnet: RoadNetTables, output: TableQuery[EdgeTable], revOutput: TableQuery[EdgeTable]) extends LineContractionBase with Logging {
         val graph = g
         def contractLines(bbox: Column[Geometry])(implicit s: Session) = {
             val nodesToProcessQuery = for {
@@ -108,21 +109,25 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
 
         def insertShortcuts(ln: Line, session: Session) = {
             def startEndShortcut(s: NodeType, e: NodeType) = Set(s, e) == Set(ln.start, ln.end)
-
-            for ((s, e, c) <- getShortcuts(ln)) {
-                val q = for {
-                    n1 <- rnet.roadNodes if n1.id === s
-                    n2 <- rnet.roadNodes if n2.id === e
-                } yield (n1.id, n2.id, c, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
-                if (startEndShortcut(s, e)) {
-                    val qWithNonDup = for {
-                        edg @ (start, end, _, _, _) <- q
-                        if !rnet.roadNet.filter(e => e.start === start && e.end === end).exists
-                    } yield edg
-                    rnet.roadNet.insert(qWithNonDup)(session)
-                } else
-                    output.insert(q)(session)
+            def insertShortcuts(shortcuts: Traversable[(NodeType, NodeType, Double)], outp: TableQuery[EdgeTable]) {
+                for ((s, e, c) <- shortcuts) {
+                    val q = for {
+                        n1 <- rnet.roadNodes if n1.id === s
+                        n2 <- rnet.roadNodes if n2.id === e
+                    } yield (n1.id, n2.id, c, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
+                    if (startEndShortcut(s, e)) {
+                        val qWithNonDup = for {
+                            edg@(start, end, _, _, _) <- q
+                            if !rnet.roadNet.filter(e => e.start === start && e.end === end).exists
+                        } yield edg
+                        rnet.roadNet.insert(qWithNonDup)(session)
+                    } else
+                        outp.insert(q)(session)
+                }
             }
+            val (forw, rev) = getShortcuts(ln)
+            insertShortcuts(forw, output)
+            insertShortcuts(rev, revOutput)
         }
 
         def deleteInner(ln: Line, s: Session) {
