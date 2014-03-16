@@ -112,7 +112,7 @@ trait MultiLevelHHDatabaseGraphComponent extends DBGraphConfigParserComponent wi
         new DatabaseGraph(rn, graphConfig.effectiveNodeCacheSize, session)
     }.toIndexedSeq
 
-    val reverseShortcutGraph = shortcutRoadNets.map { rn =>
+    val reverseShortcutGraphs = shortcutRoadNets.map { rn =>
         new ReverseDatabaseGraph(rn, graphConfig.effectiveNodeCacheSize, session)
     }.toIndexedSeq
 

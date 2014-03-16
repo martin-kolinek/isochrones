@@ -11,47 +11,61 @@ import org.isochrone.compute.SomeIsochroneComputerComponent
 import scala.collection.mutable.HashSet
 import org.isochrone.graphlib.GraphType
 import scala.collection.mutable.HashMap
+import org.isochrone.util._
 import scala.annotation.tailrec
+import scala.collection.mutable.MultiMap
 
 trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraphComponent with GraphComponentBase {
     self: GenericDijkstraAlgorithmProvider with MultiLevelHHDatabaseGraphComponent =>
     type NodeType = Long
     object HHIsoComputer extends IsochroneComputer {
         def isochrone(start: Traversable[(NodeType, Double)], max: Double) = {
-
-            ???
+            val levels = for {
+                ((g, sh), revSh) <- hhDbGraphs zip shortcutGraphs zip reverseShortcutGraphs
+                l <- Seq(SearchLevel(sh, revSh, g.neighbourhoodSize, g.reverseNeighSize, g.descendLimit),
+                    SearchLevel(g, g, g.neighbourhoodSize, g.reverseNeighSize, g.shortcutReverseLimit))
+            } yield l
+            work(start, max, Nil, levels.head, levels.tail.toList).map(IsochroneNode.tupled)
         }
 
         case class SearchLevel(graph: GraphType[NodeType], reverseGraph: GraphType[NodeType], neighSize: NodeType => Double, revNeighSize: NodeType => Double, descendLimit: NodeType => Double)
 
         case class CurrentLevelResult(toHigher: Traversable[(NodeType, Double)], all: Traversable[(NodeType, Double)], toLower: Traversable[(NodeType, Double)])
 
-        def traverseGraph(start: Traversable[(NodeType, Double)], level: SearchLevel, max: Double) = {
+        def forwardSearch(start: Traversable[(NodeType, Double)], level: SearchLevel, max: Double) = {
+            logger.debug(s"Starting forward search from $start on $level")
             val endCostMap = start.map {
                 case (nd, c) => nd -> (c + level.neighSize(nd))
             }.toMap
+            logger.debug(s"endCostMap: $endCostMap")
 
             val startSet = new HashSet[NodeType]
             startSet ++= endCostMap.keys
             val lst = compute(start, level.graph).view.takeWhile { nd =>
-                if (nd.cost > endCostMap(nd.start))
-                    startSet -= nd.nd
+                for (start <- nd.start) {
+                    if (nd.cost > endCostMap(start))
+                        startSet -= start
+                }
                 startSet.nonEmpty
             }.toList
 
-            val toHigher = lst.filter(n => n.cost <= endCostMap(n.nd)).map(n => (n.nd, n.cost))
+            val toHigher = lst.filter(n => n.start.forall(start => n.cost <= endCostMap(start))).map(n => (n.nd, n.cost))
             val toLower = lst.filter(n => max - n.cost <= level.descendLimit(n.nd)).map(n => (n.nd, n.cost))
             val all = lst.map(n => (n.nd, n.cost))
             CurrentLevelResult(toHigher, toLower, all)
         }
 
-        def continueToLower(start: Traversable[(NodeType, Double)], level: SearchLevel, max: Double) = {
+        def backwardsSearch(start: Traversable[(NodeType, Double)], level: SearchLevel, max: Double) = {
+            logger.debug(s"Starting backward search from $start on $level")
             val startMap = start.toMap
             val startSet = new HashSet[NodeType]
             startSet ++= startMap.keys
             val lst = compute(start, level.reverseGraph).view.takeWhile { n =>
-                if (startMap(n.start) + level.revNeighSize(n.nd) < n.cost)
-                    startSet -= n.nd
+                for (start <- n.start) {
+                    if (startMap(start) + level.revNeighSize(n.nd) < n.cost)
+                        startSet -= start
+                }
+                logger.debug(s"startSet: $startSet n: $n")
                 startSet.nonEmpty
             }.toList
             val toLower = lst.filter(n => max - n.cost <= level.descendLimit(n.nd)).map(n => (n.nd, n.cost))
@@ -59,44 +73,40 @@ trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraph
             CurrentLevelResult(Nil, toLower, all)
         }
 
-        def work(start: Traversable[(NodeType, Double)], max: Double, lower: List[SearchLevel], current: SearchLevel, upper: List[SearchLevel]): Traversable[(NodeType, Double)] = upper match {
-            case Nil => Nil
-            case next :: rest => {
-                val res = traverseGraph(start, current, max)
-                val lowerRes = continueToLower(res.all, current, max)
-                val fromLower = finishToLower(lowerRes, lower, max)
-                val fromUpper = work(res.toHigher, max, current :: lower, next, rest)
-                fromUpper ++ fromLower
+        def work(start: Traversable[(NodeType, Double)], max: Double, lower: List[SearchLevel], current: SearchLevel, upper: List[SearchLevel]): Traversable[(NodeType, Double)] = {
+            val forw = forwardSearch(start, current, max)
+            val back = backwardsSearch(forw.all, current, max)
+            val fromLower = finishToLower(back, lower, max)
+            val fromUpper = upper match {
+                case Nil => Nil
+                case next :: rest => work(forw.toHigher, max, current :: lower, next, rest)
             }
+            fromUpper ++ forw.all ++ back.all ++ fromLower
         }
 
         @tailrec
         def finishToLower(fromUpper: CurrentLevelResult, lower: List[SearchLevel], max: Double): Traversable[(NodeType, Double)] = lower match {
             case Nil => fromUpper.all
             case current :: rest => {
-                val curResult = continueToLower(fromUpper.toLower, current, max)
+                val curResult = backwardsSearch(fromUpper.toLower, current, max)
                 finishToLower(CurrentLevelResult(Nil, curResult.toLower, curResult.all ++ fromUpper.all), rest, max)
             }
         }
 
-        case class NodeWithStart(nd: NodeType, cost: Double, start: NodeType)
+        case class NodeWithStart(nd: NodeType, cost: Double, start: Set[NodeType])
 
         def compute(start: Traversable[(NodeType, Double)], g: GraphType[NodeType]) = {
             val dijk = dijkstraForGraph(g)
-            val startMap = new HashMap[NodeType, NodeType]
+            val startMap = new HashMap[NodeType, scala.collection.mutable.Set[NodeType]] with MultiMap[NodeType, NodeType]
+            for ((n, _) <- start) {
+                startMap.addBinding(n, n)
+            }
             new Traversable[NodeWithStart] {
                 def foreach[U](f: NodeWithStart => U) = {
-                    dijk.alg(start, {
-                        case (nd, cst, None) => {
-                            startMap(nd) = nd
-                            f(NodeWithStart(nd, cst, nd))
-                        }
-                        case (nd, cst, Some((prev, _))) => {
-                            val start = startMap(prev)
-                            startMap(nd) = start
-                            f(NodeWithStart(nd, cst, start))
-                        }
-                    }, (_, _, _) => {}, () => false)
+                    dijk.alg(start,
+                        (nd, cst, _) => f(NodeWithStart(nd, cst, startMap(nd).toSet)),
+                        (child, parent, _) => startMap(parent).foreach(s => startMap.addBinding(child, s)),
+                        () => false)
                 }
             }
         }
