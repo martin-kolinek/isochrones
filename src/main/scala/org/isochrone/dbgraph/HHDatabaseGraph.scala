@@ -108,12 +108,18 @@ trait MultiLevelHHDatabaseGraphComponent extends DBGraphConfigParserComponent wi
         val roadRegions = rn.roadRegions
     }
 
+    private val revShortcutRoadNets = for ((rn, hh) <- rnwithhh) yield new BasicRoadNetTables {
+        val roadNet = hh.reverseShortcutEdges
+        val roadNodes = rn.roadNodes
+        val roadRegions = rn.roadRegions
+    }
+
     val shortcutGraphs = shortcutRoadNets.map { rn =>
         new DatabaseGraph(rn, graphConfig.effectiveNodeCacheSize, session)
     }.toIndexedSeq
 
-    val reverseShortcutGraph = shortcutRoadNets.map { rn =>
-        new ReverseDatabaseGraph(rn, graphConfig.effectiveNodeCacheSize, session)
+    val reverseShortcutGraph = revShortcutRoadNets.map { rn =>
+        new DatabaseGraph(rn, graphConfig.effectiveNodeCacheSize, session)
     }.toIndexedSeq
 
     val graph = hhDbGraphs.head
