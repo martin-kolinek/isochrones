@@ -6,9 +6,10 @@ import org.isochrone.db.RoadNetTableComponent
 import org.isochrone.db.DatabaseProvider
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.util.db.MyPostgresDriver.simple._
+import org.isochrone.osm.SpeedCostAssignerComponent
 
 trait AreaPropertiesFinderComponent extends AreaCoverCostComponent with AreaGeometryFinderComponent {
-    self: AreaReaderComponent with DijkstraAlgorithmProviderComponent with GraphComponentBase with RoadNetTableComponent with DatabaseProvider =>
+    self: AreaReaderComponent with DijkstraAlgorithmProviderComponent with GraphComponentBase with RoadNetTableComponent with DatabaseProvider with SpeedCostAssignerComponent =>
 
     type NodeType = Long
 
