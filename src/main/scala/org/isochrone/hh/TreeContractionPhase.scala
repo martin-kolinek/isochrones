@@ -42,10 +42,10 @@ object TreeContraction extends Logging {
                 n2 <- input.roadNodes if l.end === n2.id
             } yield (l.start, o.end, l.cost + o.cost, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
 
-            output.insert(leafEdgeQuery)(s)
-            output.insert(newEdgeQuery)(s)
-            revOutput.insert(backwardsLeafEdgeQuery)(s)
-            revOutput.insert(revNewEdgeQuery)(s)
+            val inserted = output.insert(leafEdgeQuery)(s) + output.insert(newEdgeQuery)(s)
+            val revInserted = revOutput.insert(backwardsLeafEdgeQuery)(s) + revOutput.insert(revNewEdgeQuery)(s)
+
+            assert(inserted == revInserted)
 
             val cnt1 = leafEdgeQuery.delete(s)
             val cnt2 = oneWayEdgeQuery.delete(s)
@@ -62,7 +62,7 @@ object TreeContraction extends Logging {
             if !input.roadNet.filter(_.start === n.id).exists
         } yield n.id
 
-        def toDel(out:TableQuery[EdgeTable]) = out.filter(o => o.start.in(isolatedNodes) && o.end.in(isolatedNodes))
+        def toDel(out: TableQuery[EdgeTable]) = out.filter(o => o.start.in(isolatedNodes) && o.end.in(isolatedNodes))
         toDel(output).delete(s)
         toDel(revOutput).delete(s)
     }
