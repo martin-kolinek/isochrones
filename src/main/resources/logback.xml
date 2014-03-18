@@ -24,4 +24,6 @@
 	</logger>
 	<logger name="org.isochrone.dbgraph" level="off">
 	</logger>
+	<logger name="org.isochrone.util.collection.mutable" level="off">
+	</logger>
 </configuration>
