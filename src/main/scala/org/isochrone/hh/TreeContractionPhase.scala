@@ -38,8 +38,8 @@ object TreeContraction extends Logging {
             val revNewEdgeQuery = for {
                 l <- backwardsLeafEdgeQuery
                 o <- revOutput if o.start === l.end
-                n1 <- input.roadNodes if o.start === n1.id
-                n2 <- input.roadNodes if l.end === n2.id
+                n1 <- input.roadNodes if l.start === n1.id
+                n2 <- input.roadNodes if o.end === n2.id
             } yield (l.start, o.end, l.cost + o.cost, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
 
             val inserted = output.insert(leafEdgeQuery)(s) + output.insert(newEdgeQuery)(s)
