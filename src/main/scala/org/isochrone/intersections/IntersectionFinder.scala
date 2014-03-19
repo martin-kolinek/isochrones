@@ -27,17 +27,19 @@ trait IntersectionFinderComponent {
         }
 
         def hasIntersections(top: Double, left: Double, bottom: Double, right: Double) = {
-            database.withSession { implicit s: Session =>
+            database.withTransaction { implicit s: Session =>
                 intersectionsIn(top, left, bottom, right).firstOption.isDefined
             }
         }
 
         def removeIntersections(top: Double, left: Double, bottom: Double, right: Double) = {
-            database.withSession { implicit s: Session =>
-                val pairs = intersectionsIn(top, left, bottom, right).list
+            database.withTransaction { implicit s: Session =>
+                val intersectionQuery = intersectionsIn(top, left, bottom, right)
+                logger.debug(s"IntersectionQuery: ${intersectionQuery.selectStatement}")
+                val pairs = intersectionQuery.list
                 val maxid = Query(roadNetTables.roadNodes.map(_.id).max).firstOption.flatten.getOrElse(0l)
                 val collection = new IntersectionCollection(pairs, maxid)
-                roadNetTables.roadNodes.insertAll((collection.newForDb.map((x:(Long, Geometry)) => (x._1, 0, x._2)): _*))
+                roadNetTables.roadNodes.insertAll((collection.newForDb.map((x: (Long, Geometry)) => (x._1, 0, x._2)): _*))
                 for {
                     (start, end) <- pairs.map(x => (x._1, x._2)).distinct
                 } {

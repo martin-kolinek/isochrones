@@ -6,6 +6,7 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import slick.jdbc.StaticQuery.interpolation
 import com.typesafe.scalalogging.slf4j.Logging
 import org.isochrone.db.VisualizationTableComponent
+import com.vividsolutions.jts.geom.Geometry
 
 trait DuplicitRemoverComponent extends RoadNetPrimaryKeyCreator {
     self: RoadNetTableComponent with DatabaseProvider =>
@@ -17,13 +18,24 @@ trait DuplicitRemoverComponent extends RoadNetPrimaryKeyCreator {
                 val rnet = roadNetTables.roadNet.baseTableRow.tableName
                 val rnodes = roadNetTables.roadNodes.baseTableRow.tableName
                 roadNetTables.roadNet.filter(x => x.start === x.end).delete
+
                 sqlu"""UPDATE "#$rnet" SET start_node = nn.id 
-                       from "#$rnodes" oldn, "#$rnodes" nn 
-                       where nn.id < oldn.id and ST_Equals(nn.geom, oldn.geom) and "#$rnet".start_node = oldn.id""".execute
+                       from (select oldn.id as oldid, min(n.id) as id 
+                           from #$rnodes n 
+                           inner join #$rnodes oldn 
+                           on st_equals(oldn.geom, n.geom) 
+                           group by oldn.id) nn 
+                           where nn.oldid = #$rnet.start_node 
+                       """.execute
                 roadNetTables.roadNet.filter(x => x.start === x.end).delete
                 sqlu"""UPDATE "#$rnet" SET end_node = nn.id 
-                       from "#$rnodes" oldn, "#$rnodes" nn 
-                       where nn.id < oldn.id and ST_Equals(nn.geom, oldn.geom) and "#$rnet".end_node = oldn.id""".execute
+                       from (select oldn.id as oldid, min(n.id) as id 
+                           from #$rnodes n 
+                           inner join #$rnodes oldn 
+                           on st_equals(oldn.geom, n.geom) 
+                           group by oldn.id) nn 
+                           where nn.oldid = #$rnet.end_node
+                       """.execute
                 roadNetTables.roadNet.filter(x => x.start === x.end).delete
 
                 val q = for {
