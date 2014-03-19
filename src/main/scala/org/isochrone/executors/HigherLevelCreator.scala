@@ -34,13 +34,13 @@ trait HigherLevelCreator extends ActionExecutor {
 	    }
 	}) + ("higher" --> new ActionComponent
 	        with OptionsBase
-	        with HigherLevelGraphCreatorComponent 
 	        with ConfigRoadNetTableComponent
 	        with ConfigDatabaseGraphComponent
 	        with HigherConfigRoadNetTableComponent
 	        with DefaultRegionAnalyzerProvider
 	        with FromOptionDatabaseComponent
-	        with SingleSessionProvider {
+	        with SingleSessionProvider 
+	        with HigherLevelGraphCreatorComponent{
 	    override type NodeType = Long
 	    override type RegionType = Int
 	    val execute = () => HigherLevelGraph.createHigherLevelGraph()

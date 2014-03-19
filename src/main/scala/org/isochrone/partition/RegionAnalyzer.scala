@@ -29,7 +29,7 @@ trait DefaultRegionAnalyzerProvider extends RegionAnalyzerProviderComponent {
     val regionAnalyzerProvider = new RegionAnalyzerProvider {
         def getAnalyzer[Node](grp: GraphType[Node]) = new RegionAnalyzerComponent with DijkstraAlgorithmComponent with GraphComponent {
             type NodeType = Node
-            val graph = grp
+            lazy val graph = grp
         }
     }
 }
