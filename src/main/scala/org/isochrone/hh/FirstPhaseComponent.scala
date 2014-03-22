@@ -62,12 +62,13 @@ trait FirstPhaseComponentImpl extends FirstPhaseComponent {
 
             def closed(current: NodeType, costFromStart: Double, previous: Option[(NodeType, Double)]) = {
                 activeUnsettledNonMaverick -= current
-                if (costFromStart < startDh)
+                if (costFromStart <= startDh)
                     withinStartNeighbourhood += current
                 previous match {
                     case None => {}
                     case Some((prev, _)) if prev == start => {
                         s1Rest(current) = neighbourhoods.neighbourhoodSize(current)
+                        predecessors(current) = prev
                     }
                     case Some((prev, prevCost)) => {
                         predecessors(current) = prev

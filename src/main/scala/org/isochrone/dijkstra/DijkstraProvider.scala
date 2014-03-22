@@ -33,7 +33,7 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType])(implicit ndOr
         costMap ++= start
         while (!open.empty && !cancel()) {
             val (current, (curCost, _)) = open.minimum
-            logger.debug(s"Closing $current with $curCost")
+            logger.debug(s"Closing $current with $curCost from ${previous.get(current)}")
             open -= current
             closed += current
             closedFunc(current, curCost, previous.get(current))
@@ -46,6 +46,7 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType])(implicit ndOr
                 if (better.getOrElse(true)) {
                     opened(neighbour, current, newCost)
                     logger.debug(s"Opening $neighbour with $newCost")
+                    costMap(neighbour) = newCost
                     open += neighbour -> (newCost -> neighbour)
                     previous(neighbour) = current -> cost
                 }

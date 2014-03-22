@@ -19,7 +19,7 @@ trait NeighbourhoodSizeFinderComponent extends GraphComponentBase {
 
     class NeighbourhoodSizeFinder(dijk: DijkstraAlgorithmClass[NodeType]) {
         def findNeighbourhoodSize(nd: NodeType, count: Int) = {
-            dijk.helper.compute(nd).view.take(count).last._2
+            dijk.helper.compute(nd).view.take(count + 1).last._2
         }
 
         def saveNeighbourhoodSize(nd: NodeType, result: TableQuery[NodeNeighbourhoods])(implicit s: Session) = {

@@ -57,6 +57,8 @@ trait SimpleGraphComponent extends GraphComponentBase {
             val dir = (edges ++ edges.map(_.swap)).map(x => (x._1, x._2, cst))
             apply(dir: _*)
         }
+
+        def undir(edges: (NodeType, NodeType, Double)*) = new SimpleGraph(edges ++ edges.map(x => (x._2, x._1, x._3)), (edges.map(_._1) ++ edges.map(_._2)).map(_ -> (0.0 -> 0.0)).toMap)
     }
 }
 

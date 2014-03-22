@@ -31,4 +31,6 @@
 	</root>
 	<logger name="scala.slick" level="off">
 	</logger>
+	<logger name="org.isochrone.util.collection.mutable" level="off">
+	</logger>
 </configuration>
