@@ -11,11 +11,14 @@ import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import org.isochrone.OptionParserComponent
 import org.isochrone.ArgumentParser
 import scopt.OptionParser
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait FirstPhaseComponent {
     self: GraphComponentBase =>
 
-    case class NodeTree(childMap: collection.immutable.Map[NodeType, Seq[NodeType]], parentMap: collection.immutable.Map[NodeType, NodeType], withinStartNeighbourhood: collection.immutable.Set[NodeType])
+    case class NodeTree(childMap: collection.immutable.Map[NodeType, Seq[NodeType]], parentMap: collection.immutable.Map[NodeType, NodeType], withinStartNeighbourhood: collection.immutable.Set[NodeType]) {
+        override def toString = s"NodeTree($parentMap, $withinStartNeighbourhood)"
+    }
 
     def firstPhase(g: GraphType[NodeType], neigh: NeighbourhoodSizes[NodeType]): FirstPhase
 
@@ -32,7 +35,7 @@ trait FirstPhaseComponentImpl extends FirstPhaseComponent {
         val neighbourhoods = neigh
     }
 
-    trait FirstPhaseImpl extends FirstPhase {
+    trait FirstPhaseImpl extends FirstPhase with Logging {
         val graph: GraphType[NodeType]
         val neighbourhoods: NeighbourhoodSizes[NodeType]
 
@@ -95,7 +98,9 @@ trait FirstPhaseComponentImpl extends FirstPhaseComponent {
             val childMap = predecessors.toSeq.view.map(_.swap).groupBy(_._1).map {
                 case (par, chlds) => par -> chlds.map(_._2).force
             }
-            NodeTree(childMap, predecessors.toMap, withinStartNeighbourhood.toSet)
+            val ret = NodeTree(childMap, predecessors.toMap, withinStartNeighbourhood.toSet)
+            logger.debug(s"Found nodeTree for $start: $ret")
+            ret
         }
     }
 }

@@ -23,16 +23,16 @@ class DijkstraHelperClass[NodeType](dijk: DijkstraAlgorithmClass[NodeType]) {
     def compute(start: NodeType) = dijk.compute(Traversable(start -> 0.0))
 }
 
-class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType])(implicit ndOrd: Ordering[NodeType]) extends Logging {
+class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType]) extends Logging {
     import Ordering.Tuple2
     def alg(start: Traversable[(NodeType, Double)], closedFunc: (NodeType, Double, Option[(NodeType, Double)]) => Unit, opened: (NodeType, NodeType, Double) => Unit, cancel: () => Boolean) {
         val closed = new HashSet[NodeType]
         val costMap = new HashMap[NodeType, Double]
         val previous = new HashMap[NodeType, (NodeType, Double)]
-        val open = IndexedPriorityQueue(start.map(x => (x._1, (x._2, x._1))).toSeq: _*)
+        val open = IndexedPriorityQueue(start.toSeq: _*)
         costMap ++= start
         while (!open.empty && !cancel()) {
-            val (current, (curCost, _)) = open.minimum
+            val (current, curCost) = open.minimum
             logger.debug(s"Closing $current with $curCost from ${previous.get(current)}")
             open -= current
             closed += current
@@ -47,7 +47,7 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType])(implicit ndOr
                     opened(neighbour, current, newCost)
                     logger.debug(s"Opening $neighbour with $newCost")
                     costMap(neighbour) = newCost
-                    open += neighbour -> (newCost -> neighbour)
+                    open += neighbour -> newCost
                     previous(neighbour) = current -> cost
                 }
             }
@@ -73,11 +73,11 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType])(implicit ndOr
 }
 
 trait GenericDijkstraAlgorithmProvider {
-    def dijkstraForGraph[NodeType: Ordering](g: GraphType[NodeType]) = new DijkstraAlgorithmClass[NodeType](g)
+    def dijkstraForGraph[NodeType](g: GraphType[NodeType]) = new DijkstraAlgorithmClass[NodeType](g)
 }
 
 trait DijkstraAlgorithmProviderComponent {
     self: GraphComponentBase =>
 
-    def dijkstraForGraph(g: GraphType[NodeType]): DijkstraAlgorithmClass[NodeType] = new DijkstraAlgorithmClass[NodeType](g)(Ordering.by(_.hashCode))
+    def dijkstraForGraph(g: GraphType[NodeType]): DijkstraAlgorithmClass[NodeType] = new DijkstraAlgorithmClass[NodeType](g)
 }

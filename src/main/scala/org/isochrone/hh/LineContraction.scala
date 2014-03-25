@@ -54,11 +54,14 @@ trait LineContractionComponentBase {
             }
         }
 
-        def getShortcuts(ln: Line) = {
+        type EdgeType = (NodeType, NodeType, Double)
+        case class ShortcutResult(forward: Traversable[EdgeType], backward: Traversable[EdgeType], endToEnd: Traversable[EdgeType])
+
+        def getShortcuts(ln: Line): ShortcutResult = {
             def ammendWithCosts(end: NodeType, inner: List[NodeType], reverse: Boolean) = {
                 (inner :\ List(end -> 0.0)) { (nd, l) =>
                     val (prev, prevTotal) = l.head
-                    val total = prevTotal + (if (reverse) graph.edgeCost(nd, prev).get else graph.edgeCost(prev, nd).get)
+                    val total = prevTotal + (if (reverse) graph.edgeCost(prev, nd).get else graph.edgeCost(nd, prev).get)
                     nd -> total :: l
                 }
             }
@@ -70,8 +73,12 @@ trait LineContractionComponentBase {
                 }.force
             }
 
-            (getOneWayShortcuts(ln.start, ln.inner, ln.end, false) ++ getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start, false),
-                getOneWayShortcuts(ln.start, ln.inner, ln.end, true) ++ getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start, true))
+            val forward1 = getOneWayShortcuts(ln.start, ln.inner, ln.end, false)
+            val forward2 = getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start, false)
+            val endToEnd = List(forward1.head, forward2.head)
+            val forward = forward1.tail ++ forward2.tail
+            val back = getOneWayShortcuts(ln.start, ln.inner, ln.end, true).tail ++ getOneWayShortcuts(ln.end, ln.inner.reverse, ln.start, true).tail
+            ShortcutResult(forward, back, endToEnd)
         }
     }
 }
@@ -108,26 +115,21 @@ trait LineContractionComponent extends GraphComponentBase with LineContractionCo
         }
 
         def insertShortcuts(ln: Line, session: Session) = {
-            def startEndShortcut(s: NodeType, e: NodeType) = Set(s, e) == Set(ln.start, ln.end)
             def insertShortcuts(shortcuts: Traversable[(NodeType, NodeType, Double)], outp: TableQuery[EdgeTable]) {
                 for ((s, e, c) <- shortcuts) {
                     val q = for {
                         n1 <- rnet.roadNodes if n1.id === s
                         n2 <- rnet.roadNodes if n2.id === e
+                        if !outp.filter(x => x.start === n1.id && x.end === n2.id).exists
                     } yield (n1.id, n2.id, c, false, (n1.geom shortestLine n2.geom).asColumnOf[Geometry])
-                    if (startEndShortcut(s, e)) {
-                        val qWithNonDup = for {
-                            edg@(start, end, _, _, _) <- q
-                            if !rnet.roadNet.filter(e => e.start === start && e.end === end).exists
-                        } yield edg
-                        rnet.roadNet.insert(qWithNonDup)(session)
-                    } else
-                        outp.insert(q)(session)
+
+                    outp.insert(q)(session)
                 }
             }
-            val (forw, rev) = getShortcuts(ln)
-            insertShortcuts(forw, output)
-            insertShortcuts(rev, revOutput)
+            val shc = getShortcuts(ln)
+            insertShortcuts(shc.forward, output)
+            insertShortcuts(shc.backward, revOutput)
+            insertShortcuts(shc.endToEnd, rnet.roadNet)
         }
 
         def deleteInner(ln: Line, s: Session) {

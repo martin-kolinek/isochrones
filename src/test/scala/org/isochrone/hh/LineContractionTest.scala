@@ -10,29 +10,26 @@ class LineContractionTest extends FunSuite {
             type NodeType = Int
 
             val contractor = new LineContractionBase {
-                val graph = SimpleGraph.undirOneCost(1 -> 2, 2 -> 3, 3 -> 4, 4 -> 5)
+                val graph = SimpleGraph(
+                    (1, 2, 0.5), (2, 1, 1.0),
+                    (2, 3, 1.5), (3, 2, 2.0),
+                    (3, 4, 2.5), (4, 3, 3.0))
             }
             val ln = contractor.getNodeLine(3).get
-            if (ln.start == 5) {
+            if (ln.start == 4) {
                 assert(ln.end === 1)
-                assert(ln.inner === List(4, 3, 2))
+                assert(ln.inner === List(3, 2))
             } else if (ln.start == 1) {
-                assert(ln.end === 5)
-                assert(ln.inner === List(2, 3, 4))
+                assert(ln.end === 4)
+                assert(ln.inner === List(2, 3))
             } else
                 fail()
 
-            val (shortcuts, revShort) = contractor.getShortcuts(ln)
-            assert(shortcuts.toSet === revShort.map(x => (x._2, x._1, x._3)).toSet)
-            val grouped = shortcuts.groupBy(_._2).mapValues { v =>
-                v.map {
-                    case (s, e, c) => s -> c
-                }.toSet
-            }
+            val contractor.ShortcutResult(shortcuts, revShort, endToEnd) = contractor.getShortcuts(ln)
 
-            assert(grouped.keySet === Set(1, 5))
-            assert(grouped(1) === (2 to 5).map(x => x -> (x - 1)).toSet)
-            assert(grouped(5) === (1 to 4).map(x => x -> (5 - x)).toSet)
+            assert(shortcuts.toSet === Set((2, 1, 1.0), (3, 1, 3.0), (3, 4, 2.5), (2, 4, 4.0)))
+            assert(revShort.toSet === Set((1, 2, 0.5), (1, 3, 2.0), (4, 2, 5.0), (4, 3, 3.0)))
+            assert(endToEnd.toSet === Set((1, 4, 4.5), (4, 1, 6.0)))
         }
     }
 
