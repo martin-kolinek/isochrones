@@ -14,34 +14,42 @@ trait SecondPhaseComponent {
 
     class SecondPhase(graph: GraphType[NodeType], neighSizes: NeighbourhoodSizes[NodeType]) extends Logging {
         def extractHighwayEdges(tree: NodeTree) = {
-            @tailrec
-            def processQueue(q: Queue[NodeType], edges: List[(NodeType, NodeType)], slacks: Map[NodeType, Double]): List[(NodeType, NodeType)] = {
-                if (q.isEmpty)
-                    edges
-                else {
-                    val (nd, dequeued) = q.dequeue
-                    val parent = tree.parentMap(nd)
-                    val parentSlack = slacks(nd) - graph.edgeCost(nd, parent).get
-                    logger.debug(s"Processing $parent -> $nd, parentSlack = $parentSlack")
-                    val newEdges = if (parentSlack < 0) {
-                        logger.debug(s"Adding $parent -> $nd")
-                        (nd -> parent) :: (parent -> nd) :: edges
-                    } else edges
-                    val newSlacks = if (slacks(parent) > parentSlack)
-                        slacks.updated(parent, parentSlack)
-                    else
-                        slacks
-                    val next = if (slacks(parent) == Double.PositiveInfinity && !tree.withinStartNeighbourhood.contains(parent) && tree.parentMap.contains(parent))
-                        dequeued.enqueue(parent)
-                    else
-                        dequeued
-                    processQueue(next, newEdges, newSlacks)
+
+            def getPaths(current: NodeType): Seq[List[NodeType]] = {
+                tree.childMap.get(current) match {
+                    case None => List(List(current))
+                    case Some(chlds) => for {
+                        c <- chlds
+                        sp <- getPaths(c)
+                    } yield current :: sp
                 }
             }
+            val root = tree.parentMap.values.find(x => !tree.parentMap.contains(x)).get
+            val paths = getPaths(root)
+            def processPath(path: Seq[NodeType]) = {
+                val init = List(path.head -> neighSizes.neighbourhoodSize(path.head))
+                (init /: path.tail) { (lst, next) =>
+                    val (before, beforeCost) = lst.head
+                    val nextCost = beforeCost - graph.edgeCost(before, next).get
+                    (next, nextCost) :: lst
+                }.reverse
+            }
 
-            val leaves = tree.parentMap.keys.filterNot(tree.childMap.contains).toSeq
-            val slacks = leaves.map(x => x -> neighSizes.neighbourhoodSize(x)).toMap.withDefaultValue(Double.PositiveInfinity)
-            processQueue(Queue(leaves: _*), Nil, slacks)
+            def extractEdges(path: Seq[NodeType]) = {
+                val outOfForwNeigh = processPath(path).map(_._2 < 0)
+                val outOfRevNeigh = processPath(path.reverse).reverse.map(_._2 < 0)
+                val pathWithOutOfNeigh = (path, outOfForwNeigh, outOfRevNeigh).zipped.toSeq
+                for {
+                    ((a, aFarFromForw, aFarFromBack), (b, bFarFromForw, bFarFromBack)) <- (pathWithOutOfNeigh zip pathWithOutOfNeigh.tail)
+                    if aFarFromForw && bFarFromBack || aFarFromBack && bFarFromForw
+                } yield (a, b)
+            }
+
+            val edges = for {
+                p <- paths
+                e <- extractEdges(p)
+            } yield e
+            (edges ++ edges.map(_.swap)).distinct
         }
     }
 }
