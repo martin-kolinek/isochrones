@@ -18,7 +18,7 @@ import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
 import scala.collection.mutable.HashSet
 import org.isochrone.dbgraph.ReverseDatabaseGraph
 
-trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase with HigherDescendLimitFinderComponent with ShortcutReverseLimitFinderComponent with HigherNodeRemoverComponent {
+trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBase with HigherDescendLimitFinderComponent with ShortcutReverseLimitFinderComponent with HigherNodeRemoverComponent with ReverseNeighbourhoodFinderComponent {
     self: HigherLevelRoadNetTableComponent with RegularPartitionComponent with HigherHHTableComponent with HHTableComponent with RoadNetTableComponent with DatabaseProvider with ArgumentParser with FirstPhaseComponent with SecondPhaseComponent with NeighbourhoodSizeFinderComponent with LineContractionComponent with DijkstraAlgorithmProviderComponent =>
 
     override type NodeType = Long
@@ -102,6 +102,8 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
                     }
                 }
             }
+
+            ReverseNeighbourhoodFinder.findReverseNeighbourhoods()
         }
 
         def contractAll() {
