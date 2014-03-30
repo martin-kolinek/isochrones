@@ -19,7 +19,7 @@ trait QueryGraphComponent {
                      limit: Double) extends MapGraphType[NodeWithLevel] with Logging {
         logger.debug(s"Creating QueryGraph (levels = $levels)")
         def neighbours(nodeWithLevel: NodeWithLevel) = {
-            logger.debug(s"neighbours of $nodeWithLevel")
+            logger.debug(s"neighbours of $nodeWithLevel, lastEntranceNode = ${previousEntranceNodes(nodeWithLevel)}")
             def withLevel(n: (NodeType, Double)) = NodeWithLevel(n._1, nodeWithLevel.level) -> n._2
 
             val g = levels(nodeWithLevel.level)
@@ -33,6 +33,7 @@ trait QueryGraphComponent {
                     Nil
             }
             val toLowerLevel = {
+                logger.debug(s"closedCost: ${closedCost(nodeWithLevel)}, descendLimit: ${g.descendLimit(nodeWithLevel.nd)}")
                 if (closedCost(nodeWithLevel) + g.descendLimit(nodeWithLevel.nd) > limit && nodeWithLevel.level > 0)
                     List(nodeWithLevel.copy(level = nodeWithLevel.level - 1) -> 0.0)
                 else
@@ -84,17 +85,24 @@ trait QueryGraphComponent {
             closedCosts(closed) = closedCost
             previous match {
                 case None => previousEntranceNodes(closed) = closed
-                case Some((NodeWithLevel(nd, level), _)) if (level != closed.level) ||
-                    shortcuts(level).edgeCost(nd, closed.nd).nonEmpty => previousEntranceNodes(closed) = closed
-                case Some((prev, _)) if !previousEntranceNodes.contains(closed) => previousEntranceNodes(closed) = previousEntranceNodes(prev)
+                case Some((NodeWithLevel(nd, level), _)) if (level != closed.level) => {
+                    logger.debug(s"Updating previous entrance node of $closed to $closed (closed 1)")
+                    previousEntranceNodes(closed) = closed
+                }
+                case Some((prev, _)) if !previousEntranceNodes.contains(closed) => {
+                    logger.debug(s"Updating previous entrance node of $closed to previousEntranceNodes(prev) = ${previousEntranceNodes(prev)} (closed 2)")
+                    previousEntranceNodes(closed) = previousEntranceNodes(prev)
+                }
                 case _ => {}
             }
         }
 
         def onOpened(child: NodeWithLevel, parent: NodeWithLevel, newCost: Double) {
             if (child.level != parent.level || shortcuts(child.level).edgeCost(child.nd, parent.nd).nonEmpty) {
+                logger.debug(s"Updating previous entrance node of $child to $child (opened 1)")
                 previousEntranceNodes(child) = child
             } else if (!previousEntranceNodes.contains(child)) {
+                logger.debug(s"Updating previous entrance node of $child to previousEntranceNodes(parent) = ${previousEntranceNodes(parent)} (opened 2)")
                 previousEntranceNodes(child) = previousEntranceNodes(parent)
             }
         }

@@ -29,7 +29,7 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType]) extends Loggi
         val closed = new HashSet[NodeType]
         val costMap = new HashMap[NodeType, Double]
         val previous = new HashMap[NodeType, (NodeType, Double)]
-        val open = IndexedPriorityQueue(start.toSeq: _*)
+        val open = IndexedPriorityQueue(start.toSeq: _*)(Ordering.by(_.toFloat))
         costMap ++= start
         while (!open.empty && !cancel()) {
             val (current, curCost) = open.minimum
@@ -40,12 +40,12 @@ class DijkstraAlgorithmClass[NodeType](graph: GraphType[NodeType]) extends Loggi
             for ((neighbour, cost) <- graph.neighbours(current) if !closed.contains(neighbour)) {
                 val newCost = curCost + cost
                 val better = costMap.get(neighbour).map(newCost < _)
+                logger.debug(s"Opening $neighbour with $newCost")
+                opened(neighbour, current, newCost)
                 if (better.getOrElse(false)) {
                     open -= neighbour
                 }
                 if (better.getOrElse(true)) {
-                    opened(neighbour, current, newCost)
-                    logger.debug(s"Opening $neighbour with $newCost")
                     costMap(neighbour) = newCost
                     open += neighbour -> newCost
                     previous(neighbour) = current -> cost
