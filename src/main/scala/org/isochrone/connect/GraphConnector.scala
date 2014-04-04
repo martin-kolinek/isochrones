@@ -18,7 +18,8 @@ trait GraphConnectorComponent {
             def query(limit: Float) = {
                 val q = for {
                     n1 <- roadNetTables.roadNodes if n1.region.inSet(st)
-                    n2 <- roadNetTables.roadNodes if n1.geom.distance(n2.geom) < limit && !n2.region.inSet(st)
+                    n2 <- roadNetTables.roadNodes if n1.geom.distance(n2.geom) < limit && !n2.region.inSet(st) &&
+                        n1.geom.expand(limit) @&& n2.geom
                 } yield (n1.id, n2.id, n1.geom.distance(n2.geom))
                 q.sortBy(_._3).map(x => (x._1, x._2))
             }
@@ -29,16 +30,22 @@ trait GraphConnectorComponent {
         }
 
         def findUnconnected(implicit s: Session) = {
+            logger.debug("findUnconnected: regions")
             val regions = roadNetTables.roadNodes.groupBy(_.region).map(_._1).list
-
+            logger.debug("findUnconnected: regionJoints")
             val regionJoints = for {
                 n1 <- roadNetTables.roadNodes
                 n2 <- roadNetTables.roadNodes if n1.region =!= n2.region
                 rh <- higherRoadNetTables.roadNet if n1.id === rh.start && n2.id === rh.end
             } yield (n1.region, n2.region)
-
-            val ds = (new DisjointSets(regions) /: regionJoints.list)((s, j) => s.union(j._1, j._2))
-
+            val lst = regionJoints.list
+            logger.debug("findUnconnected: DisjointSets")
+            val ds = new DisjointSetStructure(regions)
+            lst.map((ds.union _).tupled)
+            for ((a, b) <- lst) {
+                ds.union(a, b)
+            }
+            logger.debug("findUnconnected: allSets")
             ds.allSets.toSeq
         }
 
@@ -57,7 +64,9 @@ trait GraphConnectorComponent {
 
         @tailrec
         def connectAll(implicit s: Session): Unit = {
+            logger.info("Finding unconnected")
             val uncon = findUnconnected
+            logger.info("Found unconnected")
             if (uncon.size > 1) {
                 val next = uncon.minBy(_.size)
                 logger.info(s"Connecting $next to the rest of the graph (${uncon.size} remaining)")
