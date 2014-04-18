@@ -13,7 +13,10 @@ trait ShortcutReverseLimitFinderComponent {
                     s <- shortcutTable
                     lim <- descendLimits if lim.nodeId === s.start
                 } yield (s.start, lim.descendLimit + s.cost)
-                shortcutReverse.insert(q)
+                val q2 = q.groupBy(_._1).map {
+                    case (key, lst) => (key, lst.map(_._2).min.ifNull(0.0))
+                }
+                shortcutReverse.insert(q2)
             }
         }
     }

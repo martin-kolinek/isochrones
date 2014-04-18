@@ -8,6 +8,7 @@ import org.isochrone.db.RoadNetTables
 import org.isochrone.util.Timing
 import org.isochrone.graphlib.GraphWithRegionsType
 import org.isochrone.db.BasicRoadNetTables
+import scala.concurrent.duration._
 
 abstract class DatabaseGraphBase(protected val roadNetTables: BasicRoadNetTables, maxRegions: Int, protected val session: Session) extends Logging {
     protected final val regionMap = new LRUCache[Int, Traversable[Long]]((k, v, m) => {
@@ -27,6 +28,9 @@ abstract class DatabaseGraphBase(protected val roadNetTables: BasicRoadNetTables
 
     private var retrievalscntr = 0
     final def retrievals = retrievalscntr
+
+    private var totalTimeRetrievingCntr = 0.seconds
+    final def totalTimeRetrieving = totalTimeRetrievingCntr
 
     private def removeRegion(nodes: Traversable[Long]) = for (n <- nodes) {
         nodesToRegions -= n
@@ -65,8 +69,10 @@ abstract class DatabaseGraphBase(protected val roadNetTables: BasicRoadNetTables
 
     private def retrieveNode(node: Long) {
         retrievalscntr += 1
-        val q = roadNetTables.roadNodes.filter(_.id === node).map(_.region)
-        q.list()(session).map(x => retrieveRegion(x))
+        totalTimeRetrievingCntr += Timing.timed {
+            val q = roadNetTables.roadNodes.filter(_.id === node).map(_.region)
+            q.list()(session).map(x => retrieveRegion(x))
+        }
     }
 
     type QueryType <: Query[_, QueryResult]

@@ -64,7 +64,8 @@ trait AreaIdentifierComponent extends AreaComponent {
                 (None, done)
             } else if ((last, next.get) == firstEdge) {
                 logger.debug(s"Completed area")
-                assert(part.tail.size > 2)
+                if (part.tail.size <= 2)
+                    throw new Exception(s"Area with size <= 2: $part")
                 (Some(Area(part.tail)), done.withEdge(last -> next.get))
             } else
                 completeArea(next.get :: part, firstEdge, done.withEdge(last -> next.get))

@@ -11,13 +11,13 @@ import scopt.OptionParser
 import org.isochrone.db.MultiLevelRoadNetTableParsingComponent
 
 class NodeNeighbourhoods(tag: Tag, name: String) extends Table[(Long, Double)](tag, name) {
-    def nodeId = column[Long]("node_id")
+    def nodeId = column[Long]("node_id", O.PrimaryKey)
     def neighbourhood = column[Double]("neighbourhood")
     def * = (nodeId, neighbourhood)
 }
 
 class DescendLimits(tag: Tag, name: String) extends Table[(Long, Double)](tag, name) {
-    def nodeId = column[Long]("node_id")
+    def nodeId = column[Long]("node_id", O.PrimaryKey)
     def descendLimit = column[Double]("descend")
     def * = (nodeId, descendLimit)
 }

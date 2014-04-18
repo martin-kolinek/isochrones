@@ -32,7 +32,12 @@ import org.isochrone.compute.PointIsochroneOutput
 trait IsochroneExecutorCompoent extends DefaultIsochronesComputationComponent with ConfigCirclePointsCountComponent with SomePreciseAreaVisualizer with ConfigIsochroneOutputComponent with ArgumentParser with GeometryOutputComponent with DbAreaInfoComponent with DefaultCostAssignerComponent with ApproxEquidistAzimuthProjComponent {
     self: SomeIsochroneComputerComponent with NodePositionComponent with GraphComponentBaseWithDefault with RoadNetTableComponent with SessionProviderComponent with GraphComponent =>
 
-    val execute = () => writeOutput()
+    def report() = {}
+        
+    val execute = () => {
+        writeOutput()
+        report()
+    }
 }
 
 trait ConfigIsochroneOutputComponent extends IsochroneOutputComponent with PointIsochroneOutput with VisualizationIsochroneOutputComponent with OptionParserComponent {

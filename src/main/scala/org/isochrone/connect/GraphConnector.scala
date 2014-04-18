@@ -38,6 +38,7 @@ trait GraphConnectorComponent {
                 n2 <- roadNetTables.roadNodes if n1.region =!= n2.region
                 rh <- higherRoadNetTables.roadNet if n1.id === rh.start && n2.id === rh.end
             } yield (n1.region, n2.region)
+            logger.debug(regionJoints.selectStatement)
             val lst = regionJoints.list
             logger.debug("findUnconnected: DisjointSets")
             val ds = new DisjointSetStructure(regions)

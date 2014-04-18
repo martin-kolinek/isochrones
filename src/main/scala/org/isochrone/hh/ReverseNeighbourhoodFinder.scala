@@ -10,6 +10,7 @@ import org.isochrone.util.db.MyPostgresDriver.simple._
 import org.isochrone.dbgraph.HHDatabaseGraph
 import org.isochrone.dbgraph.DBGraphConfigParserComponent
 import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
+import slick.jdbc.StaticQuery.interpolation
 
 trait ReverseNeighbourhoodFinderComponent extends Logging with BufferOptionParserComponent with DBGraphConfigParserComponent {
     self: RegularPartitionComponent with DatabaseProvider with RoadNetTableComponent with HHTableComponent with ArgumentParser with DijkstraAlgorithmProviderComponent =>
@@ -82,7 +83,7 @@ trait ReverseNeighbourhoodFinderComponent extends Logging with BufferOptionParse
 
                         hhTables.reverseNeighbourhoods.insertAll(toIns: _*)
                         for ((nd, c) <- toUpd) {
-                            hhTables.reverseNeighbourhoods.filter(_.nodeId === nd).map(_.neighbourhood).update(c)
+                            sqlu"update #${hhTables.reverseNeighbourhoods.baseTableRow.tableName} set neighbourhood = $c where node_id = $nd"
                         }
                     }
                 }

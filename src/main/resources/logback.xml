@@ -22,8 +22,12 @@
 	</logger>
 	<logger name="com.github.tminglei.slickpg" level="off">
 	</logger>
-	<logger name="org.isochrone.dbgraph" level="off">
+	<logger name="org.isochrone.dbgraph" level="debug">
 	</logger>
 	<logger name="org.isochrone.util.collection.mutable" level="off">
+	</logger>
+	<logger name="org.isochrone.hh" level="off">
+	</logger>
+	<logger name="org.isochrone.executors" level="info">
 	</logger>
 </configuration>

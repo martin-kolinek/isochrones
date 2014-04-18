@@ -15,6 +15,7 @@ import org.isochrone.hh.ConfigMultiLevelHHTableComponent
 import org.isochrone.dijkstra.GenericDijkstraAlgorithmProvider
 import org.isochrone.graphlib.GraphComponentBaseWithDefault
 import scopt.Read
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait HHQueryExecutor extends ActionExecutor {
     self: Main.type =>
@@ -30,9 +31,21 @@ trait HHQueryExecutor extends ActionExecutor {
 	with HHIsochroneComputer
 	with FromOptionDatabaseComponent
 	with SingleSessionProvider
-	with GraphComponentBaseWithDefault {
+	with GraphComponentBaseWithDefault
+	with Logging {
 	    def readNodeType = implicitly[Read[NodeType]]
 	    def noNode = 0l
 	    override type NodeType = Long
+	    override def report() {
+	        hhDbGraphs.zipWithIndex.foreach { case (graph, level) =>
+	            logger.info(s"HHDatabaseGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+	        }
+	        shortcutGraphs.zipWithIndex.foreach { case (graph, level) =>
+	            logger.info(s"ShortcutGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+	        }
+	        reverseShortcutGraph.zipWithIndex.foreach { case (graph, level) =>
+	            logger.info(s"ReverseShortcutGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+	        }
+	    }
 	})
 }

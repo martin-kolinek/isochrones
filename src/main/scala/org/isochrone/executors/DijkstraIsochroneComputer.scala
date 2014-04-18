@@ -21,6 +21,7 @@ import org.isochrone.dbgraph.ConfigMultiLevelDatabaseGraph
 import org.isochrone.db.ConfigMultiLevelRoadNetTableComponent
 import org.isochrone.ArgumentParser
 import org.isochrone.dijkstra.DijkstraAlgorithmProviderComponent
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait DijkstraIsochroneComputer extends ActionExecutor {
     self: Main.type =>
@@ -34,10 +35,14 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
         		with SingleSessionProvider
         		with DijkstraAlgorithmComponent 
         		with OptionParserComponent
-        		with GraphComponentBaseWithDefault {
+        		with GraphComponentBaseWithDefault
+        		with Logging {
             override type NodeType = Long
             def readNodeType = implicitly[Read[NodeType]]
             def noNode = 0l
+            override def report() {
+                logger.info(s"DatabaseGraph retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+            }
         }) + ("multidijkstra" --> new ActionComponent
                 with IsochroneExecutorCompoent
                 with OptionsBase
@@ -48,10 +53,16 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
                 with SingleSessionProvider
                 with FromOptionDatabaseComponent
                 with GraphComponentBaseWithDefault
-                with OptionParserComponent {
+                with OptionParserComponent
+                with Logging {
             override type NodeType = Long
             def readNodeType = implicitly[Read[NodeType]]
             def noNode = 0l
+            override def report() {
+                levels.zipWithIndex.foreach { case (graph, level) => 
+                    logger.info(s"DatabaseGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+                }
+            }
         })
     }
 }

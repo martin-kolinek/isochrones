@@ -92,13 +92,15 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
             database.withTransaction { implicit s: Session =>
                 for (
                     (g, out) <- Seq(
-                        new DatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s) -> hhTables.neighbourhoods,
-                        new ReverseDatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s) -> hhTables.reverseNeighbourhoods)
+                        new DatabaseGraph(roadNetTables, dbGraphConfLens.get(parsedConfig).effectiveNodeCacheSize, s) -> hhTables.neighbourhoods)
                 ) {
                     val finder = neighSizeFinder(g)
-                    roadNetTables.roadNodes.sortBy(_.id).map(_.id).foreach { n =>
-                        logger.info(s"Processing node $n")
-                        finder.saveNeighbourhoodSize(n, out)
+                    roadNetTables.roadNodes.sortBy(_.id).map(_.id).iterator.zipWithIndex.foreach {
+                        case (n, idx) => {
+                            if (idx % 1000 == 0)
+                                logger.info(s"Processing node number $idx")
+                            finder.saveNeighbourhoodSize(n, out)
+                        }
                     }
                 }
             }

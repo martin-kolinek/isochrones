@@ -26,6 +26,7 @@ import org.isochrone.executors.HHStepExecutor
 import org.isochrone.executors.AreaDescendLimitExecutor
 import org.isochrone.executors.HHQueryExecutor
 import org.isochrone.executors.DistanceExecutor
+import org.isochrone.executors.QuickPartitionExecutor
 
 object Main extends App with Logging
         with DijkstraIsochroneComputer
@@ -43,7 +44,8 @@ object Main extends App with Logging
         with HHStepExecutor
         with AreaDescendLimitExecutor
         with HHQueryExecutor
-        with DistanceExecutor {
+        with DistanceExecutor
+        with QuickPartitionExecutor {
 
     trait OptionsBase extends DefaultArgumentParser with ArgumentsProvider {
         self: OptionParserComponent =>
