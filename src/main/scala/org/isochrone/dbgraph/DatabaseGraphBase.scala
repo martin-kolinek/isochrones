@@ -32,6 +32,14 @@ abstract class DatabaseGraphBase(protected val roadNetTables: BasicRoadNetTables
     private var totalTimeRetrievingCntr = 0.seconds
     final def totalTimeRetrieving = totalTimeRetrievingCntr
 
+    private val retrievalStatisticsDict = new HashMap[Int, Int]
+    final def retrievalStatistics = retrievalStatisticsDict.toMap
+
+    def usageReport = {
+        val stats = retrievalStatistics
+        s"avg retrievals: ${stats.values.sum.toDouble / stats.size.toDouble}, max retrievals: ${stats.maxBy(_._2)}, total regions: ${stats.size}"
+    }
+
     private def removeRegion(nodes: Traversable[Long]) = for (n <- nodes) {
         nodesToRegions -= n
         nodesProps -= n
@@ -84,6 +92,10 @@ abstract class DatabaseGraphBase(protected val roadNetTables: BasicRoadNetTables
     def query(region: Int): QueryType
 
     private def retrieveRegion(region: Int) {
+        if (retrievalStatistics.contains(region))
+            retrievalStatisticsDict(region) += 1
+        else
+            retrievalStatisticsDict(region) = 1
         Timing.timeLogged(logger, x => s"retrieveRegion($region) took $x") {
             logger.debug(s"Region select: ${query(region).selectStatement}")
             val list = query(region).list()(session)

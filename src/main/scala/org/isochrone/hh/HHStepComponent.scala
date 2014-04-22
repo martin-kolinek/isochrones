@@ -118,7 +118,7 @@ trait HHStepComponent extends DBGraphConfigParserComponent with GraphComponentBa
         }
 
         def findShortcutReverseLimits() {
-            ShorctutReverseLimitFinder.findShortcutReverseLimits(higherHHTables.shortcutEdges, higherHHTables.descendLimit, higherHHTables.shortcutReverseLimit)
+            ShorctutReverseLimitFinder.findShortcutReverseLimits(higherHHTables.reverseShortcutEdges, higherHHTables.descendLimit, higherHHTables.shortcutReverseLimit)
         }
 
         def removeUnneededHigherNodes() {

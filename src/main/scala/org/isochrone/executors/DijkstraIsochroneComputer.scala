@@ -41,7 +41,9 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
             def readNodeType = implicitly[Read[NodeType]]
             def noNode = 0l
             override def report() {
-                logger.info(s"DatabaseGraph retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+                val maxRetr = graph.retrievalStatistics.maxBy(_._2)
+                logger.info(s"DatabaseGraph retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}, max retrievals: $maxRetr")
+                logger.info(s"DatabaseGraph report: ${graph.usageReport}")
             }
         }) + ("multidijkstra" --> new ActionComponent
                 with IsochroneExecutorCompoent
@@ -60,7 +62,9 @@ trait DijkstraIsochroneComputer extends ActionExecutor {
             def noNode = 0l
             override def report() {
                 levels.zipWithIndex.foreach { case (graph, level) => 
-                    logger.info(s"DatabaseGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+                    val maxRetr = graph.retrievalStatistics.maxBy(_._2)
+                    logger.info(s"DatabaseGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}, max retrievals: $maxRetr")
+                    logger.info(s"DatabaseGraph($level) report: ${graph.usageReport}")
                 }
             }
         })

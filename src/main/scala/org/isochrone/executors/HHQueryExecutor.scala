@@ -39,12 +39,15 @@ trait HHQueryExecutor extends ActionExecutor {
 	    override def report() {
 	        hhDbGraphs.zipWithIndex.foreach { case (graph, level) =>
 	            logger.info(s"HHDatabaseGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+	            logger.info(s"HHDatabaseGraph($level) report: ${graph.usageReport}")
 	        }
 	        shortcutGraphs.zipWithIndex.foreach { case (graph, level) =>
 	            logger.info(s"ShortcutGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+	            logger.info(s"ShortcutGraph($level) report: ${graph.usageReport}")
 	        }
 	        reverseShortcutGraph.zipWithIndex.foreach { case (graph, level) =>
 	            logger.info(s"ReverseShortcutGraph($level) retrievals: ${graph.retrievals}, total: ${graph.totalTimeRetrieving}")
+	            logger.info(s"ReverseShortcutGraph($level) report: ${graph.usageReport}")
 	        }
 	    }
 	})

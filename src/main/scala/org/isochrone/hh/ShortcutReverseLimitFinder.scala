@@ -11,10 +11,10 @@ trait ShortcutReverseLimitFinderComponent {
             database.withTransaction { implicit s: Session =>
                 val q = for {
                     s <- shortcutTable
-                    lim <- descendLimits if lim.nodeId === s.start
+                    lim <- descendLimits if lim.nodeId === s.end
                 } yield (s.start, lim.descendLimit + s.cost)
                 val q2 = q.groupBy(_._1).map {
-                    case (key, lst) => (key, lst.map(_._2).min.ifNull(0.0))
+                    case (key, lst) => (key, lst.map(_._2).max.ifNull(100000.0))
                 }
                 shortcutReverse.insert(q2)
             }

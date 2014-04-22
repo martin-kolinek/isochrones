@@ -18,7 +18,7 @@ trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraph
             def withLevelZero(n: (NodeType, Double)) = (NodeWithLevel(n._1, 0), n._2)
             val qg = new QueryGraph(hhDbGraphs.toIndexedSeq, shortcutGraphs, reverseShortcutGraph, max)
             val dijk = dijkstraForGraph(qg)
-            val result = new HashSet[IsochroneNode]
+            val result = new ListBuffer[IsochroneNode]
             var stop = false
             dijk.alg(start.map(withLevelZero), (cl, clc, prev) => {
                 logger.debug(s"Closing $cl with cost $clc from $prev")
@@ -28,7 +28,7 @@ trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraph
                 else
                     stop = true
             }, qg.onOpened, () => stop)
-            result.toList
+            result.distinct.toList
         }
     }
 
