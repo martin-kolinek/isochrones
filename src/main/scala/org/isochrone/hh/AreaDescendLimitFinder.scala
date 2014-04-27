@@ -11,9 +11,24 @@ trait AreaDescendLimitFinderComponent {
     object AreaDescendLimitFinder {
         def execute() {
             database.withTransaction { implicit s: Session =>
-                val insQ = roadNetTables.roadAreas.groupBy(_.nodeId).map {
+                val l0 = roadNetTables.roadAreas.groupBy(_.nodeId).map {
                     case (nid, lst) => nid -> lst.map(_.costToCover).max.ifNull(0.0)
                 }
+                
+                val maxAreaL0 = (for {
+                    l <- l0
+                    a <- roadNetTables.roadAreas if a.nodeId === l._1
+                } yield (a.id, l._2)).groupBy(_._1).map {
+                    case (id, rows) => id -> rows.map(_._2).max
+                }
+                
+                val insQ = (for {
+                    l <- maxAreaL0
+                    a <- roadNetTables.roadAreas if a.id === l._1
+                } yield (a.nodeId, l._2)).groupBy(_._1).map {
+                    case (nodeId, rows) => nodeId -> rows.map(_._2).max.ifNull(0.0)
+                }
+                
                 hhTables.descendLimit.insert(insQ)
             }
         }

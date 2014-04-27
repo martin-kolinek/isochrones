@@ -36,6 +36,8 @@ trait VisualizationIsochroneOutputComponent extends IsochroneOutputComponent wit
 
     def isochroneGeometry: Traversable[Geometry] = {
         val isoList = isochrone.toList
+        
+        logger.debug(s"Nodes: ${isoList.map(x => x.nd -> x.remaining)}")
         logger.info(s"Got isochrone (size = ${isoList.size}), computing geometry")
         val ndArs = areaInfoRetriever.getNodesAreas(isoList.map(_.nd))
 

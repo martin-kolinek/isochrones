@@ -16,6 +16,7 @@ import org.isochrone.dijkstra.GenericDijkstraAlgorithmProvider
 import org.isochrone.graphlib.GraphComponentBaseWithDefault
 import scopt.Read
 import com.typesafe.scalalogging.slf4j.Logging
+import org.isochrone.hh.ConfigHHPropsComponent
 
 trait HHQueryExecutor extends ActionExecutor {
     self: Main.type =>
@@ -28,6 +29,7 @@ trait HHQueryExecutor extends ActionExecutor {
 	with ConfigMultiLevelRoadNetTableComponent
 	with ConfigMultiLevelHHTableComponent
 	with MultiLevelHHDatabaseGraphComponent
+	with ConfigHHPropsComponent
 	with HHIsochroneComputer
 	with FromOptionDatabaseComponent
 	with SingleSessionProvider

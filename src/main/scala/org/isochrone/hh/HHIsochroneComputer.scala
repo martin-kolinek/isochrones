@@ -9,14 +9,17 @@ import scala.collection.mutable.ListBuffer
 import org.isochrone.dijkstra.GenericDijkstraAlgorithmProvider
 import org.isochrone.compute.SomeIsochroneComputerComponent
 import scala.collection.mutable.HashSet
+import org.isochrone.OptionParserComponent
+import org.isochrone.ArgumentParser
+import scopt.OptionParser
 
 trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraphComponent with GraphComponentBase {
-    self: GenericDijkstraAlgorithmProvider with MultiLevelHHDatabaseGraphComponent =>
+    self: GenericDijkstraAlgorithmProvider with MultiLevelHHDatabaseGraphComponent with HHQueryPropsComponent =>
     type NodeType = Long
     object HHIsoComputer extends IsochroneComputer {
         def isochrone(start: Traversable[(NodeType, Double)], max: Double) = {
-            def withLevelZero(n: (NodeType, Double)) = (NodeWithLevel(n._1, 0), n._2)
-            val qg = new QueryGraph(hhDbGraphs.toIndexedSeq, shortcutGraphs, reverseShortcutGraph, max)
+            def withLevelZero(n: (NodeType, Double)) = (NodeWithLevel(n._1, 0, false), n._2)
+            val qg = new QueryGraph(hhDbGraphs.toIndexedSeq, shortcutGraphs, reverseShortcutGraph, max, limitDescend)
             val dijk = dijkstraForGraph(qg)
             val result = new ListBuffer[IsochroneNode]
             var stop = false
@@ -33,4 +36,21 @@ trait HHIsochroneComputer extends SomeIsochroneComputerComponent with QueryGraph
     }
 
     val isoComputer = HHIsoComputer
+}
+
+trait HHQueryPropsComponent {
+    def limitDescend: Boolean
+}
+
+trait ConfigHHPropsComponent extends HHQueryPropsComponent with OptionParserComponent {
+    self: ArgumentParser =>
+
+    lazy val limitDescendLens = registerConfig(true)
+
+    lazy val limitDescend = limitDescendLens.get(parsedConfig)
+    
+    abstract override def parserOptions(pars:OptionParser[OptionConfig]) {
+        super.parserOptions(pars)
+        pars.opt[Boolean]("limit-descend").action((x, c) => limitDescendLens.set(c)(x))
+    }
 }

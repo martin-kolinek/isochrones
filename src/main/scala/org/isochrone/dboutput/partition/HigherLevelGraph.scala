@@ -43,6 +43,11 @@ trait HigherLevelGraphCreatorComponent extends GraphWithRegionsComponentBase {
 
         def processRegion(region: Int, nodes: Seq[Long], session: Session) {
             val analyzerComp = regionAnalyzerProvider.getAnalyzer(graph.singleRegion(region))
+            val nodeAreaCovers = roadNetTables.roadAreas.filter(_.nodeId.inSet(nodes)).groupBy(_.nodeId).map {
+                case (nodeId, rows) => nodeId -> rows.map(_.costToCover).max
+            }.list()(session).view.collect {
+                case (nd, Some(cst)) => nd -> cst
+            }.toMap
             var diam = 0.0
             for ((node, others) <- analyzerComp.RegionAnalyzer.borderNodeDistances(nodes.toSet)) {
                 higherRoadNetTables.roadNodes.insert(for {
@@ -56,7 +61,7 @@ trait HigherLevelGraphCreatorComponent extends GraphWithRegionsComponentBase {
                     higherRoadNetTables.roadNet.insert(q)(session)
                 }
                 if (!others.isEmpty)
-                    diam = math.max(diam, others.map(_._2).max)
+                    diam = math.max(diam, others.map(x => x._2 + nodeAreaCovers.getOrElse(x._1, 0.0)).max)
             }
             roadNetTables.roadRegions.insert(region, diam)(session)
         }

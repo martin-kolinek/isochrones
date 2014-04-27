@@ -37,7 +37,10 @@ abstract class DatabaseGraphBase(protected val roadNetTables: BasicRoadNetTables
 
     def usageReport = {
         val stats = retrievalStatistics
-        s"avg retrievals: ${stats.values.sum.toDouble / stats.size.toDouble}, max retrievals: ${stats.maxBy(_._2)}, total regions: ${stats.size}"
+        if (retrievalStatistics.isEmpty)
+            s"no retrievals"
+        else
+            s"avg retrievals: ${stats.values.sum.toDouble / stats.size.toDouble}, max retrievals: ${stats.maxBy(_._2)}, total regions: ${stats.size}"
     }
 
     private def removeRegion(nodes: Traversable[Long]) = for (n <- nodes) {
